@@ -1,4 +1,4 @@
-﻿/* ===================================================
+/* ===================================================
    Vaachan – Shared Design System  v2.1
    =================================================== */
 
@@ -51,7 +51,7 @@ body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;lin
 .grid-4col{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
 
 @media(max-width:1024px){.grid-4col{grid-template-columns:repeat(2,1fr);}.grid-3col{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:768px){.grid-2col,.grid-2col-wide,.grid-2col-narrow,.grid-3col,.grid-4col{grid-template-columns:1fr;}.container{padding:0 14px;}.form-row{flex-direction:column;gap:0;}}
+@media(max-width:768px){.grid-2col,.grid-2col-wide,.grid-2col-narrow,.grid-3col,.grid-4col{grid-template-columns:1fr;}.container{padding:0 14px;}.form-row{flex-direction:column;gap:0;}.form-row .form-col{margin-bottom:12px;}.form-row .form-col:last-child{margin-bottom:0;}}
 
 .card{background:var(--paper-panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);margin-bottom:24px;}
 .section-title{font-family:'Baloo 2',sans-serif;font-size:1.2rem;font-weight:700;color:var(--indigo);margin:0 0 4px 0;}

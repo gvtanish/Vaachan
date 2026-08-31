@@ -187,7 +187,7 @@
         `;
         document.head.appendChild(style);
       }
-    }
+    },
     // Toast notification (non-blocking replacement for alert)
     toast(message, type = 'info', duration = 3500) {
       let container = document.getElementById('toast-container');

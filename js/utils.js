@@ -111,6 +111,9 @@
             padding: 10px 20px;
             box-shadow: 0 4px 15px rgba(20,32,59,0.15);
             margin-bottom: 24px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
           }
           .nav-wrap {
             max-width: 1200px;
@@ -119,13 +122,15 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
+            min-width: 0;
           }
           .nav-brand {
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
+            flex-shrink: 0;
           }
           .nav-brand svg { width: 28px; height: 28px; }
           .nav-brand span {
@@ -183,15 +188,28 @@
           }
           @media (max-width: 768px) {
             #nav-container {
-              padding: 10px 12px;
+              padding: 8px 12px;
               margin-bottom: 16px;
+              overflow: hidden;
             }
             .nav-wrap {
               flex-direction: row;
               justify-content: space-between;
               align-items: center;
               flex-wrap: wrap;
-              gap: 12px;
+              gap: 8px;
+              min-width: 0;
+            }
+            .nav-brand {
+              gap: 6px;
+              min-width: 0;
+            }
+            .nav-brand img {
+              height: 24px !important;
+            }
+            .nav-brand span {
+              font-size: 1.1rem;
+              white-space: nowrap;
             }
             .nav-links {
               display: flex;
@@ -210,8 +228,8 @@
               display: none;
             }
             .nav-links a {
-              padding: 6px 12px;
-              font-size: 0.82rem;
+              padding: 6px 10px;
+              font-size: 0.8rem;
             }
             .user-greeting {
               display: none;
@@ -222,6 +240,11 @@
             .logout-btn {
               padding: 4px 8px;
               font-size: 0.75rem;
+            }
+          }
+          @media (max-width: 400px) {
+            .nav-brand span {
+              display: none;
             }
           }
         `;

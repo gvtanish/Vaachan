@@ -6,139 +6,10 @@
 <title>Vaachan · Teacher Allotment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    padding:0 0 60px 0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-  }
-  .container{
-    max-width:1200px;
-    margin:0 auto;
-    padding:0 20px;
-  }
-  .grid-2col{
-    display:grid;
-    grid-template-columns: 1fr 1.6fr;
-    gap:24px;
-    margin-top:24px;
-  }
-  @media (max-width: 900px) {
-    .grid-2col { grid-template-columns: 1fr; }
-  }
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:24px;
-    box-shadow:var(--shadow);
-    margin-bottom:24px;
-  }
-  h2.section-title{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.4rem;
-    margin:0 0 16px 0;
-    color:var(--indigo);
-  }
-
-  /* Form controls */
-  .field-group{margin-bottom:14px;}
-  label{
-    font-size:0.8rem;
-    font-weight:600;
-    color:var(--ink-soft);
-    margin-bottom:6px;
-    display:block;
-  }
-  .text-input, select{
-    width:100%;
-    padding:10px 12px;
-    border-radius:10px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    font-size:0.9rem;
-    color:var(--ink);
-  }
-  .text-input:focus, select:focus{outline:none;border-color:var(--marigold);}
-
-  .btn{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:0.95rem;
-    padding:10px 20px;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    transition:all 0.15s ease;
-  }
-  .btn:active{transform:scale(0.98);}
-  .btn-admin{
-    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
-    color:#fff;
-  }
-  .btn-sm{ padding:4px 8px; font-size:0.8rem; }
-  .btn-danger{ background:var(--coral); color:#fff; }
-
-  /* Table styling */
-  .list-table{
-    width:100%;
-    border-collapse:collapse;
-  }
-  .list-table th{
-    text-align:left;
-    padding:10px;
-    font-size:0.78rem;
-    font-weight:700;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    border-bottom:1px solid var(--line);
-  }
-  .list-table td{
-    padding:12px 10px;
-    font-size:0.88rem;
-    border-bottom:1px solid rgba(228, 220, 200, 0.4);
-  }
-
-  /* List group details */
-  .list-group{
-    border:1px solid var(--line);
-    border-radius:12px;
-    background:var(--paper);
-    overflow:hidden;
-  }
-  .list-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 14px;
-    border-bottom:1px solid rgba(228, 220, 200, 0.5);
-  }
-  .list-item:last-child{ border-bottom:none; }
-  .teacher-meta{
-    font-size:0.78rem;
-    color:var(--ink-soft);
-    margin-top:2px;
-  }
+  body { padding: 0 0 60px 0; }
+  .teacher-meta { font-size: 0.75rem; color: var(--ink-soft); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -347,7 +218,7 @@
 
     try {
       // Map Employee ID to internal email format
-      const email = `${employeeId.toLowerCase()}@vaachan.internal`;
+      const email = `${employeeId.toLowerCase()}@vaachan.school`;
 
       // Call Supabase auth sign-up (admin bypasses email verification if enabled, or creates account immediately)
       const { data, error } = await window.supabaseClient.auth.signUp({

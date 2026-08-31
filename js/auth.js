@@ -11,7 +11,7 @@
       let email = employeeId.trim();
       // If it doesn't look like an email, assume it's an employee ID or username and append internal domain
       if (!email.includes('@')) {
-        email = `${email.toLowerCase()}@vaachan.internal`;
+        email = `${email.toLowerCase()}@vaachan.school`;
       }
 
       const { data, error } = await client.auth.signInWithPassword({

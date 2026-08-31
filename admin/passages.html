@@ -6,153 +6,29 @@
 <title>Vaachan · Passages Configuration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  body { padding: 0 0 60px 0; }
+  .passage-body-preview {
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    background: var(--paper);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+    max-height: 78px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 10px;
   }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    padding:0 0 60px 0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
+  .passage-body-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 28px;
+    background: linear-gradient(transparent, var(--paper));
   }
-  .container{
-    max-width:1200px;
-    margin:0 auto;
-    padding:0 20px;
-  }
-  .grid-2col{
-    display:grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap:24px;
-    margin-top:24px;
-  }
-  @media (max-width: 900px) {
-    .grid-2col { grid-template-columns: 1fr; }
-  }
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:24px;
-    box-shadow:var(--shadow);
-    margin-bottom:24px;
-  }
-  h2.section-title{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.4rem;
-    margin:0 0 16px 0;
-    color:var(--indigo);
-  }
-
-  /* Form layouts */
-  .field-group{margin-bottom:14px;}
-  label{
-    font-size:0.8rem;
-    font-weight:600;
-    color:var(--ink-soft);
-    margin-bottom:6px;
-    display:block;
-  }
-  .text-input, select, textarea{
-    width:100%;
-    padding:10px 12px;
-    border-radius:10px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    font-size:0.9rem;
-    color:var(--ink);
-    font-family:'Inter', sans-serif;
-  }
-  .text-input:focus, select:focus, textarea:focus{outline:none;border-color:var(--marigold);}
-
-  .btn{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
-    font-size:0.95rem;
-    padding:10px 20px;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-  }
-  .btn-admin{
-    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
-    color:#fff;
-  }
-  .btn-ghost{
-    background:transparent;
-    color:var(--ink-soft);
-    border:1.5px solid var(--line);
-  }
-  .btn-sm{ padding:4px 8px; font-size:0.8rem; }
-
-  /* Passage item layouts */
-  .passage-box{
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    background:var(--paper);
-    margin-bottom:16px;
-  }
-  .passage-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-  }
-  .passage-title{
-    font-family:'Baloo 2', sans-serif;
-    font-size:1.15rem;
-    font-weight:700;
-    color:var(--indigo);
-  }
-  .passage-meta{
-    font-size:0.78rem;
-    color:var(--ink-soft);
-    display:flex;
-    gap:8px;
-    margin-top:2px;
-  }
-  .passage-body{
-    font-size:0.85rem;
-    line-height:1.5;
-    color:var(--ink);
-    background:var(--paper-panel);
-    border:1px solid rgba(228, 220, 200, 0.4);
-    border-radius:8px;
-    padding:10px 12px;
-    max-height:80px;
-    overflow-y:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .badge{
-    display:inline-block;
-    padding:2px 8px;
-    border-radius:99px;
-    font-weight:700;
-    font-size:0.72rem;
-    color:#fff;
-  }
-  .badge-mint { background: var(--mint); }
-  .badge-coral { background: var(--coral); }
-  .badge-indigo { background: var(--indigo); }
 </style>
 </head>
 <body>
@@ -318,7 +194,7 @@
       // Reset
       document.getElementById('passage-form').reset();
       loadPassages();
-      alert("Reading passage configured successfully!");
+      window.utils?.toast("Reading passage configured successfully!", "success");
 
     } catch (err) {
       alert("Error saving passage: " + err.message);

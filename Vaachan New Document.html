@@ -512,7 +512,7 @@ async function startRecording(){
   try{
     micStream = await navigator.mediaDevices.getUserMedia({audio:true});
   }catch(e){
-    alert("Microphone access is needed to record the reading. Please allow microphone permission and try again.");
+    window.utils?.toast("Microphone access is needed to record the reading. Please allow microphone permission and try again.", "error");
     return;
   }
 

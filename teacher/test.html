@@ -6,6 +6,7 @@
 <title>Vaachan · Reading Fluency Check</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/shared.css">
 <style>
   :root{
     --ink:#14203B;
@@ -531,7 +532,7 @@
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
-      alert("Microphone access is needed to record reading. Please grant mic permissions and retry.");
+      window.utils?.toast("Microphone access is needed to record reading. Please grant mic permissions and retry.", "error");
       return;
     }
 

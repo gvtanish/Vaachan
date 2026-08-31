@@ -52,6 +52,16 @@
     .card { box-shadow: none; border: none; padding: 0; }
     .chart-card { border: 1px solid #ccc; }
   }
+  @media (max-width:600px) {
+    .filter-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .filter-col{min-width:0;}
+    .filter-col input,.filter-col select{width:100%;}
+    .charts-grid{grid-template-columns:1fr;}
+    .chart-box{height:190px;}
+    .card > div[style*="justify-content:space-between"]{align-items:stretch !important;}
+    .card > div[style*="justify-content:space-between"] > div:last-child{width:100%;flex-wrap:wrap;}
+    .card > div[style*="justify-content:space-between"] .btn{flex:1;}
+  }
 </style>
 </head>
 <body>
@@ -135,6 +145,7 @@
 
     <!-- Sessions Table -->
     <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Individual Session Log</h3>
+    <div class="table-wrap">
     <table class="list-table">
       <thead>
         <tr>
@@ -154,6 +165,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 </div>
 

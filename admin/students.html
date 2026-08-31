@@ -11,6 +11,9 @@
   body { padding: 0 0 60px 0; }
   .preview-wrap { max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0; }
   .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+  @media (max-width:600px) {
+    .form-row > div[style]{width:100% !important;}
+  }
 </style>
 </head>
 <body>
@@ -34,6 +37,7 @@
         </div>
       </div>
 
+      <div class="table-wrap">
       <table class="list-table">
         <thead>
           <tr>
@@ -49,6 +53,7 @@
           <!-- Rows injected here -->
         </tbody>
       </table>
+      </div>
     </div>
 
     <!-- Right panel: Add/Import Operations -->

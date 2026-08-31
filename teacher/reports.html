@@ -105,6 +105,16 @@
   @media (max-width: 850px) {
     .charts-grid { grid-template-columns: 1fr; }
   }
+  @media (max-width: 600px) {
+    .container{padding:0 12px;}
+    .card{padding:16px;border-radius:14px;margin-top:16px;margin-bottom:16px;}
+    .report-header{align-items:stretch;margin-bottom:16px;}
+    .report-header select,.report-header .btn{width:100%;justify-content:center;}
+    .stats-grid{grid-template-columns:1fr 1fr;gap:10px;}
+    .stat-card{padding:14px 8px;}
+    .stat-val{font-size:1.7rem;}
+    .chart-box{height:220px;}
+  }
   .chart-box{
     position:relative;
     height:250px;
@@ -228,6 +238,7 @@
 
       <!-- Roster summaries -->
       <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.2rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Student Performance Summary</h3>
+      <div class="table-wrap">
       <table class="list-table">
         <thead>
           <tr>
@@ -243,6 +254,7 @@
           <!-- Rows injected here -->
         </tbody>
       </table>
+      </div>
     </div>
 
     <div id="empty-report" class="empty-state">

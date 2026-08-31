@@ -44,6 +44,21 @@
   @media (max-width: 900px) {
     .grid-layout { grid-template-columns: 1fr; }
   }
+  @media (max-width: 600px) {
+    .container{padding:0 12px;}
+    .grid-layout{gap:0;margin-top:16px;}
+    .card{padding:16px;border-radius:14px;margin-bottom:16px;}
+    h2.section-title{font-size:1.15rem;margin-bottom:12px;}
+    .hero-panel{padding:20px;border-radius:16px;margin-top:0;margin-bottom:16px;align-items:flex-start;}
+    .hero-text h1{font-size:1.55rem;}
+    .hero-text p{font-size:.85rem;}
+    .hero-panel .btn{width:100%;justify-content:center;}
+    .section-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:0;}
+    .section-box{padding:12px 8px;}
+    .section-box h3{font-size:1.35rem;}
+    .risk-item{align-items:flex-start;gap:8px;}
+    .risk-item .score-badge{flex-shrink:0;}
+  }
   .card{
     background:var(--paper-panel);
     border:1px solid var(--line);
@@ -238,6 +253,7 @@
       <!-- Recent Sessions Card -->
       <div class="card">
         <h2 class="section-title">Recent Reading Evaluations</h2>
+        <div class="table-wrap">
         <table class="list-table">
           <thead>
             <tr>
@@ -255,6 +271,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
 

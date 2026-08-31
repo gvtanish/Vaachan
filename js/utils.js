@@ -179,11 +179,15 @@
             background: rgba(255,255,255,0.05);
           }
           @media (max-width: 768px) {
+            #nav-container {
+              padding: 10px 12px;
+              margin-bottom: 16px;
+            }
             .nav-wrap {
               flex-direction: row;
               justify-content: space-between;
               align-items: center;
-              flex-wrap: nowrap;
+              flex-wrap: wrap;
               gap: 12px;
             }
             .nav-links {
@@ -191,8 +195,12 @@
               flex-direction: row;
               overflow-x: auto;
               white-space: nowrap;
-              flex: 1;
-              margin: 0 8px;
+              flex: none;
+              order: 3;
+              width: 100%;
+              min-width: 0;
+              margin: 0;
+              padding-bottom: 2px;
               scrollbar-width: none;
             }
             .nav-links::-webkit-scrollbar {

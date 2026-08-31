@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,41 +9,98 @@
 <link rel="stylesheet" href="../css/shared.css">
 <style>
   body { padding: 0 0 60px 0; }
-  .teacher-meta { font-size: 0.75rem; color: var(--ink-soft); margin-top: 2px; }
+  .teacher-meta { font-size: 0.74rem; color: var(--ink-soft); margin-top: 2px; }
+  .tab-buttons { display: flex; gap: 0; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+  .tab-btn { flex: 1; padding: 9px; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 0.88rem; border: none; cursor: pointer; background: var(--paper); color: var(--ink-soft); border-right: 1px solid var(--line); transition: all 0.15s ease; }
+  .tab-btn:last-child { border-right: none; }
+  .tab-btn.active { background: var(--indigo); color: #fff; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .preview-wrap { max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0; }
+  .progress-bar-wrap { background: var(--line); border-radius: 4px; height: 8px; margin: 12px 0; overflow: hidden; display: none; }
+  .progress-bar { height: 100%; background: var(--mint); border-radius: 4px; width: 0%; transition: width 0.3s ease; }
 </style>
 </head>
 <body>
 
 <div id="nav-container"></div>
 
-<div class="container">
-  <div class="grid-2col">
+<div class="container" style="padding-top:8px;">
+  <div class="grid-2col-narrow" style="margin-top:20px;">
     <!-- Left column: Add teacher & Teachers list -->
     <div>
       <div class="card">
-        <h2 class="section-title">Register Teacher Account</h2>
-        <form id="teacher-form" onsubmit="createTeacher(event)">
-          <div class="field-group">
-            <label for="teacher-name">Full Name</label>
-            <input type="text" id="teacher-name" class="text-input" placeholder="e.g. Anand Sharma" required>
-          </div>
-          
-          <div class="field-group">
-            <label for="teacher-emp">Employee ID</label>
-            <input type="text" id="teacher-emp" class="text-input" placeholder="e.g. T10042" required>
+        <h2 class="section-title">Register Teachers</h2>
+        <p class="section-desc">Add a single teacher or bulk-import from a CSV file.</p>
+
+        <!-- Tabs -->
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="switchTab('single')">➕ Single Account</button>
+          <button class="tab-btn" onclick="switchTab('bulk')">📄 Bulk CSV Import</button>
+        </div>
+
+        <!-- Single teacher form -->
+        <div id="tab-single" class="tab-panel active">
+          <form id="teacher-form" onsubmit="createTeacher(event)">
+            <div class="field-group">
+              <label for="teacher-name">Full Name</label>
+              <input type="text" id="teacher-name" class="text-input" placeholder="e.g. Anand Sharma" required>
+            </div>
+            <div class="field-group">
+              <label for="teacher-emp">Employee ID</label>
+              <input type="text" id="teacher-emp" class="text-input" placeholder="e.g. T10042" required>
+            </div>
+            <div class="field-group">
+              <label for="teacher-pass">Password</label>
+              <input type="password" id="teacher-pass" class="text-input" placeholder="Min 6 characters" minlength="6" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-admin btn-full" id="single-submit-btn">Create Account</button>
+          </form>
+        </div>
+
+        <!-- Bulk CSV import -->
+        <div id="tab-bulk" class="tab-panel">
+          <p style="font-size:0.79rem; color:var(--ink-soft); margin-bottom:14px; line-height:1.6;">
+            Upload a CSV with columns:<br>
+            <b>Name, EmployeeID, Password</b><br>
+            <span style="opacity:0.7;">First row should be the header.</span>
+          </p>
+
+          <a href="data:text/csv;charset=utf-8,Name%2CEmployeeID%2CPassword%0AAnand%20Sharma%2CT10042%2CPass%40123%0ABindu%20Devi%2CT10043%2CTeacher%40456"
+             download="teachers_template.csv"
+             class="btn btn-ghost btn-sm" style="margin-bottom:14px;">⬇ Download Template CSV</a>
+
+          <div class="csv-dropzone" onclick="document.getElementById('teacher-csv').click()">
+            <div style="font-size:2rem; margin-bottom:8px;">📂</div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--indigo);">Click to upload CSV</div>
+            <div style="font-size:0.75rem; color:var(--ink-soft); margin-top:4px;">Name, EmployeeID, Password</div>
+            <input type="file" id="teacher-csv" accept=".csv" style="display:none;" onchange="handleTeacherCsv(event)">
           </div>
 
-          <div class="field-group">
-            <label for="teacher-pass">Password</label>
-            <input type="password" id="teacher-pass" class="text-input" placeholder="Min 6 characters" minlength="6" required autocomplete="new-password">
+          <div id="bulk-preview" class="hidden">
+            <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); margin-bottom:6px;">
+              Preview — <span id="bulk-count">0</span> teachers
+            </div>
+            <div class="preview-wrap">
+              <table class="list-table" style="font-size:0.8rem;">
+                <thead><tr><th>Name</th><th>Employee ID</th><th>Status</th></tr></thead>
+                <tbody id="bulk-preview-tbody"></tbody>
+              </table>
+            </div>
+            <div class="progress-bar-wrap" id="bulk-progress-wrap">
+              <div class="progress-bar" id="bulk-progress-bar"></div>
+            </div>
+            <div id="bulk-status" style="font-size:0.8rem; color:var(--ink-soft); margin-bottom:10px;"></div>
+            <button class="btn btn-admin btn-full" id="bulk-commit-btn" onclick="commitBulkTeachers()">
+              🚀 Create All Teacher Accounts
+            </button>
           </div>
-
-          <button type="submit" class="btn btn-admin" style="width:100%;">Create Account</button>
-        </form>
+        </div>
       </div>
 
       <div class="card">
         <h2 class="section-title">Teachers List</h2>
+        <p class="section-desc">All registered teacher accounts.</p>
         <div class="list-group" id="teachers-list">
           <div style="padding:20px; text-align:center; color:var(--ink-soft);">Loading teachers...</div>
         </div>
@@ -53,22 +110,21 @@
     <!-- Right column: Allotment Grid -->
     <div class="card">
       <h2 class="section-title">Class Section Allotments</h2>
-      <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 20px 0; line-height:1.4;">Configure Class Teacher allotments and Subject mapping for all 15 sections.</p>
-      
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th>Class</th>
-            <th>Class Teacher</th>
-            <th>Subject Teachers</th>
-          </tr>
-        </thead>
-        <tbody id="allotment-tbody">
-          <tr>
-            <td colspan="3" style="padding:30px; text-align:center; color:var(--ink-soft);">Loading allotments schema...</td>
-          </tr>
-        </tbody>
-      </table>
+      <p class="section-desc">Set Class Teacher and subject teacher for all 15 sections. Changes save automatically.</p>
+      <div class="table-wrap">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Class Teacher</th>
+              <th>Subject Teachers</th>
+            </tr>
+          </thead>
+          <tbody id="allotment-tbody">
+            <tr class="empty-row"><td colspan="3">Loading allotment schema...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -83,14 +139,24 @@
   let teachersList = [];
   let classesList = [];
   let subjectAllotments = [];
+  let parsedTeachers = [];
 
   window.addEventListener('DOMContentLoaded', async () => {
     await window.auth.checkGuard('admin');
     window.utils.renderNav('teachers', true);
-
     loadAllotmentsData();
   });
 
+  // --- Tab switching ---
+  function switchTab(tab) {
+    document.getElementById('tab-single').classList.toggle('active', tab === 'single');
+    document.getElementById('tab-bulk').classList.toggle('active', tab === 'bulk');
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', (i === 0 && tab === 'single') || (i === 1 && tab === 'bulk'));
+    });
+  }
+
+  // --- Load data ---
   async function loadAllotmentsData() {
     try {
       const [teachers, classes, allotments] = await Promise.all([
@@ -98,17 +164,14 @@
         window.db.getClasses(),
         window.db.getClassSubjectTeachers()
       ]);
-
       teachersList = teachers;
       classesList = classes;
       subjectAllotments = allotments;
-
       renderTeachersList();
       renderAllotmentsTable();
-
     } catch (e) {
       console.error(e);
-      alert("Error loading allotment statistics: " + e.message);
+      window.utils.toast('Error loading data: ' + e.message, 'error');
     }
   }
 
@@ -118,62 +181,54 @@
       container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--ink-soft);">No registered teachers found.</div>`;
       return;
     }
-
     container.innerHTML = teachersList.map(t => `
       <div class="list-item">
         <div>
-          <div style="font-weight:600; font-size:0.9rem;">${window.utils.escapeHtml(t.name)}</div>
-          <div class="teacher-meta">ID: ${window.utils.escapeHtml(t.employee_id || '—')}</div>
+          <div style="font-weight:600; font-size:0.88rem;">${window.utils.escapeHtml(t.name)}</div>
+          <div class="teacher-meta">ID: ${window.utils.escapeHtml(t.employee_id || '—')} &nbsp;·&nbsp; ${window.utils.escapeHtml(t.employee_id ? t.employee_id.toLowerCase() + '@vaachan.school' : '')}</div>
         </div>
+        <span class="badge badge-indigo">${t.employee_id || '—'}</span>
       </div>
     `).join('');
   }
 
   function renderAllotmentsTable() {
     const tbody = document.getElementById('allotment-tbody');
-    
     tbody.innerHTML = classesList.map(c => {
       const classLabel = `${c.class_num}${c.section}`;
-      
-      // Class Teacher dropdown options
-      const ctOptions = teachersList.map(t => 
+      const ctOptions = teachersList.map(t =>
         `<option value="${t.id}" ${c.teacher_id === t.id ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
       ).join('');
-
-      // Subject teachers mapping
       const enTeacher = subjectAllotments.find(a => a.class_id === c.id && a.subject === 'English');
       const hiTeacher = subjectAllotments.find(a => a.class_id === c.id && a.subject === 'Hindi');
-
-      const enOptions = teachersList.map(t => 
-        `<option value="${t.id}" ${(enTeacher && enTeacher.teacher_id === t.id) ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
+      const enOptions = teachersList.map(t =>
+        `<option value="${t.id}" ${enTeacher && enTeacher.teacher_id === t.id ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
       ).join('');
-
-      const hiOptions = teachersList.map(t => 
-        `<option value="${t.id}" ${(hiTeacher && hiTeacher.teacher_id === t.id) ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
+      const hiOptions = teachersList.map(t =>
+        `<option value="${t.id}" ${hiTeacher && hiTeacher.teacher_id === t.id ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
       ).join('');
-
       return `
         <tr>
           <td><b>Class ${classLabel}</b></td>
           <td>
-            <select style="font-size:0.8rem; padding:6px 10px;" onchange="saveClassTeacher(${c.id}, this.value)">
-              <option value="">-- None allotted --</option>
+            <select style="font-size:0.8rem; padding:6px 28px 6px 8px;" onchange="saveClassTeacher(${c.id}, this.value)">
+              <option value="">— None —</option>
               ${ctOptions}
             </select>
           </td>
           <td>
-            <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; flex-direction:column; gap:5px;">
               <div style="display:flex; align-items:center; gap:6px; font-size:0.78rem;">
-                <span style="width:50px; font-weight:600; color:var(--ink-soft);">English:</span>
-                <select style="font-size:0.8rem; padding:4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'English', this.value)">
-                  <option value="">-- None --</option>
+                <span style="width:52px; font-weight:600; color:var(--ink-soft);">English:</span>
+                <select style="font-size:0.78rem; padding:4px 28px 4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'English', this.value)">
+                  <option value="">— None —</option>
                   ${enOptions}
                 </select>
               </div>
               <div style="display:flex; align-items:center; gap:6px; font-size:0.78rem;">
-                <span style="width:50px; font-weight:600; color:var(--ink-soft);">Hindi:</span>
-                <select style="font-size:0.8rem; padding:4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'Hindi', this.value)">
-                  <option value="">-- None --</option>
+                <span style="width:52px; font-weight:600; color:var(--ink-soft);">Hindi:</span>
+                <select style="font-size:0.78rem; padding:4px 28px 4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'Hindi', this.value)">
+                  <option value="">— None —</option>
                   ${hiOptions}
                 </select>
               </div>
@@ -184,12 +239,13 @@
     }).join('');
   }
 
+  // --- Allotment saves ---
   async function saveClassTeacher(classId, teacherId) {
     try {
       await window.db.updateClassTeacher(classId, teacherId || null);
-      await window.db.logAction("Update Class Teacher", { class_id: classId, teacher_id: teacherId });
+      window.utils.toast('Class teacher saved ✓', 'success');
     } catch (e) {
-      alert("Error saving class teacher: " + e.message);
+      window.utils.toast('Error: ' + e.message, 'error');
     }
   }
 
@@ -200,54 +256,136 @@
       } else {
         await window.db.removeSubjectTeacher(classId, subject);
       }
-      await window.db.logAction("Update Subject Teacher", { class_id: classId, subject, teacher_id: teacherId });
+      window.utils.toast(`${subject} teacher saved ✓`, 'success');
     } catch (e) {
-      alert("Error saving subject teacher: " + e.message);
+      window.utils.toast('Error: ' + e.message, 'error');
     }
   }
 
+  // --- Single teacher create ---
   async function createTeacher(e) {
     e.preventDefault();
     const name = document.getElementById('teacher-name').value.trim();
     const employeeId = document.getElementById('teacher-emp').value.trim();
     const password = document.getElementById('teacher-pass').value;
-
-    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const submitBtn = document.getElementById('single-submit-btn');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Registering Auth Account...';
-
+    submitBtn.textContent = 'Creating account...';
     try {
-      // Map Employee ID to internal email format
       const email = `${employeeId.toLowerCase()}@vaachan.school`;
-
-      // Call Supabase auth sign-up (admin bypasses email verification if enabled, or creates account immediately)
-      const { data, error } = await window.supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            name: name,
-            employee_id: employeeId,
-            role: 'teacher'
-          }
-        }
+      const client = await window.getSupabaseClient();
+      const { data, error } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { name, employee_id: employeeId, role: 'teacher' } }
       });
-
       if (error) throw error;
-
-      await window.db.logAction("Create Teacher Account", { name, employee_id: employeeId });
-
-      alert(`Teacher account registered successfully!\nEmployee ID: ${employeeId}\nEmail: ${email}`);
+      await window.db.logAction('Create Teacher Account', { name, employee_id: employeeId });
+      window.utils.toast(`✓ Account created — ${name} (${employeeId})`, 'success');
       document.getElementById('teacher-form').reset();
       loadAllotmentsData();
-
     } catch (err) {
       console.error(err);
-      alert("Error creating teacher account: " + err.message);
+      window.utils.toast('Error: ' + err.message, 'error');
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create Account';
     }
+  }
+
+  // --- Bulk CSV import ---
+  function handleTeacherCsv(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => parseBulkTeacherCsv(evt.target.result);
+    reader.readAsText(file);
+  }
+
+  function parseBulkTeacherCsv(text) {
+    parsedTeachers = [];
+    const lines = text.split('\n');
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+      if (cols.length < 3) continue;
+      const name = cols[0];
+      const employeeId = cols[1];
+      const password = cols[2];
+      if (!name || !employeeId || !password) continue;
+      parsedTeachers.push({ name, employeeId, password });
+    }
+
+    const preview = document.getElementById('bulk-preview');
+    const tbody = document.getElementById('bulk-preview-tbody');
+    const count = document.getElementById('bulk-count');
+
+    if (parsedTeachers.length === 0) {
+      window.utils.toast('No valid rows found. Check CSV format.', 'error');
+      preview.classList.add('hidden');
+      return;
+    }
+
+    count.textContent = parsedTeachers.length;
+    tbody.innerHTML = parsedTeachers.slice(0, 15).map(t => `
+      <tr>
+        <td>${window.utils.escapeHtml(t.name)}</td>
+        <td><code>${window.utils.escapeHtml(t.employeeId)}</code></td>
+        <td><span class="badge badge-marigold">Pending</span></td>
+      </tr>
+    `).join('');
+    preview.classList.remove('hidden');
+    document.getElementById('bulk-status').textContent = '';
+    document.getElementById('bulk-progress-bar').style.width = '0%';
+  }
+
+  async function commitBulkTeachers() {
+    if (parsedTeachers.length === 0) return;
+    const btn = document.getElementById('bulk-commit-btn');
+    const progressWrap = document.getElementById('bulk-progress-wrap');
+    const progressBar = document.getElementById('bulk-progress-bar');
+    const statusEl = document.getElementById('bulk-status');
+    const tbody = document.getElementById('bulk-preview-tbody');
+
+    btn.disabled = true;
+    btn.textContent = 'Creating accounts...';
+    progressWrap.style.display = 'block';
+
+    let success = 0, failed = 0;
+    const client = await window.getSupabaseClient();
+    const rows = tbody.querySelectorAll('tr');
+
+    for (let i = 0; i < parsedTeachers.length; i++) {
+      const t = parsedTeachers[i];
+      const email = `${t.employeeId.toLowerCase()}@vaachan.school`;
+      const statusCell = rows[i] ? rows[i].querySelector('td:last-child') : null;
+
+      try {
+        const { error } = await client.auth.signUp({
+          email,
+          password: t.password,
+          options: { data: { name: t.name, employee_id: t.employeeId, role: 'teacher' } }
+        });
+        if (error) throw error;
+        if (statusCell) statusCell.innerHTML = `<span class="badge badge-mint">Created ✓</span>`;
+        success++;
+      } catch (err) {
+        if (statusCell) statusCell.innerHTML = `<span class="badge badge-coral" title="${window.utils.escapeHtml(err.message)}">Failed ✗</span>`;
+        failed++;
+      }
+
+      const pct = Math.round(((i + 1) / parsedTeachers.length) * 100);
+      progressBar.style.width = pct + '%';
+      statusEl.textContent = `Progress: ${i + 1} / ${parsedTeachers.length}`;
+    }
+
+    await window.db.logAction('Bulk Import Teachers', { total: parsedTeachers.length, success, failed });
+    statusEl.textContent = `Done — ${success} created, ${failed} failed.`;
+    btn.disabled = false;
+    btn.textContent = '🚀 Create All Teacher Accounts';
+    window.utils.toast(`Bulk import done: ${success} created, ${failed} failed`, success > 0 ? 'success' : 'error');
+    loadAllotmentsData();
   }
 </script>
 </body>

@@ -6,197 +6,87 @@
 <title>Vaachan · School Login</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.25);
+  body {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(232,163,61,0.10), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(62,124,177,0.08), transparent 45%),
+      var(--paper);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px;
   }
-  *{box-sizing:border-box;}
-  body{
-    background: radial-gradient(circle at 12% 8%, rgba(232,163,61,0.08), transparent 40%),
-                radial-gradient(circle at 90% 85%, rgba(62,124,177,0.08), transparent 45%),
-                var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    margin:0;
+
+  .wrap { width: 100%; max-width: 420px; }
+
+  .letterhead {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--indigo-soft);
+    margin-bottom: 10px;
   }
-  .wrap{
-    width:100%;
-    max-width:440px;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 28px;
   }
-  .letterhead{
-    text-align:center;
-    font-size:0.75rem;
-    font-weight:700;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:var(--indigo-soft);
-    margin-bottom:12px;
-  }
-  .brand{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    margin-bottom:30px;
-  }
-  .brand-mark{
-    width:48px;
-    height:48px;
-    border-radius:12px;
-    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  .brand-mark {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    display: flex; align-items: center; justify-content: center;
     box-shadow: var(--shadow);
   }
-  .brand-mark svg{width:26px;height:26px;}
-  .brand h1{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.8rem;
-    font-weight:800;
-    margin:0;
-    color:var(--indigo);
+  .brand-mark svg { width: 28px; height: 28px; }
+  .brand h1 {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 2rem; font-weight: 800; margin: 0;
+    color: var(--indigo);
   }
-  .brand p{margin:2px 0 0;font-size:0.85rem;color:var(--ink-soft);}
-  
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:30px;
-    box-shadow:var(--shadow);
-    margin-bottom:20px;
+  .brand p { margin: 2px 0 0; font-size: 0.85rem; color: var(--ink-soft); }
+
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--line);
+    margin-bottom: 24px;
   }
-  
-  .tabs{
-    display:flex;
-    border-bottom:1px solid var(--line);
-    margin-bottom:24px;
-  }
-  .tab{
-    flex:1;
-    text-align:center;
-    padding:12px;
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:1.1rem;
-    cursor:pointer;
-    color:var(--ink-soft);
-    border-bottom:2px solid transparent;
+  .tab {
+    flex: 1; text-align: center; padding: 11px;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    cursor: pointer; color: var(--ink-soft);
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -2px;
     transition: all 0.2s ease;
   }
-  .tab.active-teacher{
-    color:var(--marigold-deep);
-    border-bottom-color:var(--marigold);
+  .tab.active-teacher { color: var(--marigold-deep); border-bottom-color: var(--marigold); }
+  .tab.active-admin { color: var(--indigo); border-bottom-color: var(--indigo); }
+
+  .btn-teacher {
+    background: linear-gradient(140deg, var(--marigold), var(--marigold-deep));
+    color: #fff;
+    box-shadow: 0 6px 18px -6px rgba(201,121,27,0.6);
+    width: 100%; font-size: 1.05rem; padding: 13px; margin-top: 10px;
   }
-  .tab.active-admin{
-    color:var(--indigo);
-    border-bottom-color:var(--indigo);
+  .btn-teacher:hover { transform: translateY(-1px); box-shadow: 0 8px 22px -6px rgba(201,121,27,0.7); }
+  .btn-admin-login {
+    background: linear-gradient(140deg, var(--indigo-soft), var(--indigo));
+    color: #fff;
+    box-shadow: 0 6px 18px -6px rgba(27,42,74,0.6);
+    width: 100%; font-size: 1.05rem; padding: 13px; margin-top: 10px;
   }
 
-  .field-group{margin-bottom:18px;}
-  .field-group label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
-  .text-input{
-    width:100%;
-    padding:12px 14px;
-    border-radius:12px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    font-family:'Inter',sans-serif;
-    font-size:0.95rem;
-    color:var(--ink);
-    transition: border-color 0.2s ease;
-  }
-  .text-input:focus{outline:none;border-color:var(--marigold);}
-
-  .btn{
-    appearance:none;
-    border:none;
-    cursor:pointer;
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:1.05rem;
-    border-radius:12px;
-    padding:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    transition:all 0.15s ease;
-    margin-top:10px;
-  }
-  .btn-teacher{
-    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
-    color:#fff;
-    box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);
-  }
-  .btn-admin{
-    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
-    color:#fff;
-    box-shadow:0 8px 18px -8px rgba(27,42,74,0.6);
-  }
-  .btn:active{transform:scale(0.98);}
-
-  .alert{
-    padding:12px;
-    border-radius:10px;
-    font-size:0.85rem;
-    line-height:1.4;
-    margin-bottom:18px;
-    display:none;
-  }
-  .alert-danger{
-    background:rgba(214,88,79,0.1);
-    color:var(--coral);
-    border:1px solid rgba(214,88,79,0.2);
-  }
-  .alert-warning{
-    background:rgba(232,163,61,0.1);
-    color:var(--marigold-deep);
-    border:1px solid rgba(232,163,61,0.2);
-  }
-
-  .setup-link{
-    text-align:center;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    cursor:pointer;
-    text-decoration:underline;
-    display:block;
-    margin-top:14px;
-  }
-
-  .setup-panel{
-    display:none;
-    border-top:1px dashed var(--line);
-    margin-top:18px;
-    padding-top:18px;
-  }
-
-  .footer{
-    text-align:center;
-    font-size:0.75rem;
-    color:var(--ink-soft);
-    opacity:0.4;
-    margin-top:20px;
-  }
+  .footer { text-align: center; font-size: 0.72rem; color: var(--ink-soft); opacity: 0.4; margin-top: 22px; }
 </style>
 </head>
 <body>
@@ -206,31 +96,36 @@
 
   <div class="brand">
     <div class="brand-mark">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.6" stroke-linecap="round"/></svg>
     </div>
     <div>
       <h1>Vaachan</h1>
-      <p>Reading Fluency platform</p>
+      <p>Reading Fluency Platform</p>
     </div>
   </div>
 
-  <div class="card">
-    <div class="alert alert-danger" id="login-error"></div>
+  <div style="background:var(--paper-panel); border:1px solid var(--line); border-radius:20px; padding:30px 28px; box-shadow:0 8px 24px -8px rgba(20,32,59,0.18); margin-bottom:20px;">
+    <div class="alert alert-danger" id="login-error" style="display:none; background:rgba(214,88,79,0.08); color:#9e3931; border:1px solid rgba(214,88,79,0.25); padding:11px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px;"></div>
 
     <div class="tabs">
-      <div class="tab active-teacher" id="tab-teacher" onclick="setRole('teacher')">Teacher Login</div>
-      <div class="tab" id="tab-admin" onclick="setRole('admin')">Admin Login</div>
+      <div class="tab active-teacher" id="tab-teacher" onclick="setRole('teacher')">🧑‍🏫 Teacher</div>
+      <div class="tab" id="tab-admin" onclick="setRole('admin')">🔐 Admin</div>
     </div>
 
     <form id="login-form" onsubmit="handleLogin(event)">
-      <div class="field-group">
-        <label id="user-label" for="username">Teacher Employee ID</label>
-        <input type="text" id="username" class="text-input" placeholder="e.g. T10042" required autocomplete="username">
+      <div class="field-group" style="margin-bottom:16px;">
+        <label id="user-label" for="username" style="display:block; font-size:0.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:7px;">Teacher Employee ID</label>
+        <input type="text" id="username" class="text-input" placeholder="e.g. T10042" required autocomplete="username"
+          style="width:100%; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--ink); transition:border-color 0.2s;">
       </div>
 
-      <div class="field-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" class="text-input" placeholder="••••••••" required autocomplete="current-password">
+      <div class="field-group" style="margin-bottom:20px; position:relative;">
+        <label for="password" style="display:block; font-size:0.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:7px;">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="password" class="text-input" placeholder="••••••••" required autocomplete="current-password"
+            style="width:100%; padding:11px 44px 11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--ink); transition:border-color 0.2s;">
+          <button type="button" onclick="togglePwd()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; color:var(--ink-soft);" title="Show/hide password">👁</button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-teacher" id="submit-btn">Enter Teacher Portal</button>
@@ -262,6 +157,11 @@
     });
   });
 
+  function togglePwd() {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  }
+
   function setRole(role) {
     currentRole = role;
     const tabTeacher = document.getElementById('tab-teacher');
@@ -276,14 +176,14 @@
       userLabel.textContent = 'Teacher Employee ID';
       usernameInput.placeholder = 'e.g. T10042';
       submitBtn.className = 'btn btn-teacher';
-      submitBtn.textContent = 'Enter Teacher Portal';
+      submitBtn.textContent = '🧑‍🏫 Enter Teacher Portal';
     } else {
       tabTeacher.className = 'tab';
       tabAdmin.className = 'tab active-admin';
       userLabel.textContent = 'Admin Email';
       usernameInput.placeholder = 'admin@vaachan.school';
-      submitBtn.className = 'btn btn-admin';
-      submitBtn.textContent = 'Enter Admin Portal';
+      submitBtn.className = 'btn btn-admin-login';
+      submitBtn.textContent = '🔐 Enter Admin Portal';
     }
   }
 

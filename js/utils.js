@@ -83,10 +83,13 @@
         `;
       }
 
+      const assetPath = (window.location.pathname.includes('/admin/') || window.location.pathname.includes('/teacher/')) ? '../assets' : './assets';
+
       container.innerHTML = `
         <div class="nav-wrap">
           <div class="nav-brand" onclick="window.location.href='${isAdmin ? '/admin/dashboard.html' : '/teacher/dashboard.html'}'">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <img src="${assetPath}/kv_logo.png" alt="KV" style="height:32px; width:auto; object-fit:contain; background:#fff; border-radius:4px; padding:2px;">
+            <img src="${assetPath}/pm_shri_logo.png" alt="PM SHRI" style="height:32px; width:auto; object-fit:contain; background:#fff; border-radius:4px; padding:2px;">
             <span>Vaachan</span>
           </div>
           <div class="nav-links">${links}</div>

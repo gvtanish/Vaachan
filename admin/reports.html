@@ -52,15 +52,32 @@
     .card { box-shadow: none; border: none; padding: 0; }
     .chart-card { border: 1px solid #ccc; }
   }
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
   @media (max-width:600px) {
     .filter-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .filter-col{min-width:0;}
     .filter-col input,.filter-col select{width:100%;}
     .charts-grid{grid-template-columns:1fr;}
     .chart-box{height:190px;}
-    .card > div[style*="justify-content:space-between"]{align-items:stretch !important;}
-    .card > div[style*="justify-content:space-between"] > div:last-child{width:100%;flex-wrap:wrap;}
-    .card > div[style*="justify-content:space-between"] .btn{flex:1;}
+    .report-header {
+      align-items: stretch !important;
+    }
+    .report-header > div:last-child {
+      width: 100%;
+      flex-wrap: wrap;
+      display: flex;
+      gap: 10px;
+    }
+    .report-header .btn {
+      flex: 1;
+    }
   }
 </style>
 </head>
@@ -70,7 +87,7 @@
 
 <div class="container">
   <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+    <div class="report-header">
       <div>
         <h2 style="font-family:'Baloo 2', sans-serif; font-size:1.8rem; margin:0; color:var(--indigo);">School Diagnostic Reports</h2>
         <p style="margin:4px 0 0 0; color:var(--ink-soft); font-size:0.9rem;">Analyze fluency statistics across all student sessions and export records.</p>

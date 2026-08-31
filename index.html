@@ -106,17 +106,26 @@
 <div class="wrap">
   <p class="letterhead">PM SHRI Kendriya Vidyalaya AFS Sulur</p>
 
+  <div class="logo-row">
+    <img src="./assets/kv_logo.png" alt="KV Logo">
+    <img src="./assets/pm_shri_logo.png" alt="PM SHRI Logo">
+  </div>
+
   <div class="brand">
-    <div class="brand-mark">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </div>
-    <div>
+    <div style="text-align:center; width:100%;">
       <h1>Vaachan</h1>
       <p>Reading Fluency Platform</p>
     </div>
   </div>
 
-  <div style="background:var(--paper-panel); border:1px solid var(--line); border-radius:20px; padding:30px 28px; box-shadow:0 8px 24px -8px rgba(20,32,59,0.18); margin-bottom:20px;">
+  <div style="position:relative; background:var(--paper-panel); border:1px solid var(--line); border-radius:20px; padding:30px 28px; box-shadow:0 8px 24px -8px rgba(20,32,59,0.18); margin-bottom:20px;">
+    <!-- Settings Button -->
+    <button type="button" onclick="showDbSettings()" style="position:absolute; top:16px; right:16px; background:none; border:none; cursor:pointer; color:var(--ink-soft); opacity:0.6; transition:opacity 0.2s;" title="Database Configuration" aria-label="Database Configuration">
+      <span class="solid-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+      </span>
+    </button>
+
     <div class="alert alert-danger" id="login-error" style="display:none; background:rgba(214,88,79,0.08); color:#9e3931; border:1px solid rgba(214,88,79,0.25); padding:11px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px;"></div>
 
     <div class="tabs">
@@ -144,7 +153,7 @@
     </form>
   </div>
 
-  <p class="footer">Built by Nexora Technologies &middot; Vaachan v2.0</p>
+  <p class="footer">PM SHRI Kendriya Vidyalaya AFS Sulur &middot; Vaachan v2.0</p>
 </div>
 
 <!-- Load Supabase Library -->
@@ -172,6 +181,23 @@
   function togglePwd() {
     const p = document.getElementById('password');
     p.type = p.type === 'password' ? 'text' : 'password';
+  }
+
+  function showDbSettings() {
+    const currentUrl = localStorage.getItem('VAACHAN_SUPABASE_URL') || '';
+    const currentKey = localStorage.getItem('VAACHAN_SUPABASE_KEY') || '';
+    
+    const url = prompt("Enter Supabase URL:", currentUrl);
+    if (url === null) return;
+    
+    const key = prompt("Enter Supabase Anon Key:", currentKey);
+    if (key === null) return;
+    
+    if (url.trim() && key.trim()) {
+      window.configureSupabase(url.trim(), key.trim());
+    } else {
+      alert("Both URL and Key are required to configure Supabase.");
+    }
   }
 
   function setRole(role) {

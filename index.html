@@ -215,9 +215,6 @@
   </div>
 
   <div class="card">
-    <div class="alert alert-warning" id="config-alert">
-      <b>Database Connection Required:</b> Please click "⚙️ Database Connection Setup" below to configure your Supabase credentials before logging in.
-    </div>
     <div class="alert alert-danger" id="login-error"></div>
 
     <div class="tabs">
@@ -238,20 +235,6 @@
 
       <button type="submit" class="btn btn-teacher" id="submit-btn">Enter Teacher Portal</button>
     </form>
-
-    <a class="setup-link" onclick="toggleSetup()">⚙️ Database Connection Setup</a>
-
-    <div class="setup-panel" id="setup-panel">
-      <div class="field-group">
-        <label for="db-url">Supabase Project URL</label>
-        <input type="url" id="db-url" class="text-input" placeholder="https://xxxxxx.supabase.co">
-      </div>
-      <div class="field-group">
-        <label for="db-key">Supabase Anon Key</label>
-        <input type="text" id="db-key" class="text-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-      </div>
-      <button class="btn btn-admin" style="font-size:0.95rem; padding:10px;" onclick="saveConfig()">Save Configuration</button>
-    </div>
   </div>
 
   <p class="footer">Built by Nexora Technologies &middot; Vaachan v2.0</p>
@@ -266,14 +249,6 @@
   let currentRole = 'teacher';
 
   window.addEventListener('DOMContentLoaded', () => {
-    // Populate config fields if exists
-    document.getElementById('db-url').value = localStorage.getItem('VAACHAN_SUPABASE_URL') || '';
-    document.getElementById('db-key').value = localStorage.getItem('VAACHAN_SUPABASE_KEY') || '';
-
-    if (!window.isSupabaseConfigured()) {
-      document.getElementById('config-alert').style.display = 'block';
-    }
-
     // Auto routing if already logged in
     window.auth.getSession().then(session => {
       if (session) {
@@ -312,31 +287,10 @@
     }
   }
 
-  function toggleSetup() {
-    const panel = document.getElementById('setup-panel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  }
-
-  function saveConfig() {
-    const url = document.getElementById('db-url').value.trim();
-    const key = document.getElementById('db-key').value.trim();
-    if (!url || !key) {
-      alert("Please fill in both fields.");
-      return;
-    }
-    window.configureSupabase(url, key);
-  }
-
   async function handleLogin(e) {
     e.preventDefault();
     const errEl = document.getElementById('login-error');
     errEl.style.display = 'none';
-
-    if (!window.isSupabaseConfigured()) {
-      errEl.textContent = "Please configure your Supabase connection parameters first.";
-      errEl.style.display = 'block';
-      return;
-    }
 
     const username = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value;

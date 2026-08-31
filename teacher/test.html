@@ -691,6 +691,55 @@
       selectedLang
     );
 
+    // If Speech Recognition transcript is empty, generate interactive fallback
+    if (!result.alignResult) {
+      const cleanRef = window.algorithm.cleanText(activePassage.text, selectedLang);
+      const refWords = cleanRef.split(" ").filter(Boolean);
+      const path = refWords.map((w, idx) => ({
+        refIndex: idx,
+        heardIndex: idx,
+        refWord: w,
+        heardWord: w,
+        type: 'correct'
+      }));
+      result.alignResult = {
+        correct: refWords.length,
+        substitutions: 0,
+        omissions: 0,
+        insertions: 0,
+        path: path
+      };
+      result.accuracyPct = 100;
+      result.accuracyScore = 10.0;
+      
+      const overall = (result.accuracyScore * 0.35) + (result.speedScore * 0.30) + (result.phrasingScore * 0.20) + (result.expressionScore * 0.15);
+      result.overallScore = Math.round(overall * 10) / 10;
+      
+      let naepLevel = 1;
+      let naepText = "Non-fluent";
+      if (result.overallScore >= 7.5) {
+        naepLevel = 4;
+        naepText = "Fluent";
+      } else if (result.overallScore >= 5.5) {
+        naepLevel = 3;
+        naepText = "Primarily Fluent";
+      } else if (result.overallScore >= 3.5) {
+        naepLevel = 2;
+        naepText = "Developing";
+      }
+      result.naepLevel = naepLevel;
+      result.naepText = naepText;
+
+      let grade = "E";
+      if (result.overallScore >= 9.0) grade = "A+";
+      else if (result.overallScore >= 8.0) grade = "A";
+      else if (result.overallScore >= 7.0) grade = "B+";
+      else if (result.overallScore >= 6.0) grade = "B";
+      else if (result.overallScore >= 5.0) grade = "C";
+      else if (result.overallScore >= 4.0) grade = "D";
+      result.grade = grade;
+    }
+
     // Save to Database
     try {
       const session = await window.auth.getSession();
@@ -715,7 +764,7 @@
         diff_json: result.alignResult ? JSON.stringify(result.alignResult) : null
       };
 
-      await window.db.saveSession(sessionData);
+      const savedSession = await window.db.saveSession(sessionData);
       
       // Log event
       await window.db.logAction("Fluency Evaluation", {
@@ -727,6 +776,7 @@
 
       lastComputedResult = {
         ...result,
+        id: savedSession.id,
         studentName: selectedStudent.name,
         classLabel: `Class ${selectedStudent.classes.class_num}${selectedStudent.classes.section}`,
         passageTitle: activePassage.title,
@@ -753,6 +803,183 @@
       bar.className = 'eq-bar';
       if (i < filled && score !== null) bar.style.background = color;
       track.appendChild(bar);
+    }
+  }
+
+  function updateWordStyle(span, type, wordText) {
+    span.textContent = wordText;
+    if (type === 'correct') {
+      span.style.textDecoration = 'none';
+      span.style.borderBottom = 'none';
+      span.style.color = 'var(--ink)';
+      span.style.background = 'transparent';
+      span.style.fontStyle = 'normal';
+    } else if (type === 'substitution') {
+      span.style.textDecoration = 'none';
+      span.style.borderBottom = '2.5px solid var(--marigold)';
+      span.style.color = 'var(--ink)';
+      span.style.background = 'rgba(232,163,61,0.1)';
+      span.style.fontStyle = 'normal';
+      span.title = "Marked as misread";
+    } else if (type === 'omission') {
+      span.style.textDecoration = 'line-through';
+      span.style.borderBottom = 'none';
+      span.style.color = 'var(--coral)';
+      span.style.background = 'rgba(214,88,79,0.1)';
+      span.style.fontStyle = 'normal';
+      span.title = "Marked as skipped";
+    } else if (type === 'insertion') {
+      span.style.textDecoration = 'underline dotted';
+      span.style.borderBottom = 'none';
+      span.style.color = 'var(--mint)';
+      span.style.background = 'rgba(78,179,151,0.1)';
+      span.style.fontStyle = 'italic';
+      span.title = "Extra word spoken";
+    }
+  }
+
+  function toggleWordType(span, idx) {
+    if (!lastComputedResult || !lastComputedResult.alignResult) return;
+    const item = lastComputedResult.alignResult.path[idx];
+    const currentType = span.dataset.type;
+    let nextType = 'correct';
+    
+    if (item.refWord === null) {
+      if (currentType === 'insertion') {
+        nextType = 'correct';
+        item.type = 'correct';
+      } else {
+        nextType = 'insertion';
+        item.type = 'insertion';
+      }
+    } else {
+      if (currentType === 'correct') {
+        nextType = 'substitution';
+      } else if (currentType === 'substitution') {
+        nextType = 'omission';
+      } else {
+        nextType = 'correct';
+      }
+    }
+    
+    span.dataset.type = nextType;
+    lastComputedResult.alignResult.path[idx].type = nextType;
+    
+    updateWordStyle(span, nextType, item.refWord || item.heardWord);
+    recalculateMetrics();
+  }
+
+  function recalculateMetrics() {
+    if (!lastComputedResult || !lastComputedResult.alignResult) return;
+    const r = lastComputedResult;
+    const path = r.alignResult.path;
+    const M = path.filter(p => p.type !== 'insertion').length;
+
+    const correct = path.filter(p => p.type === 'correct').length;
+    const substitutions = path.filter(p => p.type === 'substitution').length;
+    const omissions = path.filter(p => p.type === 'omission').length;
+    const insertions = path.filter(p => p.type === 'insertion').length;
+
+    const totalErrors = substitutions + omissions + (insertions * 0.5);
+    const accuracy = M > 0 ? Math.max(0, (M - totalErrors) / M) : 0;
+    
+    r.alignResult.correct = correct;
+    r.alignResult.substitutions = substitutions;
+    r.alignResult.omissions = omissions;
+    r.alignResult.insertions = insertions;
+
+    r.accuracyPct = Math.round(accuracy * 100);
+    r.accuracyScore = Math.round(accuracy * 100) / 10;
+
+    const durationSec = r.speakingSec || 10;
+    const speakingMinutes = durationSec / 60;
+    const cwpm = Math.round(correct / speakingMinutes);
+    r.cwpm = Math.max(5, Math.min(350, cwpm));
+
+    const benchmarks = {
+      3: { english: [53, 82], hindi: [45, 70] },
+      4: { english: [78, 115], hindi: [65, 95] },
+      5: { english: [95, 140], hindi: [80, 115] }
+    };
+    const classNum = selectedStudent.classes.class_num;
+    const range = benchmarks[classNum]?.[selectedLang] || [50, 80];
+    const minTarget = range[0];
+
+    let speedScore = 10;
+    if (r.cwpm >= minTarget) {
+      if (r.cwpm > 220) {
+        speedScore = Math.max(7.0, 10 - (r.cwpm - 220) / 15);
+      } else {
+        speedScore = 10;
+      }
+    } else {
+      speedScore = Math.max(1.0, 10 * (r.cwpm / minTarget));
+    }
+    r.speedScore = Math.round(speedScore * 10) / 10;
+
+    const overall = (r.accuracyScore * 0.35) + (r.speedScore * 0.30) + (r.phrasingScore * 0.20) + (r.expressionScore * 0.15);
+    r.overallScore = Math.round(overall * 10) / 10;
+
+    let naepLevel = 1;
+    let naepText = "Non-fluent";
+    if (r.overallScore >= 7.5) {
+      naepLevel = 4;
+      naepText = "Fluent";
+    } else if (r.overallScore >= 5.5) {
+      naepLevel = 3;
+      naepText = "Primarily Fluent";
+    } else if (r.overallScore >= 3.5) {
+      naepLevel = 2;
+      naepText = "Developing";
+    }
+    r.naepLevel = naepLevel;
+    r.naepText = naepText;
+
+    let grade = "E";
+    if (r.overallScore >= 9.0) grade = "A+";
+    else if (r.overallScore >= 8.0) grade = "A";
+    else if (r.overallScore >= 7.0) grade = "B+";
+    else if (r.overallScore >= 6.0) grade = "B";
+    else if (r.overallScore >= 5.0) grade = "C";
+    else if (r.overallScore >= 4.0) grade = "D";
+    r.grade = grade;
+
+    setBar('accuracy', r.accuracyScore);
+    setBar('speed', r.speedScore);
+    
+    const errors = substitutions + omissions;
+    document.getElementById('accuracy-note').textContent = `${r.accuracyPct}% accuracy rate. Noticed ${errors} errors/omissions.`;
+    document.getElementById('speed-note').textContent = `Speed of ${r.cwpm} Correct Words Per Minute. Target for Class ${classNum}: ${range[0]}-${range[1]} CWPM.`;
+    
+    const starCount = Math.round((r.overallScore / 10) * 5);
+    document.getElementById('stars').textContent = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
+
+    const badge = document.getElementById('grade-badge');
+    badge.textContent = 'Grade ' + r.grade;
+    badge.style.background = r.overallScore >= 8 ? 'var(--mint)' : r.overallScore >= 5 ? 'var(--indigo)' : 'var(--coral)';
+
+    document.getElementById('overall-label').textContent = r.naepText;
+    document.getElementById('overall-sub').textContent = `Overall Score: ${r.overallScore.toFixed(1)} / 10`;
+
+    saveUpdatedResultToDb();
+  }
+
+  async function saveUpdatedResultToDb() {
+    if (!lastComputedResult || !lastComputedResult.id) return;
+    try {
+      const sessionData = {
+        cwpm: lastComputedResult.cwpm,
+        accuracy_pct: lastComputedResult.accuracyPct,
+        accuracy_score: lastComputedResult.accuracyScore,
+        speed_score: lastComputedResult.speedScore,
+        overall_score: lastComputedResult.overallScore,
+        naep_level: lastComputedResult.naepLevel,
+        grade: lastComputedResult.grade,
+        diff_json: lastComputedResult.alignResult ? JSON.stringify(lastComputedResult.alignResult) : null
+      };
+      await window.db.updateSession(lastComputedResult.id, sessionData);
+    } catch (e) {
+      console.error("Error updating adjusted score in background:", e);
     }
   }
 
@@ -793,14 +1020,49 @@
     document.getElementById('overall-label').textContent = r.naepText;
     document.getElementById('overall-sub').textContent = `Overall Score: ${r.overallScore.toFixed(1)} / 10`;
 
-    // Diff view
+    // Diff / Alignment view
     const transcriptTextEl = document.getElementById('transcript-text');
-    if (r.alignResult) {
-      document.getElementById('transcript-wrap').classList.remove('hidden');
-      transcriptTextEl.innerHTML = window.utils.generateDiffHtml(r.alignResult);
-    } else {
-      document.getElementById('transcript-wrap').classList.add('hidden');
-    }
+    document.getElementById('transcript-wrap').classList.remove('hidden');
+    transcriptTextEl.innerHTML = '';
+    
+    // Add instruction note
+    const helpTip = document.createElement('div');
+    helpTip.style.fontSize = '0.78rem';
+    helpTip.style.color = 'var(--indigo)';
+    helpTip.style.marginBottom = '12px';
+    helpTip.style.padding = '6px 10px';
+    helpTip.style.background = 'rgba(27, 42, 74, 0.05)';
+    helpTip.style.borderRadius = '8px';
+    helpTip.style.fontWeight = '500';
+    helpTip.innerHTML = '💡 <b>Interactive Grading:</b> Tap any word to toggle error: <i>Normal (Correct) ➔ Yellow Underline (Misread) ➔ Red Strikethrough (Skipped)</i>.';
+    transcriptTextEl.appendChild(helpTip);
+
+    const wordsContainer = document.createElement('div');
+    wordsContainer.style.lineHeight = '2';
+    
+    r.alignResult.path.forEach((item, idx) => {
+      const span = document.createElement('span');
+      span.className = 'interactive-word';
+      span.dataset.idx = idx;
+      span.dataset.type = item.type;
+      span.style.cursor = 'pointer';
+      span.style.padding = '2px 4px';
+      span.style.margin = '0 2.5px';
+      span.style.borderRadius = '4px';
+      span.style.display = 'inline-block';
+      span.style.userSelect = 'none';
+      span.style.transition = 'all 0.15s ease';
+
+      updateWordStyle(span, item.type, item.refWord || item.heardWord);
+
+      span.addEventListener('click', () => {
+        toggleWordType(span, idx);
+      });
+
+      wordsContainer.appendChild(span);
+    });
+
+    transcriptTextEl.appendChild(wordsContainer);
 
     const idEl = document.getElementById('results-id');
     idEl.innerHTML = `<b>${window.utils.escapeHtml(selectedStudent.name)}</b> · Roll ${selectedStudent.roll_no} · ${selectedLang === 'hindi' ? 'हिन्दी' : 'English'} &middot; ${new Date().toLocaleDateString('en-IN')}`;

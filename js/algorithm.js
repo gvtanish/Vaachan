@@ -233,8 +233,8 @@
         alignResult = this.alignWords(currentStory.text, finalTranscript, lang);
         accuracyPct = alignResult.accuracy * 100;
         correctWords = alignResult.correct;
-        // Score Accuracy: ideal 100%, 80% accuracy gets ~7.5, below 50% drops quickly
-        accuracyScore = this.bellScore(alignResult.accuracy, 1.0, 0.20, 0.65);
+        // Score Accuracy: linear scale (e.g. 95% accuracy gets 9.5)
+        accuracyScore = alignResult.accuracy * 10;
       } else {
         accuracyPct = null; // NA or estimated
         accuracyScore = null;
@@ -252,10 +252,19 @@
       
       const classLevel = currentStory.classNum || 3;
       const range = benchmarks[classLevel]?.[lang] || [50, 80];
-      const speedMid = (range[0] + range[1]) / 2;
-      const speedHalfRange = (range[1] - range[0]) / 2;
-      // Ideal target centers on speedMid. Fast readers are okay, slow ones penalized.
-      const speedScore = this.bellScore(cwpm, speedMid, speedHalfRange * 1.3, 0.7);
+      const minTarget = range[0];
+      
+      // Speed Score: Meet or exceed min target = 10 (unless rushing > 220 CWPM). Slower speeds degrade gracefully.
+      let speedScore = 10;
+      if (cwpm >= minTarget) {
+        if (cwpm > 220) {
+          speedScore = Math.max(7.0, 10 - (cwpm - 220) / 15);
+        } else {
+          speedScore = 10;
+        }
+      } else {
+        speedScore = Math.max(1.0, 10 * (cwpm / minTarget));
+      }
 
       // 4. Phrasing / Pause Consistency
       // Segment pauses

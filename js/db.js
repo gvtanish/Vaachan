@@ -202,12 +202,23 @@
       return data;
     },
 
-    // Sessions / Reading Fluency Results
     async saveSession(sessionData) {
       const client = await window.getSupabaseClient();
       const { data, error } = await client
         .from('sessions')
         .insert([sessionData])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async updateSession(sessionId, sessionData) {
+      const client = await window.getSupabaseClient();
+      const { data, error } = await client
+        .from('sessions')
+        .update(sessionData)
+        .eq('id', sessionId)
         .select()
         .single();
       if (error) throw error;

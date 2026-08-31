@@ -289,7 +289,12 @@
       const roll_no = cols[1];
       const classNum = parseInt(cols[2]);
       const section = cols[3].toUpperCase();
-      const gender = cols[4] || 'M';
+      let genderVal = (cols[4] || 'M').trim().toUpperCase();
+      let gender = 'M';
+      if (genderVal.startsWith('M')) gender = 'M';
+      else if (genderVal.startsWith('F')) gender = 'F';
+      else if (genderVal.startsWith('O')) gender = 'O';
+
       const dob = cols[5] || null;
       const guardian_name = cols[6] || null;
       const guardian_phone = cols[7] || null;
@@ -356,7 +361,7 @@
       await window.db.bulkInsertStudents(listToInsert);
       await window.db.logAction("Bulk Import Students", { count: listToInsert.length });
 
-      alert(`Successfully imported ${listToInsert.length} students records!`);
+      window.utils?.toast(`Successfully imported ${listToInsert.length} students records!`, "success");
       
       // Reset
       document.getElementById('csv-preview-card').classList.add('hidden');
@@ -366,7 +371,7 @@
 
     } catch (e) {
       console.error(e);
-      alert("Error importing records: " + e.message);
+      window.utils?.toast("Error importing records: " + e.message, "error");
     }
   }
 </script>

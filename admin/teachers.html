@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -360,6 +360,12 @@
       const t = parsedTeachers[i];
       const email = `${t.employeeId.toLowerCase()}@vaachan.school`;
       const statusCell = rows[i] ? rows[i].querySelector('td:last-child') : null;
+
+      // Throttle delay to avoid triggering Supabase signup rate limiting (HTTP 429)
+      if (i > 0) {
+        statusEl.textContent = `Throttling rate limit... Progress: ${i} / ${parsedTeachers.length}`;
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
 
       try {
         const { error } = await client.auth.signUp({

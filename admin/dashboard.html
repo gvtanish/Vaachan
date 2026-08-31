@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Admin Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --sky:#3E7CB1;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  .stats-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:18px;
+    margin-bottom:24px;
+  }
+  .stat-card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    box-shadow:var(--shadow);
+  }
+  .stat-val{
+    font-family:'Baloo 2', sans-serif;
+    font-size:2.2rem;
+    font-weight:800;
+    color:var(--indigo);
+    margin:6px 0;
+  }
+  .stat-label{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    font-weight:700;
+    letter-spacing:0.04em;
+  }
+
+  .grid-2col{
+    display:grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap:24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+
+  /* Heatmap grid styling */
+  .heatmap-grid{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:10px;
+    text-align:center;
+  }
+  .heatmap-header{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    padding:8px 0;
+    font-size:0.9rem;
+    color:var(--ink-soft);
+  }
+  .heatmap-cell{
+    border-radius:10px;
+    padding:16px 8px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:1.2rem;
+    transition:transform 0.15s ease;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .heatmap-cell:hover{
+    transform:scale(1.03);
+  }
+  .heatmap-cell span{
+    display:block;
+    font-family:'Inter', sans-serif;
+    font-size:0.68rem;
+    font-weight:500;
+    opacity:0.8;
+    margin-top:2px;
+  }
+
+  /* Heatmap colors scale */
+  .scale-none { background:#F5F5F7; color:var(--ink-soft); }
+  .scale-low { background:#FBEBEA; color:var(--coral); border-color:rgba(214,88,79,0.3); }
+  .scale-mid { background:#FEF6E8; color:var(--marigold-deep); border-color:rgba(232,163,61,0.3); }
+  .scale-high { background:#EEF6F1; color:var(--mint); border-color:rgba(79,155,114,0.3); }
+
+  /* Table styling */
+  .list-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .list-table th{
+    text-align:left;
+    padding:10px;
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .list-table td{
+    padding:12px 10px;
+    font-size:0.88rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:99px;
+    font-weight:700;
+    font-size:0.75rem;
+    color:#fff;
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Teachers</div>
+      <div class="stat-val" id="stat-teachers">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Registered Students</div>
+      <div class="stat-val" id="stat-students">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Evaluations Done</div>
+      <div class="stat-val" id="stat-sessions">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">School Avg Score</div>
+      <div class="stat-val" id="stat-avg-score">0.0</div>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <!-- Heatmap -->
+    <div class="card">
+      <h2 class="section-title">Section Performance Heatmap</h2>
+      <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 20px 0; line-height:1.4;">Color indicates average overall fluency check scores (Red: &lt;5.0, Amber: 5.0-7.5, Green: &ge;7.5).</p>
+      
+      <div class="heatmap-grid" id="heatmap-container">
+        <!-- Cells generated by JS -->
+      </div>
+    </div>
+
+    <!-- Recent evaluations across school -->
+    <div class="card">
+      <h2 class="section-title">Recent School Evaluations</h2>
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Class</th>
+            <th>Evaluator</th>
+            <th>CWPM</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
+        <tbody id="recent-sessions-tbody">
+          <tr>
+            <td colspan="5" class="empty-state">Loading school activities...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('admin');
+    window.utils.renderNav('dashboard', true);
+
+    loadAdminDashboard();
+  });
+
+  async function loadAdminDashboard() {
+    try {
+      // 1. Load data
+      const [teachers, classes, students, sessions] = await Promise.all([
+        window.db.getTeachers(),
+        window.db.getClasses(),
+        window.db.getStudents(),
+        window.db.getSessions()
+      ]);
+
+      // Populate counts
+      document.getElementById('stat-teachers').textContent = teachers.length;
+      document.getElementById('stat-students').textContent = students.length;
+      document.getElementById('stat-sessions').textContent = sessions.length;
+
+      if (sessions.length > 0) {
+        const sumScore = sessions.reduce((acc, s) => acc + Number(s.overall_score || 0), 0);
+        document.getElementById('stat-avg-score').textContent = (sumScore / sessions.length).toFixed(1);
+      } else {
+        document.getElementById('stat-avg-score').textContent = '—';
+      }
+
+      // 2. Render Heatmap for 15 sections
+      // Group sessions by class
+      const classSessions = {};
+      sessions.forEach(s => {
+        const student = s.students || {};
+        if (student.class_id) {
+          if (!classSessions[student.class_id]) classSessions[student.class_id] = [];
+          classSessions[student.class_id].push(s);
+        }
+      });
+
+      const heatmapContainer = document.getElementById('heatmap-container');
+      
+      // We want to generate grid cells for Classes 3..5 and sections A..E
+      let html = '';
+      
+      // Column Headers
+      html += '<div class="heatmap-header">Class</div>';
+      ['A','B','C','D','E'].forEach(sec => {
+        html += `<div class="heatmap-header">Sec ${sec}</div>`;
+      });
+
+      for (let c = 3; c <= 5; c++) {
+        html += `<div class="heatmap-header" style="display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--indigo);">Class ${c}</div>`;
+        
+        ['A','B','C','D','E'].forEach(sec => {
+          // Find class ID corresponding to (c, sec)
+          const matchedClass = classes.find(cl => cl.class_num === c && cl.section === sec);
+          
+          let scoreText = '—';
+          let scaleClass = 'scale-none';
+          let countText = '0 tests';
+
+          if (matchedClass) {
+            const classSess = classSessions[matchedClass.id] || [];
+            if (classSess.length > 0) {
+              const avg = classSess.reduce((acc, s) => acc + Number(s.overall_score || 0), 0) / classSess.length;
+              scoreText = avg.toFixed(1);
+              countText = `${classSess.length} test${classSess.length > 1 ? 's' : ''}`;
+              
+              if (avg >= 7.5) scaleClass = 'scale-high';
+              else if (avg >= 5.0) scaleClass = 'scale-mid';
+              else scaleClass = 'scale-low';
+            }
+          }
+
+          html += `
+            <div class="heatmap-cell ${scaleClass}">
+              ${scoreText}
+              <span>${countText}</span>
+            </div>
+          `;
+        });
+      }
+
+      heatmapContainer.innerHTML = html;
+
+      // 3. Render school wide recent sessions
+      const tbody = document.getElementById('recent-sessions-tbody');
+      const limitSessions = sessions.slice(0, 8);
+
+      if (limitSessions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No evaluations recorded yet.</td></tr>`;
+      } else {
+        tbody.innerHTML = limitSessions.map(s => {
+          const student = s.students || {};
+          const classLabel = student.classes ? `${student.classes.class_num}${student.classes.section}` : '—';
+          const teacherName = s.profiles ? s.profiles.name : 'Unknown';
+          
+          let color = 'badge-indigo';
+          if (s.overall_score >= 8) color = 'badge-mint';
+          else if (s.overall_score < 4) color = 'badge-coral';
+
+          return `
+            <tr>
+              <td><b>${window.utils.escapeHtml(student.name || 'Unknown')}</b></td>
+              <td>${classLabel}</td>
+              <td>${window.utils.escapeHtml(teacherName)}</td>
+              <td>${Math.round(s.cwpm || 0)}</td>
+              <td><span class="badge ${color}">${s.grade || 'E'}</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading admin dashboard: " + e.message);
+    }
+  }
+</script>
+</body>
+</html>

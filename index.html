@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · School Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.25);
+  }
+  *{box-sizing:border-box;}
+  body{
+    background: radial-gradient(circle at 12% 8%, rgba(232,163,61,0.08), transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(62,124,177,0.08), transparent 45%),
+                var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    margin:0;
+  }
+  .wrap{
+    width:100%;
+    max-width:440px;
+  }
+  .letterhead{
+    text-align:center;
+    font-size:0.75rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--indigo-soft);
+    margin-bottom:12px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:30px;
+  }
+  .brand-mark{
+    width:48px;
+    height:48px;
+    border-radius:12px;
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: var(--shadow);
+  }
+  .brand-mark svg{width:26px;height:26px;}
+  .brand h1{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.8rem;
+    font-weight:800;
+    margin:0;
+    color:var(--indigo);
+  }
+  .brand p{margin:2px 0 0;font-size:0.85rem;color:var(--ink-soft);}
+  
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    margin-bottom:20px;
+  }
+  
+  .tabs{
+    display:flex;
+    border-bottom:1px solid var(--line);
+    margin-bottom:24px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:12px;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1.1rem;
+    cursor:pointer;
+    color:var(--ink-soft);
+    border-bottom:2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .tab.active-teacher{
+    color:var(--marigold-deep);
+    border-bottom-color:var(--marigold);
+  }
+  .tab.active-admin{
+    color:var(--indigo);
+    border-bottom-color:var(--indigo);
+  }
+
+  .field-group{margin-bottom:18px;}
+  .field-group label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .text-input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:0.95rem;
+    color:var(--ink);
+    transition: border-color 0.2s ease;
+  }
+  .text-input:focus{outline:none;border-color:var(--marigold);}
+
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1.05rem;
+    border-radius:12px;
+    padding:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    transition:all 0.15s ease;
+    margin-top:10px;
+  }
+  .btn-teacher{
+    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
+    color:#fff;
+    box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);
+  }
+  .btn-admin{
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    color:#fff;
+    box-shadow:0 8px 18px -8px rgba(27,42,74,0.6);
+  }
+  .btn:active{transform:scale(0.98);}
+
+  .alert{
+    padding:12px;
+    border-radius:10px;
+    font-size:0.85rem;
+    line-height:1.4;
+    margin-bottom:18px;
+    display:none;
+  }
+  .alert-danger{
+    background:rgba(214,88,79,0.1);
+    color:var(--coral);
+    border:1px solid rgba(214,88,79,0.2);
+  }
+  .alert-warning{
+    background:rgba(232,163,61,0.1);
+    color:var(--marigold-deep);
+    border:1px solid rgba(232,163,61,0.2);
+  }
+
+  .setup-link{
+    text-align:center;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    cursor:pointer;
+    text-decoration:underline;
+    display:block;
+    margin-top:14px;
+  }
+
+  .setup-panel{
+    display:none;
+    border-top:1px dashed var(--line);
+    margin-top:18px;
+    padding-top:18px;
+  }
+
+  .footer{
+    text-align:center;
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    opacity:0.4;
+    margin-top:20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="letterhead">PM SHRI Kendriya Vidyalaya AFS Sulur</p>
+
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <h1>Vaachan</h1>
+      <p>Reading Fluency platform</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="alert alert-warning" id="config-alert">
+      <b>Database Connection Required:</b> Please click "⚙️ Database Connection Setup" below to configure your Supabase credentials before logging in.
+    </div>
+    <div class="alert alert-danger" id="login-error"></div>
+
+    <div class="tabs">
+      <div class="tab active-teacher" id="tab-teacher" onclick="setRole('teacher')">Teacher Login</div>
+      <div class="tab" id="tab-admin" onclick="setRole('admin')">Admin Login</div>
+    </div>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="field-group">
+        <label id="user-label" for="username">Teacher Employee ID</label>
+        <input type="text" id="username" class="text-input" placeholder="e.g. T10042" required autocomplete="username">
+      </div>
+
+      <div class="field-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="text-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-teacher" id="submit-btn">Enter Teacher Portal</button>
+    </form>
+
+    <a class="setup-link" onclick="toggleSetup()">⚙️ Database Connection Setup</a>
+
+    <div class="setup-panel" id="setup-panel">
+      <div class="field-group">
+        <label for="db-url">Supabase Project URL</label>
+        <input type="url" id="db-url" class="text-input" placeholder="https://xxxxxx.supabase.co">
+      </div>
+      <div class="field-group">
+        <label for="db-key">Supabase Anon Key</label>
+        <input type="text" id="db-key" class="text-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+      <button class="btn btn-admin" style="font-size:0.95rem; padding:10px;" onclick="saveConfig()">Save Configuration</button>
+    </div>
+  </div>
+
+  <p class="footer">Built by Nexora Technologies &middot; Vaachan v2.0</p>
+</div>
+
+<!-- Load Supabase Library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./js/supabase.js"></script>
+<script src="./js/auth.js"></script>
+
+<script>
+  let currentRole = 'teacher';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // Populate config fields if exists
+    document.getElementById('db-url').value = localStorage.getItem('VAACHAN_SUPABASE_URL') || '';
+    document.getElementById('db-key').value = localStorage.getItem('VAACHAN_SUPABASE_KEY') || '';
+
+    if (!window.isSupabaseConfigured()) {
+      document.getElementById('config-alert').style.display = 'block';
+    }
+
+    // Auto routing if already logged in
+    window.auth.getSession().then(session => {
+      if (session) {
+        const role = sessionStorage.getItem('VAACHAN_USER_ROLE');
+        if (role === 'admin') {
+          window.location.href = './admin/dashboard.html';
+        } else if (role === 'teacher') {
+          window.location.href = './teacher/dashboard.html';
+        }
+      }
+    });
+  });
+
+  function setRole(role) {
+    currentRole = role;
+    const tabTeacher = document.getElementById('tab-teacher');
+    const tabAdmin = document.getElementById('tab-admin');
+    const userLabel = document.getElementById('user-label');
+    const usernameInput = document.getElementById('username');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (role === 'teacher') {
+      tabTeacher.className = 'tab active-teacher';
+      tabAdmin.className = 'tab';
+      userLabel.textContent = 'Teacher Employee ID';
+      usernameInput.placeholder = 'e.g. T10042';
+      submitBtn.className = 'btn btn-teacher';
+      submitBtn.textContent = 'Enter Teacher Portal';
+    } else {
+      tabTeacher.className = 'tab';
+      tabAdmin.className = 'tab active-admin';
+      userLabel.textContent = 'Admin Email';
+      usernameInput.placeholder = 'admin@vaachan.school';
+      submitBtn.className = 'btn btn-admin';
+      submitBtn.textContent = 'Enter Admin Portal';
+    }
+  }
+
+  function toggleSetup() {
+    const panel = document.getElementById('setup-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function saveConfig() {
+    const url = document.getElementById('db-url').value.trim();
+    const key = document.getElementById('db-key').value.trim();
+    if (!url || !key) {
+      alert("Please fill in both fields.");
+      return;
+    }
+    window.configureSupabase(url, key);
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+
+    if (!window.isSupabaseConfigured()) {
+      errEl.textContent = "Please configure your Supabase connection parameters first.";
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const username = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value;
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Authenticating...';
+
+    try {
+      const profile = await window.auth.signIn(username, pass);
+      
+      // Verification of role matching
+      if (profile.role !== currentRole) {
+        throw new Error(`Account role is not matched. The entered account is registered as a ${profile.role}.`);
+      }
+
+      if (profile.role === 'admin') {
+        window.location.href = './admin/dashboard.html';
+      } else {
+        window.location.href = './teacher/dashboard.html';
+      }
+    } catch (err) {
+      errEl.textContent = err.message || "Invalid username or password.";
+      errEl.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = currentRole === 'teacher' ? 'Enter Teacher Portal' : 'Enter Admin Portal';
+    }
+  }
+</script>
+</body>
+</html>

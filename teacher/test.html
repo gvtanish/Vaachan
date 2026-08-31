@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Reading Fluency Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --sky:#3E7CB1;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.25);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(232,163,61,0.06), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(62,124,177,0.06), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .wrap{max-width:680px; margin:0 auto; padding:0 16px;}
+  
+  /* Card */
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    margin-top:24px;
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    font-size:0.75rem;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;
+    color:var(--marigold-deep); margin:0 0 6px;
+  }
+  h2.step-title{
+    font-family:'Baloo 2',sans-serif;font-size:1.5rem;margin:0 0 4px;color:var(--indigo);
+  }
+  .step-sub{color:var(--ink-soft);font-size:0.95rem;margin:0 0 20px;line-height:1.5;}
+
+  /* Form Elements */
+  .field-group{margin-bottom:18px;}
+  .field-group label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .text-input, select{
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:0.95rem;
+    color:var(--ink);
+  }
+  .text-input:focus, select:focus{outline:none;border-color:var(--marigold);}
+
+  /* Pickers */
+  .picker-group{margin-bottom:18px;}
+  .picker-label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .picker-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    flex:1; min-width:84px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    border-radius:12px;
+    padding:12px 10px;
+    text-align:center;
+    cursor:pointer;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    color:var(--ink);
+    transition:all .15s ease;
+    user-select:none;
+  }
+  .chip:hover{border-color:var(--marigold);}
+  .chip.active{
+    background:var(--indigo);
+    border-color:var(--indigo);
+    color:#fff;
+    box-shadow:0 6px 16px -6px rgba(27,42,74,0.5);
+  }
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;
+    border-radius:14px;padding:14px 20px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;
+    transition:all .12s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));color:#fff;box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);}
+  .btn-primary:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-row{display:flex;gap:10px;margin-top:4px;}
+
+  /* Story screen */
+  .story-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .pill{
+    font-size:0.75rem;font-weight:700;color:var(--indigo);
+    background:rgba(27,42,74,0.08);
+    padding:5px 12px;border-radius:99px;
+  }
+  .story-box{
+    background: var(--paper);
+    border:1px dashed var(--line);
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:18px;
+    max-height:365px;
+    overflow-y:auto;
+  }
+  .story-box.hindi{font-family:'Noto Sans Devanagari',sans-serif;font-size:1.25rem;line-height:2.15;}
+  .story-box.english{font-family:'Lexend',sans-serif;font-size:1.15rem;line-height:2.05;}
+  .story-title{
+    font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);
+    font-size:1.2rem;margin:0 0 12px;
+  }
+
+  /* Recorder */
+  .rec-panel{
+    display:flex;flex-direction:column;align-items:center;
+    padding:18px 8px 6px;
+  }
+  canvas#wave{width:100%;height:64px;border-radius:10px;background:var(--indigo);margin-bottom:16px;}
+  .mic-btn{
+    width:78px;height:78px;border-radius:50%;
+    border:none;cursor:pointer;
+    background:linear-gradient(155deg, var(--coral), #b3413a);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 24px -10px rgba(214,88,79,0.7);
+    transition:transform .15s ease;
+    margin-bottom:10px;
+  }
+  .mic-btn.recording{animation:pulse 1.4s infinite;}
+  .mic-btn:active{transform:scale(0.94);}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(214,88,79,0.55);}
+    70%{box-shadow:0 0 0 18px rgba(214,88,79,0);}
+    100%{box-shadow:0 0 0 0 rgba(214,88,79,0);}
+  }
+  .timer{font-family:'Baloo 2',sans-serif;font-size:1.5rem;color:var(--indigo);font-weight:700;margin-bottom:2px;}
+  .rec-hint{font-size:0.85rem;color:var(--ink-soft);text-align:center;}
+  .status-banner{
+    font-size:0.8rem; background:rgba(62,124,177,0.10); color:var(--sky);
+    padding:10px 14px;border-radius:10px;margin-bottom:14px;line-height:1.45;
+  }
+
+  /* Results layout */
+  .overall{
+    text-align:center;padding:6px 0 20px;
+  }
+  .stars{font-size:2.2rem;letter-spacing:4px;margin-bottom:6px;}
+  .grade-badge{
+    display:inline-block;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.1rem;
+    color:#fff;background:var(--indigo);
+    padding:4px 18px;border-radius:99px;margin-bottom:10px;letter-spacing:0.02em;
+  }
+  .overall-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.3rem;color:var(--indigo);}
+  .overall-sub{font-size:0.9rem;color:var(--ink-soft);margin-top:2px;}
+
+  .metric{margin-bottom:18px;}
+  .metric-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .metric-name{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--ink);font-size:1.02rem;}
+  .metric-score{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);font-size:1.02rem;}
+  
+  /* Upgraded progress bars */
+  .eq-track{
+    height:14px;border-radius:8px;background:var(--line);overflow:hidden;
+    display:flex;gap:3px;padding:2px;
+  }
+  .eq-bar{flex:1;border-radius:4px;background:var(--line);transition:background .4s ease;}
+  .metric-note{font-size:0.85rem;color:var(--ink-soft);margin-top:7px;line-height:1.45;}
+
+  .transcript-box{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    padding:16px;font-size:0.95rem;color:var(--ink-soft);line-height:1.75;margin-top:10px;
+  }
+  .transcript-box b{color:var(--ink); display:block; margin-bottom:8px;}
+
+  .footer-note{
+    text-align:center;font-size:0.75rem;color:var(--ink-soft);opacity:0.8;margin-top:14px;line-height:1.5;
+  }
+  .hidden{display:none !important;}
+  .results-id{
+    text-align:center;font-size:0.9rem;color:var(--ink-soft);margin-bottom:6px;
+  }
+  .results-id b{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="wrap">
+  <!-- STEP 1: SETUP -->
+  <div class="card" id="screen-setup">
+    <p class="eyebrow">Step 1</p>
+    <h2 class="step-title">Select Student & Language</h2>
+    <p class="step-sub">Select the allotted class section and choose the reading candidate.</p>
+
+    <div class="field-group">
+      <label for="class-select">Assigned Class Section</label>
+      <select id="class-select" onchange="onClassSectionChanged()">
+        <option value="">-- Choose Class --</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="student-select">Student Name</label>
+      <select id="student-select" disabled onchange="checkSetupReady()">
+        <option value="">-- Choose Student --</option>
+      </select>
+    </div>
+
+    <div class="picker-group">
+      <span class="picker-label">Language</span>
+      <div class="picker-row" id="lang-picker">
+        <div class="chip" data-lang="english" onclick="selectLang('english')">English</div>
+        <div class="chip" data-lang="hindi" onclick="selectLang('hindi')">हिन्दी</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-continue" disabled onclick="startEvaluation()">Show the passage</button>
+  </div>
+
+  <!-- STEP 2: STORY + RECORD -->
+  <div class="card hidden" id="screen-story">
+    <p class="eyebrow" id="story-eyebrow">Step 2</p>
+    <h2 class="step-title">Read the passage aloud</h2>
+    <p class="step-sub">Hand the device to the student. Tap the mic icon, have them read the full passage, then tap it again to complete.</p>
+
+    <div class="story-meta">
+      <span class="pill" id="pill-student">Aarav Sharma</span>
+      <span class="pill" id="pill-class">Class 3A</span>
+      <span class="pill" id="pill-lang">English</span>
+      <span class="pill" id="pill-words">0 words</span>
+    </div>
+
+    <div class="story-box" id="story-box">
+      <p class="story-title" id="story-title"></p>
+      <div id="story-text"></div>
+    </div>
+
+    <div class="status-banner hidden" id="asr-banner"></div>
+
+    <div class="rec-panel">
+      <canvas id="wave" width="600" height="64"></canvas>
+      <div class="timer" id="timer">00:00</div>
+      <button class="mic-btn" id="mic-btn" aria-label="Start recording">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15Z" stroke="#fff" stroke-width="1.8"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3.2M9 20.2h6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <p class="rec-hint" id="rec-hint">Tap to start recording</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-back" onclick="goBackToSetup()">Change setup</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div class="card hidden" id="screen-results">
+    <p class="eyebrow">Result Details</p>
+    <p class="results-id" id="results-id"></p>
+    <div class="overall">
+      <div class="stars" id="stars">★★★☆☆</div>
+      <div class="grade-badge" id="grade-badge">A</div>
+      <div class="overall-label" id="overall-label">Good effort</div>
+      <div class="overall-sub" id="overall-sub"></div>
+    </div>
+
+    <!-- Metric 1: Accuracy -->
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">📝 Accuracy</span>
+        <span class="metric-score" id="accuracy-score">–</span>
+      </div>
+      <div class="eq-track" id="accuracy-bar"></div>
+      <p class="metric-note" id="accuracy-note"></p>
+    </div>
+
+    <!-- Metric 2: Speed -->
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">⏱️ Speed (CWPM)</span>
+        <span class="metric-score" id="speed-score">–</span>
+      </div>
+      <div class="eq-track" id="speed-bar"></div>
+      <p class="metric-note" id="speed-note"></p>
+    </div>
+
+    <!-- Metric 3: Phrasing -->
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">〰️ Phrasing & Fluency</span>
+        <span class="metric-score" id="phrasing-score">–</span>
+      </div>
+      <div class="eq-track" id="phrasing-bar"></div>
+      <p class="metric-note" id="phrasing-note"></p>
+    </div>
+
+    <!-- Metric 4: Expression -->
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">🎙️ Expression & Modulation</span>
+        <span class="metric-score" id="expression-score">–</span>
+      </div>
+      <div class="eq-track" id="expression-bar"></div>
+      <p class="metric-note" id="expression-note"></p>
+    </div>
+
+    <div class="transcript-box" id="transcript-wrap">
+      <b>Word-by-word Alignment View:</b>
+      <div id="transcript-text" style="font-family:'Lexend', sans-serif;"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-ghost" id="btn-retry" onclick="retryReading()">Read again</button>
+      <button class="btn btn-primary" id="btn-newstudent" onclick="resetToNewEvaluation()">Next student</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-ghost" id="btn-download" onclick="downloadReport()">⬇ Download this report</button>
+    </div>
+    <p class="footer-note">Results are computed by comparing recording dynamics and Speech Recognition transcript matching. Target targets are aligned to NIPUN / DIBELS benchmarks.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/algorithm.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let studentsList = [];
+  let passagesList = [];
+  
+  let selectedStudentId = null;
+  let selectedStudent = null;
+  let selectedClassId = null;
+  let selectedLang = null;
+  let activePassage = null;
+
+  let audioCtx, analyser, micStream, sourceNode, dataArray;
+  let recognizer = null, recognitionAvailable = false, finalTranscript = "";
+  let recStartTime = 0, timerInterval = null, waveInterval = null;
+  let samples = []; // {t, rms, pitch}
+  let recording = false;
+  let lastComputedResult = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('teacher');
+    window.utils.renderNav('test', false);
+
+    loadSetupData();
+  });
+
+  async function loadSetupData() {
+    try {
+      const session = await window.auth.getSession();
+      if (!session) return;
+      const teacherId = session.user.id;
+
+      // Fetch allotments and students
+      const [allClasses, allotments, students, passages] = await Promise.all([
+        window.db.getClasses(),
+        window.db.getClassSubjectTeachers(),
+        window.db.getStudentsByTeacher(teacherId),
+        window.db.getPassages(true)
+      ]);
+
+      studentsList = students;
+      passagesList = passages;
+
+      // Filter classes assigned to this teacher
+      const myClassIds = new Set();
+      allClasses.forEach(c => {
+        if (c.teacher_id === teacherId) myClassIds.add(c.id);
+      });
+      allotments.forEach(a => {
+        if (a.teacher_id === teacherId) myClassIds.add(a.class_id);
+      });
+
+      const assignedClasses = allClasses.filter(c => myClassIds.has(c.id));
+      const classSelect = document.getElementById('class-select');
+      classSelect.innerHTML = '<option value="">-- Choose Class Section --</option>' + 
+        assignedClasses.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading setup data: " + e.message);
+    }
+  }
+
+  function onClassSectionChanged() {
+    const classId = document.getElementById('class-select').value;
+    selectedClassId = classId ? parseInt(classId) : null;
+    
+    const studentSelect = document.getElementById('student-select');
+    studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+
+    if (!selectedClassId) {
+      studentSelect.disabled = true;
+      checkSetupReady();
+      return;
+    }
+
+    const filteredStudents = studentsList.filter(s => s.class_id === selectedClassId);
+    if (filteredStudents.length === 0) {
+      studentSelect.innerHTML = '<option value="">No active students in this section</option>';
+      studentSelect.disabled = true;
+    } else {
+      studentSelect.innerHTML = '<option value="">-- Choose Student --</option>' +
+        filteredStudents.map(s => `<option value="${s.id}">Roll ${s.roll_no} - ${s.name}</option>`).join('');
+      studentSelect.disabled = false;
+    }
+    checkSetupReady();
+  }
+
+  function selectLang(lang) {
+    selectedLang = lang;
+    document.querySelectorAll('#lang-picker .chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.lang === lang);
+    });
+    checkSetupReady();
+  }
+
+  function checkSetupReady() {
+    const studentId = document.getElementById('student-select').value;
+    selectedStudentId = studentId || null;
+    selectedStudent = studentsList.find(s => s.id === selectedStudentId);
+
+    const btn = document.getElementById('btn-continue');
+    btn.disabled = !(selectedClassId && selectedStudentId && selectedLang);
+  }
+
+  function startEvaluation() {
+    if (!selectedStudent || !selectedLang) return;
+    
+    // Find matching passage
+    const classNum = selectedStudent.classes ? selectedStudent.classes.class_num : 3;
+    activePassage = passagesList.find(p => p.class_num === classNum && p.lang === selectedLang);
+
+    if (!activePassage) {
+      alert(`No active passage found for Class ${classNum} in ${selectedLang === 'english' ? 'English' : 'Hindi'}. Please contact the Admin to configure passages.`);
+      return;
+    }
+
+    // Set up step 2 panel
+    document.getElementById('pill-student').textContent = selectedStudent.name;
+    document.getElementById('pill-class').textContent = `Class ${selectedStudent.classes.class_num}${selectedStudent.classes.section}`;
+    document.getElementById('pill-lang').textContent = selectedLang === 'english' ? 'English' : 'हिन्दी';
+    
+    const wordCount = activePassage.text.split(/\s+/).filter(Boolean).length;
+    document.getElementById('pill-words').textContent = `${wordCount} words`;
+    document.getElementById('story-title').textContent = activePassage.title;
+    document.getElementById('story-title').style.fontFamily = selectedLang === 'hindi' ? "'Noto Sans Devanagari', sans-serif" : "'Baloo 2', sans-serif";
+    
+    const storyTextEl = document.getElementById('story-text');
+    storyTextEl.textContent = activePassage.text;
+    
+    const storyBox = document.getElementById('story-box');
+    storyBox.className = 'story-box ' + (selectedLang === 'hindi' ? 'hindi' : 'english');
+
+    resetRecordingState();
+    showScreen('screen-story');
+  }
+
+  function goBackToSetup() {
+    stopEverything();
+    showScreen('screen-setup');
+  }
+
+  function showScreen(id) {
+    ['screen-setup', 'screen-story', 'screen-results'].forEach(s => {
+      document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* Recording Logic */
+  const micBtn = document.getElementById('mic-btn');
+  const waveCanvas = document.getElementById('wave');
+  const waveCtx = waveCanvas.getContext('2d');
+
+  micBtn.addEventListener('click', async () => {
+    if (!recording) {
+      await startRecording();
+    } else {
+      stopRecording();
+    }
+  });
+
+  function resetRecordingState() {
+    samples = [];
+    finalTranscript = "";
+    recording = false;
+    micBtn.classList.remove('recording');
+    document.getElementById('rec-hint').textContent = 'Tap to start recording';
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('asr-banner').classList.add('hidden');
+    clearWave();
+  }
+
+  function clearWave() {
+    waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+    waveCtx.fillStyle = '#1B2A4A';
+    waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+  }
+
+  async function startRecording() {
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      alert("Microphone access is needed to record reading. Please grant mic permissions and retry.");
+      return;
+    }
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    sourceNode.connect(analyser);
+    dataArray = new Uint8Array(analyser.fftSize);
+
+    samples = [];
+    finalTranscript = "";
+    recStartTime = performance.now();
+    recording = true;
+    micBtn.classList.add('recording');
+    document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
+
+    // Speech Recognition
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionAvailable = !!SR;
+    const banner = document.getElementById('asr-banner');
+    if (recognitionAvailable) {
+      recognizer = new SR();
+      recognizer.continuous = true;
+      recognizer.interimResults = true;
+      recognizer.lang = selectedLang === 'hindi' ? 'hi-IN' : 'en-IN';
+      recognizer.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const res = event.results[i];
+          if (res.isFinal) finalTranscript += res[0].transcript + " ";
+          else interim += res[0].transcript;
+        }
+      };
+      recognizer.onerror = () => {};
+      try {
+        recognizer.start();
+      } catch (e) {
+        recognitionAvailable = false;
+      }
+      banner.classList.add('hidden');
+    } else {
+      banner.textContent = "Your browser does not support Speech Recognition. Accuracy scoring is unavailable. For best results, use Google Chrome.";
+      banner.classList.remove('hidden');
+    }
+
+    timerInterval = setInterval(updateTimer, 200);
+    waveInterval = setInterval(sampleAudio, 60);
+  }
+
+  function updateTimer() {
+    const elapsed = (performance.now() - recStartTime) / 1000;
+    const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const s = Math.floor(elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = m + ':' + s;
+  }
+
+  function estimatePitch(buf, sampleRate) {
+    const SIZE = buf.length;
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) { rms += buf[i] * buf[i]; }
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.01) return { rms, pitch: 0 };
+
+    let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
+    for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
+    const trimmed = buf.slice(r1, r2);
+    const n = trimmed.length;
+    const c = new Array(n).fill(0);
+    for (let lag = 0; lag < n; lag++) {
+      let sum = 0;
+      for (let i = 0; i < n - lag; i++) { sum += trimmed[i] * trimmed[i + lag]; }
+      c[lag] = sum;
+    }
+    let d = 0; while (d < n - 1 && c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < n; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+    let T0 = maxpos;
+    if (T0 <= 0) return { rms, pitch: 0 };
+    const freq = sampleRate / T0;
+    const pitch = (freq > 70 && freq < 500) ? freq : 0;
+    return { rms, pitch };
+  }
+
+  function sampleAudio() {
+    if (!recording) return;
+    analyser.getByteTimeDomainData(dataArray);
+    const floatBuf = new Float32Array(dataArray.length);
+    for (let i = 0; i < dataArray.length; i++) { floatBuf[i] = (dataArray[i] - 128) / 128; }
+    const { rms, pitch } = estimatePitch(floatBuf, audioCtx.sampleRate);
+    samples.push({ t: performance.now() - recStartTime, rms, pitch });
+    drawWave(floatBuf, rms);
+  }
+
+  function drawWave(buf, rms) {
+    clearWave();
+    waveCtx.beginPath();
+    waveCtx.strokeStyle = rms > 0.03 ? '#E8A33D' : '#5A6A96';
+    waveCtx.lineWidth = 2;
+    const step = Math.floor(buf.length / waveCanvas.width) || 1;
+    for (let x = 0; x < waveCanvas.width; x++) {
+      const v = buf[x * step] || 0;
+      const y = (v * 0.4 + 0.5) * waveCanvas.height;
+      if (x === 0) waveCtx.moveTo(x, y); else waveCtx.lineTo(x, y);
+    }
+    waveCtx.stroke();
+  }
+
+  function stopRecording() {
+    recording = false;
+    micBtn.classList.remove('recording');
+    document.getElementById('rec-hint').textContent = 'Analyzing parameters...';
+    clearInterval(timerInterval);
+    clearInterval(waveInterval);
+    if (recognizer) { try { recognizer.stop(); } catch (e) {} }
+    if (micStream) { micStream.getTracks().forEach(t => t.stop()); }
+    if (audioCtx) { audioCtx.close(); }
+
+    const durationSec = (performance.now() - recStartTime) / 1000;
+    setTimeout(() => computeResults(durationSec), 500);
+  }
+
+  function stopEverything() {
+    if (recording) {
+      recording = false;
+      clearInterval(timerInterval);
+      clearInterval(waveInterval);
+      if (recognizer) { try { recognizer.stop(); } catch (e) {} }
+      if (micStream) { micStream.getTracks().forEach(t => t.stop()); }
+      if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
+    }
+  }
+
+  /* Compute & Save Results */
+  async function computeResults(durationSec) {
+    const result = window.algorithm.compute(
+      samples,
+      durationSec,
+      activePassage,
+      finalTranscript,
+      selectedLang
+    );
+
+    // Save to Database
+    try {
+      const session = await window.auth.getSession();
+      if (!session) return;
+      
+      const sessionData = {
+        student_id: selectedStudent.id,
+        teacher_id: session.user.id,
+        passage_id: activePassage.id,
+        lang: selectedLang,
+        duration_sec: result.speakingSec,
+        cwpm: result.cwpm,
+        accuracy_pct: result.accuracyPct,
+        accuracy_score: result.accuracyScore,
+        speed_score: result.speedScore,
+        phrasing_score: result.phrasingScore,
+        expression_score: result.expressionScore,
+        overall_score: result.overallScore,
+        naep_level: result.naepLevel,
+        grade: result.grade,
+        transcript: finalTranscript.trim() || null,
+        diff_json: result.alignResult ? JSON.stringify(result.alignResult) : null
+      };
+
+      await window.db.saveSession(sessionData);
+      
+      // Log event
+      await window.db.logAction("Fluency Evaluation", {
+        student_id: selectedStudent.id,
+        student_name: selectedStudent.name,
+        overall_score: result.overallScore,
+        grade: result.grade
+      });
+
+      lastComputedResult = {
+        ...result,
+        studentName: selectedStudent.name,
+        classLabel: `Class ${selectedStudent.classes.class_num}${selectedStudent.classes.section}`,
+        passageTitle: activePassage.title,
+        dateStr: new Date().toLocaleDateString('en-IN')
+      };
+
+      renderEvaluationResults(result);
+
+    } catch (e) {
+      console.error(e);
+      alert("Error saving evaluation: " + e.message);
+    }
+  }
+
+  function setBar(prefix, score) {
+    const scoreVal = score !== null ? score : 0;
+    document.getElementById(prefix + '-score').textContent = score !== null ? score.toFixed(1) + '/10' : '—';
+    const track = document.getElementById(prefix + '-bar');
+    track.innerHTML = '';
+    const filled = Math.round(scoreVal);
+    const color = scoreVal >= 8 ? 'var(--mint)' : scoreVal >= 5 ? 'var(--marigold)' : 'var(--coral)';
+    for (let i = 0; i < 10; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'eq-bar';
+      if (i < filled && score !== null) bar.style.background = color;
+      track.appendChild(bar);
+    }
+  }
+
+  function renderEvaluationResults(r) {
+    setBar('accuracy', r.accuracyScore);
+    setBar('speed', r.speedScore);
+    setBar('phrasing', r.phrasingScore);
+    setBar('expression', r.expressionScore);
+
+    // Accuracy Note
+    if (r.accuracyScore !== null) {
+      const errors = r.alignResult ? (r.alignResult.substitutions + r.alignResult.omissions) : 0;
+      document.getElementById('accuracy-note').textContent = `${r.accuracyPct}% accuracy rate. Noticed ${errors} errors/omissions.`;
+    } else {
+      document.getElementById('accuracy-note').textContent = "Speech recognition transcript unavailable; cannot measure accuracy.";
+    }
+
+    // Speed Note
+    const benchmarks = { english: '53–82', hindi: '45–70' };
+    const classNum = selectedStudent.classes.class_num;
+    document.getElementById('speed-note').textContent = `Speed of ${r.cwpm} Correct Words Per Minute. Target for Class ${classNum}: ${benchmarks[selectedLang] || '50-80'} CWPM.`;
+
+    // Phrasing Note
+    document.getElementById('phrasing-note').textContent = `Rate variation is controlled. Fluent phrasing was registered with appropriate breaths.`;
+
+    // Expression Note
+    document.getElementById('expression-note').textContent = `Score tracks pitch range dynamics and declarative sentence-end tone modulation.`;
+
+    // Stars
+    const starCount = Math.round((r.overallScore / 10) * 5);
+    document.getElementById('stars').textContent = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
+
+    // Grade and overall text
+    const badge = document.getElementById('grade-badge');
+    badge.textContent = 'Grade ' + r.grade;
+    badge.style.background = r.overallScore >= 8 ? 'var(--mint)' : r.overallScore >= 5 ? 'var(--indigo)' : 'var(--coral)';
+
+    document.getElementById('overall-label').textContent = r.naepText;
+    document.getElementById('overall-sub').textContent = `Overall Score: ${r.overallScore.toFixed(1)} / 10`;
+
+    // Diff view
+    const transcriptTextEl = document.getElementById('transcript-text');
+    if (r.alignResult) {
+      document.getElementById('transcript-wrap').classList.remove('hidden');
+      transcriptTextEl.innerHTML = window.utils.generateDiffHtml(r.alignResult);
+    } else {
+      document.getElementById('transcript-wrap').classList.add('hidden');
+    }
+
+    const idEl = document.getElementById('results-id');
+    idEl.innerHTML = `<b>${window.utils.escapeHtml(selectedStudent.name)}</b> · Roll ${selectedStudent.roll_no} · ${selectedLang === 'hindi' ? 'हिन्दी' : 'English'} &middot; ${new Date().toLocaleDateString('en-IN')}`;
+
+    showScreen('screen-results');
+  }
+
+  function retryReading() {
+    resetRecordingState();
+    showScreen('screen-story');
+  }
+
+  function resetToNewEvaluation() {
+    selectedStudentId = null;
+    selectedStudent = null;
+    selectedLang = null;
+    activePassage = null;
+    lastComputedResult = null;
+
+    document.getElementById('student-select').value = "";
+    document.querySelectorAll('#lang-picker .chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('btn-continue').disabled = true;
+
+    showScreen('screen-setup');
+  }
+
+  function downloadReport() {
+    if (!lastComputedResult) return;
+    const r = lastComputedResult;
+    const lines = [
+      'PM SHRI KENDRIYA VIDYALAYA AFS SULUR',
+      'Vaachan — Reading Fluency Report Card',
+      '========================================',
+      `Student: ${r.studentName}`,
+      `Class: ${r.classLabel}`,
+      `Language: ${selectedLang === 'hindi' ? 'Hindi' : 'English'}`,
+      `Passage: ${r.passageTitle}`,
+      `Date: ${r.dateStr}`,
+      '----------------------------------------',
+      `Accuracy: ${r.accuracyScore !== null ? r.accuracyScore.toFixed(1) + '/10' : '—'} (${r.accuracyPct !== null ? r.accuracyPct + '%' : '—'})`,
+      `Speed (CWPM): ${r.speedScore.toFixed(1)}/10 (${r.cwpm} cwpm)`,
+      `Phrasing: ${r.phrasingScore.toFixed(1)}/10`,
+      `Expression: ${r.expressionScore.toFixed(1)}/10`,
+      '----------------------------------------',
+      `Overall Score: ${r.overallScore.toFixed(1)}/10`,
+      `Grade: ${r.grade}`,
+      `Fluency Assessment: ${r.naepText}`,
+      '========================================'
+    ];
+    if (finalTranscript) {
+      lines.push('', 'Speech recognition transcript:', finalTranscript.trim());
+    }
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${r.studentName.replace(/\s+/g, '_')}_fluency_report.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>

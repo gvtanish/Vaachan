@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Student Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .grid-2col{
+    display:grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap:24px;
+    margin-top:24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  /* Form layouts */
+  .form-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .form-col{
+    flex:1;
+  }
+  label{
+    font-size:0.8rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    display:block;
+  }
+  .text-input, select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-size:0.9rem;
+    color:var(--ink);
+  }
+  .text-input:focus, select:focus{outline:none;border-color:var(--marigold);}
+
+  .btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:10px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all 0.15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{
+    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
+    color:#fff;
+  }
+  .btn-admin{
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    color:#fff;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.5px solid var(--line);
+  }
+
+  /* Table styles */
+  .list-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .list-table th{
+    text-align:left;
+    padding:10px;
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .list-table td{
+    padding:12px 10px;
+    font-size:0.88rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+
+  /* CSV Import boxes */
+  .csv-dropzone{
+    border: 2.5px dashed var(--line);
+    border-radius:14px;
+    padding:30px 20px;
+    text-align:center;
+    background:var(--paper);
+    cursor:pointer;
+    margin-bottom:15px;
+    transition:all 0.2s ease;
+  }
+  .csv-dropzone:hover{
+    border-color:var(--marigold);
+  }
+
+  .preview-wrap{
+    max-height:220px;
+    overflow-y:auto;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-top:12px;
+    margin-bottom:15px;
+  }
+
+  .alert{
+    padding:12px;
+    border-radius:10px;
+    font-size:0.85rem;
+    line-height:1.4;
+    margin-bottom:15px;
+  }
+  .alert-success{
+    background:rgba(79,155,114,0.1);
+    color:var(--mint);
+    border:1px solid rgba(79,155,114,0.2);
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="grid-2col">
+    <!-- Left panel: Students list & Filter -->
+    <div class="card">
+      <h2 class="section-title">Manage Student Records</h2>
+      
+      <div class="form-row" style="margin-bottom:20px;">
+        <div style="flex:1;">
+          <input type="text" id="search-input" class="text-input" placeholder="Search by name or roll number..." oninput="loadRoster()">
+        </div>
+        <div style="width:160px;">
+          <select id="class-filter" onchange="loadRoster()">
+            <option value="">All Classes</option>
+          </select>
+        </div>
+      </div>
+
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th style="width:70px;">Roll</th>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Guardian Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="roster-tbody">
+          <!-- Rows injected here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right panel: Add/Import Operations -->
+    <div>
+      <!-- Manual Add Card -->
+      <div class="card">
+        <h2 class="section-title">Add Student Record</h2>
+        <form id="add-student-form" onsubmit="addStudent(event)">
+          <div class="field-group">
+            <label for="student-name">Full Name</label>
+            <input type="text" id="student-name" class="text-input" placeholder="e.g. Ramesh Kumar" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-col">
+              <label for="student-roll">Roll No</label>
+              <input type="text" id="student-roll" class="text-input" placeholder="e.g. 12" required>
+            </div>
+            <div class="form-col">
+              <label for="student-class">Class Section</label>
+              <select id="student-class" required>
+                <option value="">-- Select --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <label for="student-gender">Gender</label>
+              <select id="student-gender">
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div class="form-col">
+              <label for="student-dob">DOB</label>
+              <input type="date" id="student-dob" class="text-input">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="student-guardian">Guardian Name</label>
+            <input type="text" id="student-guardian" class="text-input" placeholder="e.g. Suresh Kumar">
+          </div>
+
+          <button type="submit" class="btn btn-admin" style="width:100%;">Save Student Record</button>
+        </form>
+      </div>
+
+      <!-- CSV Bulk Import Card -->
+      <div class="card">
+        <h2 class="section-title">Bulk CSV Import</h2>
+        <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 16px 0; line-height:1.4;">Upload a comma-separated file with columns:<br><b>Name, RollNo, ClassNumber, SectionLetter, Gender, DOB, GuardianName, GuardianPhone</b></p>
+        
+        <div class="csv-dropzone" onclick="document.getElementById('csv-file').click()">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--marigold); margin-bottom:8px;"><path d="M12 16V8m0 8l-4-4m4 4l4-4M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="font-size:0.85rem; font-weight:600; color:var(--indigo);">Click to choose CSV file</div>
+          <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="handleCsvFile(event)">
+        </div>
+
+        <div id="csv-preview-card" class="hidden">
+          <div class="stat-label">Parsing Preview (<span id="csv-count">0</span> records)</div>
+          <div class="preview-wrap">
+            <table class="list-table" style="font-size:0.75rem;">
+              <thead>
+                <tr>
+                  <th>Roll</th>
+                  <th>Name</th>
+                  <th>Class</th>
+                  <th>Gender</th>
+                </tr>
+              </thead>
+              <tbody id="csv-preview-tbody"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="commitCsvImport()">Commit CSV Import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let rawClasses = [];
+  let parsedStudents = [];
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('admin');
+    window.utils.renderNav('students', true);
+
+    loadRosterData();
+  });
+
+  async function loadRosterData() {
+    try {
+      const classes = await window.db.getClasses();
+      rawClasses = classes;
+
+      // Populate class filter dropdowns
+      const filterSelect = document.getElementById('class-filter');
+      filterSelect.innerHTML = '<option value="">All Classes</option>' +
+        classes.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
+
+      const formSelect = document.getElementById('student-class');
+      formSelect.innerHTML = '<option value="">-- Choose Section --</option>' +
+        classes.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
+
+      loadRoster();
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading students config: " + e.message);
+    }
+  }
+
+  async function loadRoster() {
+    try {
+      const classId = document.getElementById('class-filter').value;
+      const search = document.getElementById('search-input').value;
+
+      const filters = {};
+      if (classId) filters.classId = parseInt(classId);
+      if (search) filters.search = search;
+
+      const students = await window.db.getStudents(filters);
+
+      const tbody = document.getElementById('roster-tbody');
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No student records matches query filters.</td></tr>`;
+      } else {
+        tbody.innerHTML = students.map(s => {
+          const classLabel = s.classes ? `${s.classes.class_num}${s.classes.section}` : '—';
+          return `
+            <tr>
+              <td><b>${s.roll_no}</b></td>
+              <td><b>${window.utils.escapeHtml(s.name)}</b></td>
+              <td>${classLabel}</td>
+              <td>${window.utils.escapeHtml(s.guardian_name || '—')}</td>
+              <td>
+                <span class="badge ${s.is_active ? 'badge-mint' : 'badge-coral'}" style="background:${s.is_active ? 'var(--mint)' : 'var(--coral)'};">
+                  ${s.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="toggleActive('${s.id}', ${s.is_active})">Toggle</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function toggleActive(studentId, currentStatus) {
+    try {
+      const student = rawStudents = await window.db.getStudents();
+      const st = rawStudents.find(s => s.id === studentId);
+      if (st) {
+        st.is_active = !currentStatus;
+        await window.db.upsertStudent(st);
+        await window.db.logAction("Toggle Student Status", { student_id: studentId, status: !currentStatus });
+        loadRoster();
+      }
+    } catch (e) {
+      alert("Error toggle student: " + e.message);
+    }
+  }
+
+  async function addStudent(e) {
+    e.preventDefault();
+    const name = document.getElementById('student-name').value.trim();
+    const roll_no = document.getElementById('student-roll').value.trim();
+    const class_id = parseInt(document.getElementById('student-class').value);
+    const gender = document.getElementById('student-gender').value;
+    const dob = document.getElementById('student-dob').value || null;
+    const guardian_name = document.getElementById('student-guardian').value.trim() || null;
+
+    try {
+      await window.db.upsertStudent({
+        name,
+        roll_no,
+        class_id,
+        gender,
+        dob,
+        guardian_name,
+        is_active: true
+      });
+
+      await window.db.logAction("Add Student Manual", { name, roll_no, class_id });
+
+      // Reset form
+      document.getElementById('add-student-form').reset();
+      loadRoster();
+      alert("Student record saved successfully!");
+
+    } catch (err) {
+      console.error(err);
+      alert("Error adding student record: " + err.message);
+    }
+  }
+
+  /* CSV Import parsing */
+  function handleCsvFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const text = evt.target.result;
+      parseCsv(text);
+    };
+    reader.readAsText(file);
+  }
+
+  function parseCsv(text) {
+    parsedStudents = [];
+    const lines = text.split('\n');
+    
+    // Skip headers (Name, RollNo, ClassNumber, SectionLetter, Gender, DOB, GuardianName, GuardianPhone)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+      if (cols.length < 4) continue;
+
+      const name = cols[0];
+      const roll_no = cols[1];
+      const classNum = parseInt(cols[2]);
+      const section = cols[3].toUpperCase();
+      const gender = cols[4] || 'M';
+      const dob = cols[5] || null;
+      const guardian_name = cols[6] || null;
+      const guardian_phone = cols[7] || null;
+
+      // Find matching class ID in database classes list
+      const matchedClass = rawClasses.find(c => c.class_num === classNum && c.section === section);
+      if (!matchedClass) {
+        console.warn(`Class ${classNum}${section} not recognized on line ${i + 1}`);
+        continue;
+      }
+
+      parsedStudents.push({
+        name,
+        roll_no,
+        class_id: matchedClass.id,
+        gender,
+        dob: dob || null,
+        guardian_name,
+        guardian_phone,
+        is_active: true,
+        class_label: `${classNum}${section}`
+      });
+    }
+
+    const previewCard = document.getElementById('csv-preview-card');
+    const previewTbody = document.getElementById('csv-preview-tbody');
+    const previewCount = document.getElementById('csv-count');
+
+    if (parsedStudents.length === 0) {
+      alert("No valid records found in the uploaded CSV. Ensure format correctness.");
+      previewCard.classList.add('hidden');
+      return;
+    }
+
+    previewCount.textContent = parsedStudents.length;
+    previewTbody.innerHTML = parsedStudents.slice(0, 10).map(s => `
+      <tr>
+        <td>${s.roll_no}</td>
+        <td>${window.utils.escapeHtml(s.name)}</td>
+        <td>${s.class_label}</td>
+        <td>${s.gender}</td>
+      </tr>
+    `).join('');
+
+    previewCard.classList.remove('hidden');
+  }
+
+  async function commitCsvImport() {
+    if (parsedStudents.length === 0) return;
+
+    try {
+      // Map back array without display labels
+      const listToInsert = parsedStudents.map(s => ({
+        name: s.name,
+        roll_no: s.roll_no,
+        class_id: s.class_id,
+        gender: s.gender,
+        dob: s.dob,
+        guardian_name: s.guardian_name,
+        guardian_phone: s.guardian_phone,
+        is_active: true
+      }));
+
+      await window.db.bulkInsertStudents(listToInsert);
+      await window.db.logAction("Bulk Import Students", { count: listToInsert.length });
+
+      alert(`Successfully imported ${listToInsert.length} students records!`);
+      
+      // Reset
+      document.getElementById('csv-preview-card').classList.add('hidden');
+      document.getElementById('csv-file').value = '';
+      parsedStudents = [];
+      loadRoster();
+
+    } catch (e) {
+      console.error(e);
+      alert("Error importing records: " + e.message);
+    }
+  }
+</script>
+</body>
+</html>

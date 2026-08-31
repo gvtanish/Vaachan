@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Passages Configuration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .grid-2col{
+    display:grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap:24px;
+    margin-top:24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  /* Form layouts */
+  .field-group{margin-bottom:14px;}
+  label{
+    font-size:0.8rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    display:block;
+  }
+  .text-input, select, textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-size:0.9rem;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+  }
+  .text-input:focus, select:focus, textarea:focus{outline:none;border-color:var(--marigold);}
+
+  .btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:10px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-admin{
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    color:#fff;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.5px solid var(--line);
+  }
+  .btn-sm{ padding:4px 8px; font-size:0.8rem; }
+
+  /* Passage item layouts */
+  .passage-box{
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    background:var(--paper);
+    margin-bottom:16px;
+  }
+  .passage-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .passage-title{
+    font-family:'Baloo 2', sans-serif;
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--indigo);
+  }
+  .passage-meta{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+  .passage-body{
+    font-size:0.85rem;
+    line-height:1.5;
+    color:var(--ink);
+    background:var(--paper-panel);
+    border:1px solid rgba(228, 220, 200, 0.4);
+    border-radius:8px;
+    padding:10px 12px;
+    max-height:80px;
+    overflow-y:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:99px;
+    font-weight:700;
+    font-size:0.72rem;
+    color:#fff;
+  }
+  .badge-mint { background: var(--mint); }
+  .badge-coral { background: var(--coral); }
+  .badge-indigo { background: var(--indigo); }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="grid-2col">
+    <!-- Left column: Create passage -->
+    <div class="card">
+      <h2 class="section-title">Add Reading Passage</h2>
+      <form id="passage-form" onsubmit="savePassage(event)">
+        <div class="field-group">
+          <label for="passage-title-input">Passage Title</label>
+          <input type="text" id="passage-title-input" class="text-input" placeholder="e.g. The Brave Little Sailboat" required>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-bottom:14px;">
+          <div style="flex:1;">
+            <label for="passage-class">Class Level</label>
+            <select id="passage-class" required>
+              <option value="3">Class 3</option>
+              <option value="4">Class 4</option>
+              <option value="5">Class 5</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label for="passage-lang">Language</label>
+            <select id="passage-lang" required>
+              <option value="english">English</option>
+              <option value="hindi">हिन्दी (Hindi)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-bottom:14px;">
+          <div style="flex:1;">
+            <label for="passage-cwpm-lo">Low target CWPM</label>
+            <input type="number" id="passage-cwpm-lo" class="text-input" placeholder="e.g. 53" required>
+          </div>
+          <div style="flex:1;">
+            <label for="passage-cwpm-hi">High target CWPM</label>
+            <input type="number" id="passage-cwpm-hi" class="text-input" placeholder="e.g. 82" required>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="passage-text-input">Passage Text</label>
+          <textarea id="passage-text-input" rows="8" placeholder="Type or paste reference passage text..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-admin" style="width:100%;">Save Passage</button>
+      </form>
+    </div>
+
+    <!-- Right column: Passages list -->
+    <div class="card">
+      <h2 class="section-title">Registered Passages</h2>
+      <div id="passages-list">
+        <div style="padding:30px; text-align:center; color:var(--ink-soft);">Loading passages...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let passagesList = [];
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('admin');
+    window.utils.renderNav('passages', true);
+
+    loadPassages();
+  });
+
+  async function loadPassages() {
+    try {
+      const passages = await window.db.getPassages(false); // fetch all, including inactive
+      passagesList = passages;
+
+      renderPassages();
+    } catch (e) {
+      console.error(e);
+      alert("Error loading passages: " + e.message);
+    }
+  }
+
+  function renderPassages() {
+    const container = document.getElementById('passages-list');
+    if (passagesList.length === 0) {
+      container.innerHTML = `<div style="padding:30px; text-align:center; color:var(--ink-soft);">No passages configured in the database.</div>`;
+      return;
+    }
+
+    container.innerHTML = passagesList.map(p => {
+      const activeBadge = p.is_active ? '<span class="badge badge-mint">Active</span>' : '<span class="badge badge-coral">Inactive</span>';
+      const langBadge = p.lang === 'hindi' ? '<span class="badge badge-indigo">Hindi</span>' : '<span class="badge badge-indigo">English</span>';
+
+      return `
+        <div class="passage-box">
+          <div class="passage-header">
+            <div>
+              <div class="passage-title">${window.utils.escapeHtml(p.title)}</div>
+              <div class="passage-meta">
+                <span>Class ${p.class_num}</span> &middot;
+                ${langBadge} &middot;
+                <span>Target: ${p.cwpm_lo}-${p.cwpm_hi} CWPM</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              ${activeBadge}
+              <button class="btn btn-ghost btn-sm" onclick="togglePassageStatus(${p.id}, ${p.is_active})">Toggle</button>
+            </div>
+          </div>
+          <div class="passage-body">${window.utils.escapeHtml(p.text)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function togglePassageStatus(passageId, currentStatus) {
+    try {
+      const p = passagesList.find(item => item.id === passageId);
+      if (p) {
+        p.is_active = !currentStatus;
+        await window.db.upsertPassage(p);
+        await window.db.logAction("Toggle Passage Status", { passage_id: passageId, status: !currentStatus });
+        loadPassages();
+      }
+    } catch (e) {
+      alert("Error toggling passage: " + e.message);
+    }
+  }
+
+  async function savePassage(e) {
+    e.preventDefault();
+    const title = document.getElementById('passage-title-input').value.trim();
+    const classNum = parseInt(document.getElementById('passage-class').value);
+    const lang = document.getElementById('passage-lang').value;
+    const cwpm_lo = parseInt(document.getElementById('passage-cwpm-lo').value);
+    const cwpm_hi = parseInt(document.getElementById('passage-cwpm-hi').value);
+    const text = document.getElementById('passage-text-input').value.trim();
+
+    try {
+      await window.db.upsertPassage({
+        title,
+        class_num: classNum,
+        lang,
+        cwpm_lo,
+        cwpm_hi,
+        text,
+        is_active: true
+      });
+
+      await window.db.logAction("Add Reading Passage", { title, class_num: classNum, lang });
+
+      // Reset
+      document.getElementById('passage-form').reset();
+      loadPassages();
+      alert("Reading passage configured successfully!");
+
+    } catch (err) {
+      alert("Error saving passage: " + err.message);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · School Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-top:24px;
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  /* Filter bar styles */
+  .filter-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .filter-col{
+    flex:1;
+    min-width:140px;
+  }
+  select, input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter', sans-serif;
+    font-size:0.88rem;
+  }
+
+  .charts-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap:20px;
+    margin-bottom:24px;
+  }
+  .chart-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+  }
+  .chart-box{
+    position:relative;
+    height:220px;
+    width:100%;
+    margin-top:12px;
+  }
+
+  /* List tables */
+  .list-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .list-table th{
+    text-align:left;
+    padding:12px;
+    font-size:0.8rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .list-table td{
+    padding:14px 12px;
+    font-size:0.9rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+
+  .btn{
+    text-decoration:none;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:0.92rem;
+    border-radius:10px;
+    padding:10px 18px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-primary{
+    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
+    color:#fff;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--indigo);
+    border:1.5px solid var(--indigo);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+  }
+
+  @media print {
+    body { background:#fff; color:#000; }
+    #nav-container, .btn, .filter-row { display:none !important; }
+    .card { box-shadow:none; border:none; padding:0; }
+    .chart-card { border:1px solid #000; }
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+      <div>
+        <h2 style="font-family:'Baloo 2', sans-serif; font-size:1.8rem; margin:0; color:var(--indigo);">School Diagnostic Reports</h2>
+        <p style="margin:4px 0 0 0; color:var(--ink-soft); font-size:0.9rem;">Analyze fluency statistics across all student sessions and export records.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Layout</button>
+      </div>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="filter-row">
+      <div class="filter-col">
+        <label>Class Level</label>
+        <select id="class-filter" onchange="applyFilters()">
+          <option value="">All Classes</option>
+          <option value="3">Class 3</option>
+          <option value="4">Class 4</option>
+          <option value="5">Class 5</option>
+        </select>
+      </div>
+      <div class="filter-col">
+        <label>Section</label>
+        <select id="section-filter" onchange="applyFilters()">
+          <option value="">All Sections</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+      <div class="filter-col">
+        <label>Language</label>
+        <select id="lang-filter" onchange="applyFilters()">
+          <option value="">All Languages</option>
+          <option value="english">English</option>
+          <option value="hindi">Hindi</option>
+        </select>
+      </div>
+      <div class="filter-col">
+        <label>Start Date</label>
+        <input type="date" id="start-date" onchange="applyFilters()">
+      </div>
+      <div class="filter-col">
+        <label>End Date</label>
+        <input type="date" id="end-date" onchange="applyFilters()">
+      </div>
+    </div>
+
+    <!-- Analytical Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Performance by Class</div>
+        <div class="chart-box">
+          <canvas id="classChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Performance by Section</div>
+        <div class="chart-box">
+          <canvas id="sectionChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Fluency levels distribution</div>
+        <div class="chart-box">
+          <canvas id="levelsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Table -->
+    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Individual Session Log</h3>
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Student</th>
+          <th>Class</th>
+          <th>Language</th>
+          <th>Evaluator</th>
+          <th>CWPM</th>
+          <th>Grade</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="sessions-tbody">
+        <tr>
+          <td colspan="8" class="empty-state">Loading sessions logs...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let allSessions = [];
+  let filteredSessions = [];
+
+  let classChart = null;
+  let sectionChart = null;
+  let levelsChart = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('admin');
+    window.utils.renderNav('reports', true);
+
+    loadReportsData();
+  });
+
+  async function loadReportsData() {
+    try {
+      allSessions = await window.db.getSessions();
+      filteredSessions = [...allSessions];
+
+      applyFilters();
+    } catch (e) {
+      console.error(e);
+      alert("Error loading reports log: " + e.message);
+    }
+  }
+
+  function applyFilters() {
+    const classVal = document.getElementById('class-filter').value;
+    const sectionVal = document.getElementById('section-filter').value;
+    const langVal = document.getElementById('lang-filter').value;
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    filteredSessions = allSessions.filter(s => {
+      const student = s.students || {};
+      const classObj = student.classes || {};
+
+      const matchClass = classVal ? classObj.class_num === parseInt(classVal) : true;
+      const matchSection = sectionVal ? classObj.section === sectionVal : true;
+      const matchLang = langVal ? s.lang === langVal : true;
+      const matchStart = startDate ? new Date(s.session_date) >= new Date(startDate) : true;
+      const matchEnd = endDate ? new Date(s.session_date) <= new Date(endDate) : true;
+
+      return matchClass && matchSection && matchLang && matchStart && matchEnd;
+    });
+
+    renderCharts();
+    renderTable();
+  }
+
+  function renderCharts() {
+    // 1. Group by Class
+    const classSums = { 3: 0, 4: 0, 5: 0 };
+    const classCounts = { 3: 0, 4: 0, 5: 0 };
+    
+    // 2. Group by Section
+    const secSums = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+    const secCounts = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+
+    // 3. Group by levels
+    const levels = { 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    filteredSessions.forEach(s => {
+      const student = s.students || {};
+      const classObj = student.classes || {};
+
+      if (classObj.class_num) {
+        classSums[classObj.class_num] += Number(s.overall_score || 0);
+        classCounts[classObj.class_num]++;
+      }
+      if (classObj.section) {
+        secSums[classObj.section] += Number(s.overall_score || 0);
+        secCounts[classObj.section]++;
+      }
+      if (s.naep_level) {
+        levels[s.naep_level]++;
+      }
+    });
+
+    const classAvgs = [3, 4, 5].map(c => classCounts[c] > 0 ? classSums[c] / classCounts[c] : 0);
+    const secAvgs = ['A','B','C','D','E'].map(sec => secCounts[sec] > 0 ? secSums[sec] / secCounts[sec] : 0);
+
+    // Class chart
+    const ctxClass = document.getElementById('classChart').getContext('2d');
+    if (classChart) classChart.destroy();
+    classChart = new Chart(ctxClass, {
+      type: 'bar',
+      data: {
+        labels: ['Class 3', 'Class 4', 'Class 5'],
+        datasets: [{
+          data: classAvgs,
+          backgroundColor: '#1B2A4A',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { min: 0, max: 10 } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Section chart
+    const ctxSec = document.getElementById('sectionChart').getContext('2d');
+    if (sectionChart) sectionChart.destroy();
+    sectionChart = new Chart(ctxSec, {
+      type: 'bar',
+      data: {
+        labels: ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E'],
+        datasets: [{
+          data: secAvgs,
+          backgroundColor: '#E8A33D',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { min: 0, max: 10 } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // Levels Pie Chart
+    const ctxLvl = document.getElementById('levelsChart').getContext('2d');
+    if (levelsChart) levelsChart.destroy();
+    levelsChart = new Chart(ctxLvl, {
+      type: 'pie',
+      data: {
+        labels: ['Fluent', 'Primarily', 'Developing', 'Non-fluent'],
+        datasets: [{
+          data: [levels[4], levels[3], levels[2], levels[1]],
+          backgroundColor: ['#4F9B72', '#1B2A4A', '#E8A33D', '#D6584F']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('sessions-tbody');
+    if (filteredSessions.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching sessions logs found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filteredSessions.map(s => {
+      const student = s.students || {};
+      const classLabel = student.classes ? `${student.classes.class_num}${student.classes.section}` : '—';
+      const teacherName = s.profiles ? s.profiles.name : 'Unknown';
+      const dateStr = window.utils.formatDate(s.session_date);
+
+      return `
+        <tr>
+          <td>${dateStr}</td>
+          <td><b>${window.utils.escapeHtml(student.name || 'Unknown')}</b></td>
+          <td>Class ${classLabel}</td>
+          <td>${s.lang === 'hindi' ? 'Hindi' : 'English'}</td>
+          <td>${window.utils.escapeHtml(teacherName)}</td>
+          <td>${Math.round(s.cwpm || 0)}</td>
+          <td><b>${s.grade || 'E'}</b></td>
+          <td><b>${s.overall_score || '0'}/10</b></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function exportCSV() {
+    if (filteredSessions.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const headers = ['Date', 'Student Name', 'Class Section', 'Language', 'Evaluator', 'Duration (sec)', 'CWPM', 'Accuracy Pct', 'Accuracy Score', 'Speed Score', 'Phrasing Score', 'Expression Score', 'Overall Score', 'Grade', 'Fluency Level'];
+    
+    const rows = filteredSessions.map(s => {
+      const student = s.students || {};
+      const classLabel = student.classes ? `${student.classes.class_num}${student.classes.section}` : '';
+      const teacherName = s.profiles ? s.profiles.name : '';
+      const naepMap = { 4: 'Fluent', 3: 'Primarily Fluent', 2: 'Developing', 1: 'Non-fluent' };
+
+      return [
+        s.session_date,
+        `"${student.name || ''}"`,
+        classLabel,
+        s.lang,
+        `"${teacherName}"`,
+        s.duration_sec || '',
+        s.cwpm || '',
+        s.accuracy_pct || '',
+        s.accuracy_score || '',
+        s.speed_score || '',
+        s.phrasing_score || '',
+        s.expression_score || '',
+        s.overall_score || '',
+        s.grade || '',
+        naepMap[s.naep_level] || ''
+      ].join(',');
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vaachan_fluency_report_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+</body>
+</html>

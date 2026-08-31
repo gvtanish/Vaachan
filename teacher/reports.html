@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Class Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-top:24px;
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  .report-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:20px;
+  }
+  select{
+    padding:10px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:0.95rem;
+  }
+
+  .stats-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:18px;
+    margin-bottom:24px;
+  }
+  .stat-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+  }
+  .stat-val{
+    font-family:'Baloo 2', sans-serif;
+    font-size:2.2rem;
+    font-weight:800;
+    color:var(--indigo);
+    margin:6px 0;
+  }
+  .stat-label{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    font-weight:700;
+    letter-spacing:0.04em;
+  }
+
+  .charts-grid{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap:24px;
+    margin-bottom:24px;
+  }
+  @media (max-width: 850px) {
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+  .chart-box{
+    position:relative;
+    height:250px;
+    width:100%;
+  }
+
+  /* List tables */
+  .list-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .list-table th{
+    text-align:left;
+    padding:12px;
+    font-size:0.8rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .list-table td{
+    padding:14px 12px;
+    font-size:0.9rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+
+  .btn{
+    text-decoration:none;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    border-radius:10px;
+    padding:10px 20px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--indigo);
+    border:1.5px solid var(--indigo);
+  }
+  .btn-ghost:hover{
+    background:rgba(27, 42, 74, 0.04);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+  }
+
+  /* Printing styles */
+  @media print {
+    body { background: #fff; color: #000; }
+    #nav-container, .btn, select { display: none !important; }
+    .card { box-shadow: none; border: none; padding: 0; margin: 0; }
+    .stat-card { border: 1px solid #000; }
+    .charts-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="card">
+    <div class="report-header">
+      <div>
+        <h2 style="font-family:'Baloo 2', sans-serif; font-size:1.8rem; margin:0; color:var(--indigo);">Class Performance Reports</h2>
+        <p style="margin:4px 0 0 0; color:var(--ink-soft); font-size:0.9rem;">View comprehensive summary statistics and diagnostic charts for your assigned class section.</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <select id="class-select" onchange="onClassSelected()">
+          <option value="">-- Choose Class Section --</option>
+        </select>
+        <button class="btn btn-ghost" onclick="window.print()">🖨️ Print Report</button>
+      </div>
+    </div>
+
+    <div id="report-content" class="hidden">
+      <!-- Summary stats cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Average Accuracy</div>
+          <div class="stat-val" id="avg-accuracy">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Average Speed</div>
+          <div class="stat-val" id="avg-speed">0 CWPM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NAEP Fluent (Level 3-4)</div>
+          <div class="stat-val" id="avg-fluent">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Evaluated Ratio</div>
+          <div class="stat-val" id="eval-ratio">0/0</div>
+        </div>
+      </div>
+
+      <!-- Charts block -->
+      <div class="charts-grid">
+        <div class="stat-card">
+          <div class="stat-label" style="margin-bottom:12px; display:block;">Skill Dimension Performance (Avg Scores out of 10)</div>
+          <div class="chart-box">
+            <canvas id="dimensionsChart"></canvas>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label" style="margin-bottom:12px; display:block;">NAEP Fluency Levels Distribution</div>
+          <div class="chart-box">
+            <canvas id="levelsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roster summaries -->
+      <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.2rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Student Performance Summary</h3>
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Last Evaluated</th>
+            <th>Avg CWPM</th>
+            <th>Avg Accuracy</th>
+            <th>Latest Grade</th>
+          </tr>
+        </thead>
+        <tbody id="student-summary-tbody">
+          <!-- Rows injected here -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="empty-report" class="empty-state">
+      <p>Please select an assigned class section from the dropdown menu to generate report analytics.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let studentsList = [];
+  let sessionsList = [];
+  let selectedClassId = null;
+
+  let dimensionsChartInstance = null;
+  let levelsChartInstance = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('teacher');
+    window.utils.renderNav('reports', false);
+
+    loadReportClasses();
+  });
+
+  async function loadReportClasses() {
+    try {
+      const session = await window.auth.getSession();
+      if (!session) return;
+      const teacherId = session.user.id;
+
+      const [allClasses, allotments, students, sessions] = await Promise.all([
+        window.db.getClasses(),
+        window.db.getClassSubjectTeachers(),
+        window.db.getStudentsByTeacher(teacherId),
+        window.db.getSessions({ teacherId })
+      ]);
+
+      studentsList = students;
+      sessionsList = sessions;
+
+      // Filter classes assigned to this teacher
+      const myClassIds = new Set();
+      allClasses.forEach(c => {
+        if (c.teacher_id === teacherId) myClassIds.add(c.id);
+      });
+      allotments.forEach(a => {
+        if (a.teacher_id === teacherId) myClassIds.add(a.class_id);
+      });
+
+      const assignedClasses = allClasses.filter(c => myClassIds.has(c.id));
+      const classSelect = document.getElementById('class-select');
+      classSelect.innerHTML = '<option value="">-- Choose Class Section --</option>' +
+        assignedClasses.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading report classes: " + e.message);
+    }
+  }
+
+  function onClassSelected() {
+    const classVal = document.getElementById('class-select').value;
+    selectedClassId = classVal ? parseInt(classVal) : null;
+
+    if (!selectedClassId) {
+      document.getElementById('report-content').classList.add('hidden');
+      document.getElementById('empty-report').classList.remove('hidden');
+      return;
+    }
+
+    document.getElementById('empty-report').classList.add('hidden');
+    document.getElementById('report-content').classList.remove('hidden');
+
+    generateReport();
+  }
+
+  function generateReport() {
+    // 1. Filter students in this class section
+    const classStudents = studentsList.filter(s => s.class_id === selectedClassId);
+
+    // Group sessions by student
+    const studentHistoryMap = {};
+    classStudents.forEach(st => {
+      studentHistoryMap[st.id] = sessionsList.filter(s => s.student_id === st.id);
+    });
+
+    const evaluatedStudents = classStudents.filter(st => studentHistoryMap[st.id].length > 0);
+
+    // 2. Calculations
+    let sumAccuracy = 0;
+    let sumCwpm = 0;
+    let sumFluent = 0;
+
+    let sumAccScore = 0;
+    let sumSpeedScore = 0;
+    let sumPhraScore = 0;
+    let sumExprScore = 0;
+    let countedAccScore = 0;
+
+    let levelsCounts = { 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    evaluatedStudents.forEach(st => {
+      const history = studentHistoryMap[st.id];
+      // Sort history to get the latest parameters
+      history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const latest = history[0];
+
+      // Averages over student's sessions
+      const avgStAcc = history.reduce((acc, s) => acc + Number(s.accuracy_pct || 0), 0) / history.length;
+      const avgStCwpm = history.reduce((acc, s) => acc + Number(s.cwpm || 0), 0) / history.length;
+
+      sumAccuracy += avgStAcc;
+      sumCwpm += avgStCwpm;
+
+      if (latest.naep_level >= 3) {
+        sumFluent++;
+      }
+
+      // Latest metrics for skill bars
+      if (latest.accuracy_score !== null) {
+        sumAccScore += Number(latest.accuracy_score);
+        countedAccScore++;
+      }
+      sumSpeedScore += Number(latest.speed_score || 0);
+      sumPhraScore += Number(latest.phrasing_score || 0);
+      sumExprScore += Number(latest.expression_score || 0);
+
+      levelsCounts[latest.naep_level] = (levelsCounts[latest.naep_level] || 0) + 1;
+    });
+
+    const nEval = evaluatedStudents.length;
+
+    // Set Cards values
+    document.getElementById('avg-accuracy').textContent = nEval > 0 ? Math.round(sumAccuracy / nEval) + '%' : '—';
+    document.getElementById('avg-speed').textContent = nEval > 0 ? Math.round(sumCwpm / nEval) + ' CWPM' : '—';
+    document.getElementById('avg-fluent').textContent = nEval > 0 ? Math.round((sumFluent / nEval) * 100) + '%' : '—';
+    document.getElementById('eval-ratio').textContent = `${nEval}/${classStudents.length}`;
+
+    // Render tables
+    const tbody = document.getElementById('student-summary-tbody');
+    if (classStudents.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No students found in this section.</td></tr>`;
+    } else {
+      tbody.innerHTML = classStudents.map(st => {
+        const history = studentHistoryMap[st.id] || [];
+        let lastDate = '—';
+        let avgCwpmVal = '—';
+        let avgAccVal = '—';
+        let latestGrade = '—';
+
+        if (history.length > 0) {
+          history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          lastDate = window.utils.formatDate(history[0].session_date);
+          avgCwpmVal = Math.round(history.reduce((a, s) => a + Number(s.cwpm || 0), 0) / history.length) + ' wpm';
+          
+          const sumAccs = history.reduce((a, s) => a + Number(s.accuracy_pct || 0), 0);
+          avgAccVal = Math.round(sumAccs / history.length) + '%';
+          latestGrade = history[0].grade;
+        }
+
+        return `
+          <tr>
+            <td><b>${st.roll_no}</b></td>
+            <td><b>${window.utils.escapeHtml(st.name)}</b></td>
+            <td>${lastDate}</td>
+            <td>${avgCwpmVal}</td>
+            <td>${avgAccVal}</td>
+            <td><b>${latestGrade}</b></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 3. Render charts
+    const avgAccScore = countedAccScore > 0 ? sumAccScore / countedAccScore : 0;
+    const avgSpeedScore = nEval > 0 ? sumSpeedScore / nEval : 0;
+    const avgPhrasingScore = nEval > 0 ? sumPhraScore / nEval : 0;
+    const avgExpressionScore = nEval > 0 ? sumExprScore / nEval : 0;
+
+    renderDimensionChart([avgAccScore, avgSpeedScore, avgPhrasingScore, avgExpressionScore]);
+    renderLevelsChart([levelsCounts[4], levelsCounts[3], levelsCounts[2], levelsCounts[1]]);
+  }
+
+  function renderDimensionChart(data) {
+    const ctx = document.getElementById('dimensionsChart').getContext('2d');
+    if (dimensionsChartInstance) {
+      dimensionsChartInstance.destroy();
+    }
+
+    dimensionsChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Accuracy', 'Speed (CWPM)', 'Phrasing', 'Expression'],
+        datasets: [{
+          data: data,
+          backgroundColor: ['#4F9B72', '#E8A33D', '#3E7CB1', '#1B2A4A'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 10 }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  function renderLevelsChart(data) {
+    const ctx = document.getElementById('levelsChart').getContext('2d');
+    if (levelsChartInstance) {
+      levelsChartInstance.destroy();
+    }
+
+    levelsChartInstance = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Level 4: Fluent', 'Level 3: Primarily Fluent', 'Level 2: Developing', 'Level 1: Non-fluent'],
+        datasets: [{
+          data: data,
+          backgroundColor: ['#4F9B72', '#1B2A4A', '#E8A33D', '#D6584F']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right' }
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

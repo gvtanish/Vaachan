@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Reading Fluency Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --sky:#3E7CB1;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(232,163,61,0.10), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(62,124,177,0.10), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding: 28px 16px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+
+  /* Header */
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .brand-mark{
+    width:44px;height:44px;border-radius:12px;
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow: var(--shadow);
+    flex-shrink:0;
+  }
+  .brand-mark svg{width:24px;height:24px;}
+  .brand h1{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.5rem;font-weight:800;margin:0;
+    letter-spacing:-0.01em;
+    color:var(--indigo);
+  }
+  .brand p{margin:1px 0 0;font-size:0.8rem;color:var(--ink-soft);}
+
+  /* Card */
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    font-size:0.72rem;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;
+    color:var(--marigold-deep); margin:0 0 6px;
+  }
+  h2.step-title{
+    font-family:'Baloo 2',sans-serif;font-size:1.3rem;margin:0 0 4px;color:var(--indigo);
+  }
+  .step-sub{color:var(--ink-soft);font-size:0.92rem;margin:0 0 18px;line-height:1.5;}
+
+  /* Pickers */
+  .picker-group{margin-bottom:18px;}
+  .picker-label{font-size:0.8rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .picker-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    flex:1; min-width:84px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    border-radius:12px;
+    padding:12px 10px;
+    text-align:center;
+    cursor:pointer;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    color:var(--ink);
+    transition:all .15s ease;
+    user-select:none;
+  }
+  .chip:hover{border-color:var(--marigold);}
+  .chip.active{
+    background:var(--indigo);
+    border-color:var(--indigo);
+    color:#fff;
+    box-shadow:0 6px 16px -6px rgba(27,42,74,0.5);
+  }
+  .chip small{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:0.68rem;opacity:0.75;margin-top:2px;}
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;
+    border-radius:14px;padding:14px 20px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));color:#fff;box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);}
+  .btn-primary:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-danger{background:linear-gradient(155deg, var(--coral), #b3413a);color:#fff;box-shadow:0 8px 18px -8px rgba(214,88,79,0.55);}
+  .btn-row{display:flex;gap:10px;margin-top:4px;}
+
+  /* Story screen */
+  .story-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .pill{
+    font-size:0.72rem;font-weight:700;color:var(--indigo);
+    background:rgba(27,42,74,0.08);
+    padding:5px 11px;border-radius:99px;
+  }
+  .story-box{
+    background: var(--paper);
+    border:1px dashed var(--line);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+    max-height:320px;
+    overflow-y:auto;
+  }
+  .story-box.hindi{font-family:'Noto Sans Devanagari',sans-serif;font-size:1.18rem;line-height:2.05;}
+  .story-box.english{font-family:'Lexend',sans-serif;font-size:1.05rem;line-height:1.95;}
+  .story-title{
+    font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);
+    font-size:1.05rem;margin:0 0 10px;
+  }
+
+  /* Recorder */
+  .rec-panel{
+    display:flex;flex-direction:column;align-items:center;
+    padding:18px 8px 6px;
+  }
+  canvas#wave{width:100%;height:64px;border-radius:10px;background:var(--indigo);margin-bottom:16px;}
+  .mic-btn{
+    width:78px;height:78px;border-radius:50%;
+    border:none;cursor:pointer;
+    background:linear-gradient(155deg, var(--coral), #b3413a);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 24px -10px rgba(214,88,79,0.7);
+    transition:transform .15s ease;
+    margin-bottom:10px;
+  }
+  .mic-btn.recording{animation:pulse 1.4s infinite;}
+  .mic-btn:active{transform:scale(0.94);}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(214,88,79,0.55);}
+    70%{box-shadow:0 0 0 18px rgba(214,88,79,0);}
+    100%{box-shadow:0 0 0 0 rgba(214,88,79,0);}
+  }
+  .timer{font-family:'Baloo 2',sans-serif;font-size:1.4rem;color:var(--indigo);font-weight:700;margin-bottom:2px;}
+  .rec-hint{font-size:0.82rem;color:var(--ink-soft);text-align:center;}
+  .status-banner{
+    font-size:0.78rem; background:rgba(62,124,177,0.10); color:var(--sky);
+    padding:8px 12px;border-radius:10px;margin-bottom:14px;line-height:1.4;
+  }
+
+  /* Results */
+  .overall{
+    text-align:center;padding:6px 0 20px;
+  }
+  .stars{font-size:1.9rem;letter-spacing:4px;margin-bottom:4px;}
+  .grade-badge{
+    display:inline-block;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.05rem;
+    color:#fff;background:var(--indigo);
+    padding:3px 14px;border-radius:99px;margin-bottom:8px;letter-spacing:0.02em;
+  }
+  .overall-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.2rem;color:var(--indigo);}
+  .overall-sub{font-size:0.82rem;color:var(--ink-soft);margin-top:2px;}
+
+  .metric{margin-bottom:18px;}
+  .metric-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .metric-name{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--ink);font-size:0.98rem;display:flex;align-items:center;gap:6px;}
+  .metric-score{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);font-size:0.98rem;}
+  .eq-track{
+    height:12px;border-radius:8px;background:var(--line);overflow:hidden;
+    display:flex;gap:3px;padding:2px;
+  }
+  .eq-bar{flex:1;border-radius:4px;background:var(--line);transition:background .4s ease;}
+  .metric-note{font-size:0.82rem;color:var(--ink-soft);margin-top:7px;line-height:1.45;}
+
+  .transcript-box{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;font-size:0.85rem;color:var(--ink-soft);line-height:1.6;margin-top:6px;
+  }
+  .transcript-box b{color:var(--ink);}
+
+  .footer-note{
+    text-align:center;font-size:0.74rem;color:var(--ink-soft);opacity:0.8;margin-top:8px;line-height:1.5;
+  }
+  .hidden{display:none !important;}
+
+  /* Letterhead */
+  .letterhead{
+    text-align:center;
+    font-family:'Inter',sans-serif;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--indigo-soft);
+    opacity:0.85;
+    margin-bottom:14px;
+  }
+
+  /* Page footer */
+  .page-footer{
+    text-align:center;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    opacity:0.65;
+    margin-top:30px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+
+  .field-group{margin-bottom:18px;}
+  .field-group label{font-size:0.8rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .text-input{
+    width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);
+    background:var(--paper);font-family:'Inter',sans-serif;font-size:0.95rem;color:var(--ink);
+  }
+  .text-input:focus{outline:none;border-color:var(--marigold);}
+  .results-id{
+    text-align:center;font-size:0.85rem;color:var(--ink-soft);margin-bottom:2px;
+  }
+  .results-id b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="letterhead">PM SHRI Kendriya Vidyalaya AFS Sulur</p>
+
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C7 3 4 6 4 9.5c0 2.4 1.4 4.4 3.6 5.6L7 20l4-2.2c.3 0 .7.05 1 .05 5 0 8-3 8-6.35C20 6 17 3 12 3Z" stroke="#F4E3BF" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.5 9.2h7M8.5 12h5" stroke="#E8A33D" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <h1>Vaachan</h1>
+      <p>Reading fluency check &middot; Class 3&ndash;5</p>
+    </div>
+  </div>
+
+  <!-- STEP 1: SETUP -->
+  <div class="card" id="screen-setup">
+    <p class="eyebrow">Step 1</p>
+    <h2 class="step-title">Set up the reading</h2>
+    <p class="step-sub">Pick the class and the language the student will read in. Each class has its own passage, sized to grade level.</p>
+
+    <div class="field-group">
+      <label for="student-name">Student name <span style="font-weight:400;opacity:0.7;">(optional)</span></label>
+      <input type="text" id="student-name" class="text-input" placeholder="e.g. Aarav Sharma">
+    </div>
+
+    <div class="picker-group">
+      <span class="picker-label">Class</span>
+      <div class="picker-row" id="class-picker">
+        <div class="chip" data-class="3">Class 3<small>~75 words</small></div>
+        <div class="chip" data-class="4">Class 4<small>~120 words</small></div>
+        <div class="chip" data-class="5">Class 5<small>~150 words</small></div>
+      </div>
+    </div>
+
+    <div class="picker-group">
+      <span class="picker-label">Language</span>
+      <div class="picker-row" id="lang-picker">
+        <div class="chip" data-lang="english">English</div>
+        <div class="chip" data-lang="hindi">हिन्दी</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-continue" disabled>Show the passage</button>
+  </div>
+
+  <!-- STEP 2: STORY + RECORD -->
+  <div class="card hidden" id="screen-story">
+    <p class="eyebrow" id="story-eyebrow">Step 2</p>
+    <h2 class="step-title">Read the passage aloud</h2>
+    <p class="step-sub">Hand the device to the student, or hold it near them. Tap the mic, read the full passage at a natural pace, then tap it again to stop.</p>
+
+    <div class="story-meta">
+      <span class="pill" id="pill-class"></span>
+      <span class="pill" id="pill-lang"></span>
+      <span class="pill" id="pill-words"></span>
+    </div>
+
+    <div class="story-box" id="story-box">
+      <p class="story-title" id="story-title"></p>
+      <div id="story-text"></div>
+    </div>
+
+    <div class="status-banner hidden" id="asr-banner"></div>
+
+    <div class="rec-panel">
+      <canvas id="wave" width="600" height="64"></canvas>
+      <div class="timer" id="timer">00:00</div>
+      <button class="mic-btn" id="mic-btn" aria-label="Start recording">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15Z" stroke="#fff" stroke-width="1.8"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3.2M9 20.2h6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <p class="rec-hint" id="rec-hint">Tap to start recording</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-back">Change setup</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div class="card hidden" id="screen-results">
+    <p class="eyebrow">Result</p>
+    <p class="results-id hidden" id="results-id"></p>
+    <div class="overall">
+      <div class="stars" id="stars">★★★☆☆</div>
+      <div class="grade-badge" id="grade-badge">A</div>
+      <div class="overall-label" id="overall-label">Good effort</div>
+      <div class="overall-sub" id="overall-sub"></div>
+    </div>
+
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">⏱️ Speed</span>
+        <span class="metric-score" id="speed-score">–</span>
+      </div>
+      <div class="eq-track" id="speed-bar"></div>
+      <p class="metric-note" id="speed-note"></p>
+    </div>
+
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">〰️ Phrasing</span>
+        <span class="metric-score" id="phrasing-score">–</span>
+      </div>
+      <div class="eq-track" id="phrasing-bar"></div>
+      <p class="metric-note" id="phrasing-note"></p>
+    </div>
+
+    <div class="metric">
+      <div class="metric-head">
+        <span class="metric-name">🎙️ Modulation</span>
+        <span class="metric-score" id="modulation-score">–</span>
+      </div>
+      <div class="eq-track" id="modulation-bar"></div>
+      <p class="metric-note" id="modulation-note"></p>
+    </div>
+
+    <div class="transcript-box hidden" id="transcript-wrap">
+      <b>What the mic heard:</b>
+      <div id="transcript-text"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn btn-ghost" id="btn-retry">Read again</button>
+      <button class="btn btn-primary" id="btn-newstudent">Next student</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-ghost" id="btn-download">⬇ Download this report</button>
+    </div>
+    <p class="footer-note">Scores are an automated estimate from the recording (pace, pause patterns, pitch &amp; volume variety). Use alongside your own judgement, not in place of it.</p>
+  </div>
+
+  <p class="page-footer">Built by G V Tanish Vettrivel, Class 11</p>
+
+</div>
+
+<script>
+/* ---------------- Story data ---------------- */
+const STORIES = {
+  3: {
+    english: {
+      title: "Chintu the Squirrel",
+      text: "Once there was a little squirrel named Chintu. He lived in a big oak tree in the park. Every morning, Chintu jumped from branch to branch, looking for nuts. One day, he found a shiny red apple on the ground. He was very happy. Chintu carried the apple up to his nest. He shared it with his friend, a small bird named Mithu. They ate the apple together and became the best of friends.",
+      wpmRange: [45, 70]
+    },
+    hindi: {
+      title: "चिंटू गिलहरी",
+      text: "एक बार की बात है, चिंटू नाम की एक छोटी गिलहरी पार्क के एक बड़े पेड़ पर रहती थी। हर सुबह चिंटू एक डाल से दूसरी डाल पर कूदती और मेवे ढूंढती थी। एक दिन उसे जमीन पर एक चमकीला लाल सेब मिला। वह बहुत खुश हुई। चिंटू सेब को अपने घोंसले तक ले गई। उसने वह सेब अपनी दोस्त, मिठू नाम की एक छोटी चिड़िया के साथ बाँटा। दोनों ने मिलकर सेब खाया और अच्छे दोस्त बन गए।",
+      wpmRange: [40, 65]
+    }
+  },
+  4: {
+    english: {
+      title: "A Story on a Rainy Night",
+      text: "Meera loved rainy days more than anything else. Every time dark clouds gathered in the sky, she would run to the window and watch the raindrops race down the glass. One evening, the rain grew very heavy, and the lights in her house suddenly went out. Meera was scared for a moment, but her grandmother lit a candle and sat beside her. Grandmother told an old story about a brave little boat that sailed through a stormy river to save its village. Meera listened closely, forgetting all about the darkness. When the lights finally came back, she smiled and said that stories were brighter than any lamp. From that night, Meera always asked for a story whenever it rained.",
+      wpmRange: [60, 90]
+    },
+    hindi: {
+      title: "बारिश की एक रात की कहानी",
+      text: "मीरा को बारिश के दिन सबसे ज्यादा पसंद थे। जब भी आसमान में काले बादल छा जाते, वह खिड़की के पास दौड़ जाती और शीशे पर गिरती बूंदों को देखती रहती। एक शाम बारिश बहुत तेज हो गई और अचानक घर की बिजली चली गई। मीरा थोड़ा डर गई, लेकिन उसकी दादी ने एक मोमबत्ती जलाई और उसके पास बैठ गईं। दादी ने एक पुरानी कहानी सुनाई, जिसमें एक छोटी सी नाव तूफानी नदी को पार करके अपने गाँव को बचाती है। मीरा कहानी सुनते-सुनते अंधेरा भूल गई। जब बिजली वापस आई, तो उसने मुस्कुराकर कहा कि कहानियाँ किसी भी दीये से ज्यादा उजाला देती हैं। उस रात के बाद, मीरा जब भी बारिश होती, दादी से एक कहानी जरूर माँगती।",
+      wpmRange: [55, 85]
+    }
+  },
+  5: {
+    english: {
+      title: "The Boy Who Drew on Walls",
+      text: "In a small village near the mountains, there lived a boy named Arjun who loved to draw. He had no proper paper, so he sketched on old newspapers, walls, and even in the sand near the river. The villagers often laughed and said drawing would never help him earn a living. Arjun never argued, but he never stopped drawing either. One winter, a traveller passing through the village saw Arjun's sketches on a wall near the temple. He was amazed by the detail and life in each picture. The traveller turned out to be an art teacher from the city, and he offered Arjun a scholarship to study at a proper school. Years later, Arjun returned to his village as a well-known artist and painted a huge, colourful mural on the school wall, so every child who once laughed could learn to dream too.",
+      wpmRange: [70, 110]
+    },
+    hindi: {
+      title: "वह लड़का जो दीवारों पर चित्र बनाता था",
+      text: "पहाड़ों के पास एक छोटे से गाँव में अर्जुन नाम का एक लड़का रहता था, जिसे चित्र बनाना बहुत पसंद था। उसके पास ठीक से कागज़ नहीं था, इसलिए वह पुराने अखबारों, दीवारों और यहाँ तक कि नदी के किनारे रेत पर भी चित्र बनाता था। गाँव वाले अक्सर हँसते और कहते कि चित्रकारी से उसका पेट कभी नहीं भरेगा। अर्जुन कभी बहस नहीं करता था, लेकिन उसने चित्र बनाना कभी नहीं छोड़ा। एक सर्दी में, गाँव से गुजर रहे एक यात्री ने मंदिर के पास दीवार पर अर्जुन के बनाए चित्र देखे। वह उनकी बारीकी और जीवंतता देखकर हैरान रह गया। वह यात्री असल में शहर का एक कला शिक्षक था, और उसने अर्जुन को एक अच्छे स्कूल में पढ़ने के लिए छात्रवृत्ति दिलवाई। कई सालों बाद, अर्जुन एक जाने-माने कलाकार बनकर अपने गाँव लौटा और स्कूल की दीवार पर एक विशाल, रंगीन चित्र बनाया, ताकि हर वह बच्चा जो कभी हँसा था, अब सपने देखना सीख सके।",
+      wpmRange: [65, 100]
+    }
+  }
+};
+
+/* ---------------- State ---------------- */
+let selectedClass = null, selectedLang = null, currentStory = null, studentName = "";
+let lastResult = null;
+let audioCtx, analyser, micStream, sourceNode, dataArray, timeDomainArray;
+let recognizer = null, recognitionAvailable = false, finalTranscript = "";
+let recStartTime = 0, timerInterval = null, waveInterval = null;
+let samples = []; // {t, rms, pitch}
+let recording = false;
+
+/* ---------------- Screen 1: setup ---------------- */
+document.querySelectorAll('#class-picker .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#class-picker .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedClass = chip.dataset.class;
+    checkReady();
+  });
+});
+document.querySelectorAll('#lang-picker .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#lang-picker .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedLang = chip.dataset.lang;
+    checkReady();
+  });
+});
+function checkReady(){
+  document.getElementById('btn-continue').disabled = !(selectedClass && selectedLang);
+}
+document.getElementById('btn-continue').addEventListener('click', ()=>{
+  studentName = document.getElementById('student-name').value.trim();
+  currentStory = STORIES[selectedClass][selectedLang];
+  document.getElementById('pill-class').textContent = "Class " + selectedClass;
+  document.getElementById('pill-lang').textContent = selectedLang === 'hindi' ? 'हिन्दी' : 'English';
+  document.getElementById('pill-words').textContent = wordCount(currentStory.text) + " words";
+  document.getElementById('story-title').textContent = currentStory.title;
+  document.getElementById('story-title').style.fontFamily = selectedLang === 'hindi' ? "'Noto Sans Devanagari',sans-serif" : "'Baloo 2',sans-serif";
+  const storyTextEl = document.getElementById('story-text');
+  storyTextEl.textContent = currentStory.text;
+  const storyBox = document.getElementById('story-box');
+  storyBox.className = 'story-box ' + (selectedLang === 'hindi' ? 'hindi' : 'english');
+  resetRecordingState();
+  showScreen('screen-story');
+});
+document.getElementById('btn-back').addEventListener('click', ()=>{
+  stopEverything();
+  showScreen('screen-setup');
+});
+
+function showScreen(id){
+  ['screen-setup','screen-story','screen-results'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function wordCount(str){
+  return str.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/* ---------------- Screen 2: recording ---------------- */
+const micBtn = document.getElementById('mic-btn');
+const waveCanvas = document.getElementById('wave');
+const waveCtx = waveCanvas.getContext('2d');
+
+micBtn.addEventListener('click', async ()=>{
+  if (!recording) {
+    await startRecording();
+  } else {
+    stopRecording();
+  }
+});
+
+function resetRecordingState(){
+  samples = [];
+  finalTranscript = "";
+  recording = false;
+  micBtn.classList.remove('recording');
+  document.getElementById('rec-hint').textContent = 'Tap to start recording';
+  document.getElementById('timer').textContent = '00:00';
+  document.getElementById('asr-banner').classList.add('hidden');
+  clearWave();
+}
+
+function clearWave(){
+  waveCtx.clearRect(0,0,waveCanvas.width, waveCanvas.height);
+  waveCtx.fillStyle = '#1B2A4A';
+  waveCtx.fillRect(0,0,waveCanvas.width, waveCanvas.height);
+}
+
+async function startRecording(){
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    alert("Microphone access is needed to record the reading. Please allow microphone permission and try again.");
+    return;
+  }
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  sourceNode = audioCtx.createMediaStreamSource(micStream);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  sourceNode.connect(analyser);
+  dataArray = new Uint8Array(analyser.fftSize);
+  timeDomainArray = new Float32Array(analyser.fftSize);
+
+  samples = [];
+  finalTranscript = "";
+  recStartTime = performance.now();
+  recording = true;
+  micBtn.classList.add('recording');
+  document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
+
+  // Speech recognition (best effort, Chrome/Edge only)
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognitionAvailable = !!SR;
+  const banner = document.getElementById('asr-banner');
+  if (recognitionAvailable){
+    recognizer = new SR();
+    recognizer.continuous = true;
+    recognizer.interimResults = true;
+    recognizer.lang = selectedLang === 'hindi' ? 'hi-IN' : 'en-IN';
+    recognizer.onresult = (event)=>{
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++){
+        const res = event.results[i];
+        if (res.isFinal) finalTranscript += res[0].transcript + " ";
+        else interim += res[0].transcript;
+      }
+    };
+    recognizer.onerror = ()=>{ /* keep going, we still have audio-based metrics */ };
+    try{ recognizer.start(); }catch(e){ recognitionAvailable = false; }
+    banner.classList.add('hidden');
+  } else {
+    banner.textContent = "This browser can't transcribe speech, so word-speed will be estimated from timing instead of a live transcript. For best results, use Chrome.";
+    banner.classList.remove('hidden');
+  }
+
+  timerInterval = setInterval(updateTimer, 200);
+  waveInterval = setInterval(sampleAudio, 60);
+}
+
+function updateTimer(){
+  const elapsed = (performance.now() - recStartTime) / 1000;
+  const m = Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s = Math.floor(elapsed%60).toString().padStart(2,'0');
+  document.getElementById('timer').textContent = m + ':' + s;
+}
+
+function estimatePitch(buf, sampleRate){
+  // Autocorrelation-based pitch detector (basic, good enough for a modulation trend)
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i=0;i<SIZE;i++){ rms += buf[i]*buf[i]; }
+  rms = Math.sqrt(rms/SIZE);
+  if (rms < 0.01) return {rms, pitch:0};
+
+  let r1=0, r2=SIZE-1, thres=0.2;
+  for (let i=0;i<SIZE/2;i++){ if (Math.abs(buf[i])<thres){ r1=i; break; } }
+  for (let i=1;i<SIZE/2;i++){ if (Math.abs(buf[SIZE-i])<thres){ r2=SIZE-i; break; } }
+  const trimmed = buf.slice(r1, r2);
+  const n = trimmed.length;
+  const c = new Array(n).fill(0);
+  for (let lag=0; lag<n; lag++){
+    let sum=0;
+    for (let i=0;i<n-lag;i++){ sum += trimmed[i]*trimmed[i+lag]; }
+    c[lag]=sum;
+  }
+  let d=0; while(d<n-1 && c[d]>c[d+1]) d++;
+  let maxval=-1, maxpos=-1;
+  for (let i=d;i<n;i++){ if (c[i]>maxval){ maxval=c[i]; maxpos=i; } }
+  let T0 = maxpos;
+  if (T0<=0) return {rms, pitch:0};
+  const freq = sampleRate/T0;
+  const pitch = (freq>70 && freq<500) ? freq : 0; // human voice range
+  return {rms, pitch};
+}
+
+function sampleAudio(){
+  if (!recording) return;
+  analyser.getByteTimeDomainData(dataArray);
+  const floatBuf = new Float32Array(dataArray.length);
+  for (let i=0;i<dataArray.length;i++){ floatBuf[i] = (dataArray[i]-128)/128; }
+  const {rms, pitch} = estimatePitch(floatBuf, audioCtx.sampleRate);
+  samples.push({t: performance.now()-recStartTime, rms, pitch});
+  drawWave(floatBuf, rms);
+}
+
+function drawWave(buf, rms){
+  clearWave();
+  waveCtx.beginPath();
+  waveCtx.strokeStyle = rms > 0.03 ? '#E8A33D' : '#5A6A96';
+  waveCtx.lineWidth = 2;
+  const step = Math.floor(buf.length/waveCanvas.width) || 1;
+  for (let x=0; x<waveCanvas.width; x++){
+    const v = buf[x*step] || 0;
+    const y = (v*0.4+0.5) * waveCanvas.height;
+    if (x===0) waveCtx.moveTo(x,y); else waveCtx.lineTo(x,y);
+  }
+  waveCtx.stroke();
+}
+
+function stopRecording(){
+  recording = false;
+  micBtn.classList.remove('recording');
+  document.getElementById('rec-hint').textContent = 'Analysing…';
+  clearInterval(timerInterval);
+  clearInterval(waveInterval);
+  if (recognizer){ try{ recognizer.stop(); }catch(e){} }
+  if (micStream){ micStream.getTracks().forEach(t=>t.stop()); }
+  if (audioCtx){ audioCtx.close(); }
+
+  const durationSec = (performance.now() - recStartTime)/1000;
+  setTimeout(()=> computeResults(durationSec), 350); // small delay to let final ASR result land
+}
+
+function stopEverything(){
+  if (recording) {
+    recording = false;
+    clearInterval(timerInterval);
+    clearInterval(waveInterval);
+    if (recognizer){ try{ recognizer.stop(); }catch(e){} }
+    if (micStream){ micStream.getTracks().forEach(t=>t.stop()); }
+    if (audioCtx){ try{ audioCtx.close(); }catch(e){} }
+  }
+}
+
+/* ---------------- Scoring ---------------- */
+
+// Smooth bell-curve scorer: 10 at the ideal value, decaying gracefully on both sides.
+// `edgeScore` fixes what score to give at +/-halfSpread from the ideal (so behaviour stays
+// predictable and tunable), instead of the old hard "in range = 8-10, out of range = cliff".
+function bellScore(value, ideal, halfSpread, edgeScore){
+  edgeScore = edgeScore === undefined ? 0.8 : edgeScore;
+  const k = Math.sqrt(-0.5 / Math.log(edgeScore));
+  const sigma = Math.max(halfSpread * k, 1e-6);
+  const z = (value - ideal) / sigma;
+  return clamp(10 * Math.exp(-0.5 * z * z), 0, 10);
+}
+
+// Median filter (odd window) — smooths jittery frame-to-frame pitch estimates.
+function medianSmooth(arr, win){
+  const half = Math.floor(win/2);
+  const out = [];
+  for (let i=0;i<arr.length;i++){
+    const lo = Math.max(0, i-half), hi = Math.min(arr.length, i+half+1);
+    const slice = arr.slice(lo,hi).slice().sort((a,b)=>a-b);
+    out.push(slice[Math.floor(slice.length/2)]);
+  }
+  return out;
+}
+
+// Corrects the classic autocorrelation "octave error" (pitch tracker suddenly reporting
+// double/half the real pitch for a frame or two), which otherwise inflates modulation variance
+// with noise rather than genuine expressive pitch change.
+function fixOctaveErrors(pitches){
+  const out = [];
+  let ref = null;
+  for (const p of pitches){
+    let v = p;
+    if (ref){
+      const ratio = v/ref;
+      if (ratio > 1.6) v = v/2;
+      else if (ratio < 0.62) v = v*2;
+    }
+    out.push(v);
+    ref = ref === null ? v : ref*0.7 + v*0.3; // slow-moving reference
+  }
+  return out;
+}
+
+function computeResults(durationSec){
+  const targetWords = wordCount(currentStory.text);
+  const heardWords = wordCount(finalTranscript);
+
+  // Calibrate a voice-activity threshold from THIS recording's own noise floor, instead of a
+  // fixed number — a quiet room and a noisy classroom don't share one silence cut-off.
+  const rmsSorted = samples.map(s=>s.rms).slice().sort((a,b)=>a-b);
+  const floorSample = rmsSorted.length ? rmsSorted[Math.floor(rmsSorted.length*0.2)] : 0.01;
+  const voiceThreshold = clamp(Math.max(floorSample*2.6, 0.014), 0.012, 0.05);
+
+  // Speaking duration = time from first sound to last sound, not button-press-to-button-press.
+  // The raw duration includes the "thinking pause" before a child starts reading and any pause
+  // after finishing before the mic was tapped off — both were dragging speed scores down unfairly.
+  // Guarded with a floor at 50% of the raw duration: if the noise threshold misclassifies part of
+  // real speech as silence, the trim can otherwise collapse to almost nothing and send WPM (and
+  // the speed score) to a nonsense extreme.
+  const voicedIdx = samples.map((s,i)=>({i,voiced:s.rms>voiceThreshold})).filter(x=>x.voiced).map(x=>x.i);
+  let speakingSec = durationSec;
+  if (voicedIdx.length >= 2){
+    const trimmed = (samples[voicedIdx[voicedIdx.length-1]].t - samples[voicedIdx[0]].t)/1000;
+    if (trimmed > 1) speakingSec = clamp(trimmed, durationSec*0.5, durationSec);
+  }
+
+  // Word count: the passage length is fixed and known, so it's a far more reliable basis for WPM
+  // than the live transcript (browser speech recognition regularly drops words, especially in
+  // Hindi or with background noise). The transcript is used only as a completeness/accuracy check.
+  const useTranscript = recognitionAvailable && heardWords > 0;
+  const captureRatio = useTranscript ? clamp(heardWords/targetWords, 0, 1.3) : null;
+  const minutes = Math.max(speakingSec/60, 0.08);
+  const wpm = clamp(targetWords / minutes, 5, 400); // sanity bound against timing edge-cases
+
+  /* ---- Speed score: smooth bell curve centred on the class's ideal pace ---- */
+  const [lo, hi] = currentStory.wpmRange;
+  const mid = (lo+hi)/2, halfRange = (hi-lo)/2;
+  const speedScore = bellScore(wpm, mid, halfRange, 0.8); // 8/10 right at the band edges
+
+  /* ---- Pause / phrasing analysis from RMS samples (using the calibrated threshold) ---- */
+  let pauses = [];
+  let inPause = false, pauseStart = 0, speechStarted = false;
+  for (let i=0;i<samples.length;i++){
+    const s = samples[i];
+    if (s.rms > voiceThreshold) speechStarted = true;
+    if (!speechStarted) continue; // ignore lead-in silence
+    if (s.rms <= voiceThreshold){
+      if (!inPause){ inPause = true; pauseStart = s.t; }
+    } else if (inPause){
+      const dur = s.t - pauseStart;
+      if (dur > 200) pauses.push(dur);
+      inPause = false;
+    }
+  }
+  const shortPauses = pauses.filter(p=>p>=200 && p<600).length;    // natural phrase/breath breaks
+  const mediumPauses = pauses.filter(p=>p>=600 && p<1400).length;  // hesitations
+  const longPauses = pauses.filter(p=>p>=1400).length;             // major breaks/stumbles
+  const totalPauses = shortPauses + mediumPauses + longPauses;
+
+  // Phrasing quality is mainly about HOW pauses are placed, not just whether any are long.
+  // Long pauses alone are rare even in choppy reading, so scoring only on those saturated
+  // almost every recording at 10. Instead, compare the total number of pause-breaks against
+  // how many natural break points the passage actually has (its commas/full stops): reading
+  // word-by-word produces far more breaks than that; reading in one unbroken rush produces far
+  // fewer. Both move the score down from the ideal, which sits a little above the punctuation count
+  // to allow for a couple of natural breath pauses.
+  const punctCount = Math.max((currentStory.text.match(/[,।.]/g) || []).length, 2);
+  const idealPauses = punctCount * 1.25;
+  const pauseSpreadScore = bellScore(totalPauses, idealPauses, Math.max(idealPauses*0.9, 1.5), 0.8);
+
+  // Layer a direct penalty for genuine hesitations/stumbles on top of the chunking score.
+  let phrasingScore = clamp(pauseSpreadScore - mediumPauses*0.9 - longPauses*2, 0, 10);
+
+  // If the transcript is trustworthy (captured most of the passage), fold in a light
+  // word-coverage check — lots of skipped/substituted words is also a fluency issue.
+  if (useTranscript && captureRatio >= 0.7){
+    const targetSet = currentStory.text.toLowerCase().replace(/[.,।!?]/g,'').split(/\s+/).filter(Boolean);
+    const heardSet = finalTranscript.toLowerCase().replace(/[.,।!?]/g,'').split(/\s+/).filter(Boolean);
+    const targetUnique = new Set(targetSet);
+    const matched = heardSet.filter(w=>targetUnique.has(w)).length;
+    const overlapRatio = clamp(matched / targetSet.length, 0, 1);
+    phrasingScore = clamp(phrasingScore - (1-overlapRatio) * 2.5, 0, 10);
+  }
+
+  // Confidence scaling for very short/glitchy recordings, instead of a hard clamp.
+  const sampleConfidence = clamp(samples.length / 20, 0.4, 1);
+  phrasingScore = 10 - (10-phrasingScore) / sampleConfidence;
+  phrasingScore = clamp(phrasingScore, 0, 10);
+
+  /* ---- Modulation from pitch & volume variety (smoothed, octave-corrected) ---- */
+  const voicedRms = samples.filter(s=>s.rms>voiceThreshold).map(s=>s.rms);
+  let rawPitches = samples.filter(s=>s.pitch>0 && s.rms>voiceThreshold).map(s=>s.pitch);
+  let modulationScore = 5;
+  if (rawPitches.length > 6){
+    let smoothed = medianSmooth(rawPitches, 5);
+    smoothed = fixOctaveErrors(smoothed);
+    const pMean = avg(smoothed);
+    const pStd = stdev(smoothed, pMean);
+    const pCV = pMean>0 ? pStd/pMean : 0;
+    const rMean = avg(voicedRms);
+    const rStd = stdev(voicedRms, rMean);
+    const rCV = rMean>0 ? rStd/rMean : 0;
+
+    const pitchPart = bellScore(pCV, 0.14, 0.08, 0.8);   // ideal ~0.14 CV, flat or shouty both drop
+    const volPart = bellScore(rCV, 0.35, 0.20, 0.8);
+    let combined = clamp(pitchPart*0.6 + volPart*0.4, 0, 10);
+
+    // Scale confidence for thin pitch data rather than an all-or-nothing cutoff.
+    const conf = clamp((rawPitches.length-6)/14, 0.3, 1);
+    modulationScore = 5 + (combined-5)*conf;
+  }
+  modulationScore = clamp(modulationScore, 0, 10);
+
+  renderResults({speedScore, phrasingScore, modulationScore, wpm, speakingSec, useTranscript, captureRatio, shortPauses, mediumPauses, longPauses, heardWords, targetWords});
+}
+
+function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function stdev(arr, mean){ return Math.sqrt(arr.reduce((a,b)=>a+(b-mean)*(b-mean),0)/arr.length); }
+function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+
+/* ---------------- Render results ---------------- */
+function renderResults(r){
+  setBar('speed', r.speedScore);
+  setBar('phrasing', r.phrasingScore);
+  setBar('modulation', r.modulationScore);
+
+  let captureNote = '';
+  if (r.useTranscript && r.captureRatio !== null && r.captureRatio < 0.55){
+    captureNote = ' (the mic only picked up part of the reading clearly — try again somewhere quieter for a more reliable score)';
+  }
+  document.getElementById('speed-note').textContent =
+    `≈ ${Math.round(r.wpm)} words per minute, based on the ${r.targetWords}-word passage over ${r.speakingSec.toFixed(1)}s of actual speaking time` +
+    `. Target for Class ${selectedClass}: ${currentStory.wpmRange[0]}–${currentStory.wpmRange[1]} wpm.` + captureNote;
+
+  document.getElementById('phrasing-note').textContent =
+    r.mediumPauses + r.longPauses === 0
+      ? "Read in smooth, connected phrases with no long breaks."
+      : `${r.mediumPauses} hesitant pause(s) and ${r.longPauses} long break(s) noticed — reading word-by-word or stopping mid-sentence lowers this score.`;
+
+  document.getElementById('modulation-note').textContent =
+    "Based on how much the pitch and loudness varied — a flat, monotone voice scores lower than expressive reading with natural rise and fall.";
+
+  const overall = (r.speedScore + r.phrasingScore + r.modulationScore)/3;
+  const starCount = (overall/10)*5;
+  document.getElementById('stars').textContent = starString(starCount);
+  const labels = [
+    [0,3.5,'Needs practice'], [3.5,6,'Getting there'], [6,8,'Good reading'], [8,10.1,'Excellent reading']
+  ];
+  const label = labels.find(l=>overall>=l[0] && overall<l[1])[2];
+  document.getElementById('overall-label').textContent = label;
+  document.getElementById('overall-sub').textContent = `Overall score ${overall.toFixed(1)} / 10`;
+  const grade = gradeFor(overall);
+  const badge = document.getElementById('grade-badge');
+  badge.textContent = 'Grade ' + grade;
+  badge.style.background = overall>=8 ? 'var(--mint)' : overall>=5 ? 'var(--indigo)' : 'var(--coral)';
+
+  const idEl = document.getElementById('results-id');
+  const dateStr = new Date().toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+  if (studentName){
+    idEl.innerHTML = `<b>${escapeHtml(studentName)}</b> · Class ${selectedClass} · ${selectedLang === 'hindi' ? 'हिन्दी' : 'English'} · ${dateStr}`;
+  } else {
+    idEl.innerHTML = `Class ${selectedClass} · ${selectedLang === 'hindi' ? 'हिन्दी' : 'English'} · ${dateStr}`;
+  }
+  idEl.classList.remove('hidden');
+
+  if (r.useTranscript){
+    document.getElementById('transcript-wrap').classList.remove('hidden');
+    document.getElementById('transcript-text').textContent = finalTranscript.trim() || '(no speech captured)';
+  } else {
+    document.getElementById('transcript-wrap').classList.add('hidden');
+  }
+
+  lastResult = {r, overall, label, grade, dateStr};
+  showScreen('screen-results');
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function downloadReport(){
+  if (!lastResult) return;
+  const {r, overall, label, grade, dateStr} = lastResult;
+  const lines = [
+    'PM SHRI KENDRIYA VIDYALAYA AFS SULUR',
+    'Vaachan — Reading Fluency Report',
+    '='.repeat(40),
+    `Student: ${studentName || '—'}`,
+    `Class: ${selectedClass}`,
+    `Language: ${selectedLang === 'hindi' ? 'Hindi' : 'English'}`,
+    `Passage: ${currentStory.title}`,
+    `Date: ${dateStr}`,
+    '',
+    `Speed: ${r.speedScore.toFixed(1)}/10  (≈ ${Math.round(r.wpm)} wpm; target ${currentStory.wpmRange[0]}-${currentStory.wpmRange[1]} wpm)`,
+    `Phrasing: ${r.phrasingScore.toFixed(1)}/10  (${r.mediumPauses} hesitant pause(s), ${r.longPauses} long break(s))`,
+    `Modulation: ${r.modulationScore.toFixed(1)}/10`,
+    '',
+    `Overall: ${overall.toFixed(1)}/10 — Grade ${grade} — ${label}`,
+  ];
+  if (r.useTranscript){
+    lines.push('', 'Transcript (auto, may be incomplete):', finalTranscript.trim());
+  }
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fname = (studentName ? studentName.replace(/\s+/g,'_') : 'student') + `_class${selectedClass}_${Date.now()}.txt`;
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+document.getElementById('btn-download').addEventListener('click', downloadReport);
+
+function setBar(prefix, score){
+  document.getElementById(prefix+'-score').textContent = score.toFixed(1) + '/10';
+  const track = document.getElementById(prefix+'-bar');
+  track.innerHTML = '';
+  const filled = Math.round(score);
+  const color = score>=8 ? 'var(--mint)' : score>=5 ? 'var(--marigold)' : 'var(--coral)';
+  for (let i=0;i<10;i++){
+    const bar = document.createElement('div');
+    bar.className = 'eq-bar';
+    if (i<filled) bar.style.background = color;
+    track.appendChild(bar);
+  }
+}
+
+function starString(n){
+  // Whole stars only — the half-star glyph doesn't render consistently across devices/fonts.
+  const full = clamp(Math.round(n), 0, 5);
+  return '★'.repeat(full) + '☆'.repeat(5 - full);
+}
+
+function gradeFor(overall){
+  if (overall>=9) return 'A+';
+  if (overall>=8) return 'A';
+  if (overall>=7) return 'B+';
+  if (overall>=6) return 'B';
+  if (overall>=5) return 'C';
+  if (overall>=4) return 'D';
+  return 'E';
+}
+
+/* ---------------- Navigation ---------------- */
+document.getElementById('btn-retry').addEventListener('click', ()=>{
+  resetRecordingState();
+  showScreen('screen-story');
+});
+document.getElementById('btn-newstudent').addEventListener('click', ()=>{
+  selectedClass = null; selectedLang = null; studentName = "";
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('student-name').value = '';
+  document.getElementById('btn-continue').disabled = true;
+  showScreen('screen-setup');
+});
+</script>
+</body>
+</html>

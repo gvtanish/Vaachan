@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Teacher Allotment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .grid-2col{
+    display:grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap:24px;
+    margin-top:24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2col { grid-template-columns: 1fr; }
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+
+  /* Form controls */
+  .field-group{margin-bottom:14px;}
+  label{
+    font-size:0.8rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    display:block;
+  }
+  .text-input, select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-size:0.9rem;
+    color:var(--ink);
+  }
+  .text-input:focus, select:focus{outline:none;border-color:var(--marigold);}
+
+  .btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:10px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all 0.15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-admin{
+    background:linear-gradient(155deg, var(--indigo), var(--indigo-soft));
+    color:#fff;
+  }
+  .btn-sm{ padding:4px 8px; font-size:0.8rem; }
+  .btn-danger{ background:var(--coral); color:#fff; }
+
+  /* Table styling */
+  .list-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .list-table th{
+    text-align:left;
+    padding:10px;
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .list-table td{
+    padding:12px 10px;
+    font-size:0.88rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+
+  /* List group details */
+  .list-group{
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:var(--paper);
+    overflow:hidden;
+  }
+  .list-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(228, 220, 200, 0.5);
+  }
+  .list-item:last-child{ border-bottom:none; }
+  .teacher-meta{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="grid-2col">
+    <!-- Left column: Add teacher & Teachers list -->
+    <div>
+      <div class="card">
+        <h2 class="section-title">Register Teacher Account</h2>
+        <form id="teacher-form" onsubmit="createTeacher(event)">
+          <div class="field-group">
+            <label for="teacher-name">Full Name</label>
+            <input type="text" id="teacher-name" class="text-input" placeholder="e.g. Anand Sharma" required>
+          </div>
+          
+          <div class="field-group">
+            <label for="teacher-emp">Employee ID</label>
+            <input type="text" id="teacher-emp" class="text-input" placeholder="e.g. T10042" required>
+          </div>
+
+          <div class="field-group">
+            <label for="teacher-pass">Password</label>
+            <input type="password" id="teacher-pass" class="text-input" placeholder="Min 6 characters" minlength="6" required autocomplete="new-password">
+          </div>
+
+          <button type="submit" class="btn btn-admin" style="width:100%;">Create Account</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Teachers List</h2>
+        <div class="list-group" id="teachers-list">
+          <div style="padding:20px; text-align:center; color:var(--ink-soft);">Loading teachers...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Allotment Grid -->
+    <div class="card">
+      <h2 class="section-title">Class Section Allotments</h2>
+      <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 20px 0; line-height:1.4;">Configure Class Teacher allotments and Subject mapping for all 15 sections.</p>
+      
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Class Teacher</th>
+            <th>Subject Teachers</th>
+          </tr>
+        </thead>
+        <tbody id="allotment-tbody">
+          <tr>
+            <td colspan="3" style="padding:30px; text-align:center; color:var(--ink-soft);">Loading allotments schema...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let teachersList = [];
+  let classesList = [];
+  let subjectAllotments = [];
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('admin');
+    window.utils.renderNav('teachers', true);
+
+    loadAllotmentsData();
+  });
+
+  async function loadAllotmentsData() {
+    try {
+      const [teachers, classes, allotments] = await Promise.all([
+        window.db.getTeachers(),
+        window.db.getClasses(),
+        window.db.getClassSubjectTeachers()
+      ]);
+
+      teachersList = teachers;
+      classesList = classes;
+      subjectAllotments = allotments;
+
+      renderTeachersList();
+      renderAllotmentsTable();
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading allotment statistics: " + e.message);
+    }
+  }
+
+  function renderTeachersList() {
+    const container = document.getElementById('teachers-list');
+    if (teachersList.length === 0) {
+      container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--ink-soft);">No registered teachers found.</div>`;
+      return;
+    }
+
+    container.innerHTML = teachersList.map(t => `
+      <div class="list-item">
+        <div>
+          <div style="font-weight:600; font-size:0.9rem;">${window.utils.escapeHtml(t.name)}</div>
+          <div class="teacher-meta">ID: ${window.utils.escapeHtml(t.employee_id || '—')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderAllotmentsTable() {
+    const tbody = document.getElementById('allotment-tbody');
+    
+    tbody.innerHTML = classesList.map(c => {
+      const classLabel = `${c.class_num}${c.section}`;
+      
+      // Class Teacher dropdown options
+      const ctOptions = teachersList.map(t => 
+        `<option value="${t.id}" ${c.teacher_id === t.id ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
+      ).join('');
+
+      // Subject teachers mapping
+      const enTeacher = subjectAllotments.find(a => a.class_id === c.id && a.subject === 'English');
+      const hiTeacher = subjectAllotments.find(a => a.class_id === c.id && a.subject === 'Hindi');
+
+      const enOptions = teachersList.map(t => 
+        `<option value="${t.id}" ${(enTeacher && enTeacher.teacher_id === t.id) ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
+      ).join('');
+
+      const hiOptions = teachersList.map(t => 
+        `<option value="${t.id}" ${(hiTeacher && hiTeacher.teacher_id === t.id) ? 'selected' : ''}>${window.utils.escapeHtml(t.name)}</option>`
+      ).join('');
+
+      return `
+        <tr>
+          <td><b>Class ${classLabel}</b></td>
+          <td>
+            <select style="font-size:0.8rem; padding:6px 10px;" onchange="saveClassTeacher(${c.id}, this.value)">
+              <option value="">-- None allotted --</option>
+              ${ctOptions}
+            </select>
+          </td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px; font-size:0.78rem;">
+                <span style="width:50px; font-weight:600; color:var(--ink-soft);">English:</span>
+                <select style="font-size:0.8rem; padding:4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'English', this.value)">
+                  <option value="">-- None --</option>
+                  ${enOptions}
+                </select>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:0.78rem;">
+                <span style="width:50px; font-weight:600; color:var(--ink-soft);">Hindi:</span>
+                <select style="font-size:0.8rem; padding:4px 8px; flex:1;" onchange="saveSubjectTeacher(${c.id}, 'Hindi', this.value)">
+                  <option value="">-- None --</option>
+                  ${hiOptions}
+                </select>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function saveClassTeacher(classId, teacherId) {
+    try {
+      await window.db.updateClassTeacher(classId, teacherId || null);
+      await window.db.logAction("Update Class Teacher", { class_id: classId, teacher_id: teacherId });
+    } catch (e) {
+      alert("Error saving class teacher: " + e.message);
+    }
+  }
+
+  async function saveSubjectTeacher(classId, subject, teacherId) {
+    try {
+      if (teacherId) {
+        await window.db.allotSubjectTeacher(classId, subject, teacherId);
+      } else {
+        await window.db.removeSubjectTeacher(classId, subject);
+      }
+      await window.db.logAction("Update Subject Teacher", { class_id: classId, subject, teacher_id: teacherId });
+    } catch (e) {
+      alert("Error saving subject teacher: " + e.message);
+    }
+  }
+
+  async function createTeacher(e) {
+    e.preventDefault();
+    const name = document.getElementById('teacher-name').value.trim();
+    const employeeId = document.getElementById('teacher-emp').value.trim();
+    const password = document.getElementById('teacher-pass').value;
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering Auth Account...';
+
+    try {
+      // Map Employee ID to internal email format
+      const email = `${employeeId.toLowerCase()}@vaachan.internal`;
+
+      // Call Supabase auth sign-up (admin bypasses email verification if enabled, or creates account immediately)
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            employee_id: employeeId,
+            role: 'teacher'
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      await window.db.logAction("Create Teacher Account", { name, employee_id: employeeId });
+
+      alert(`Teacher account registered successfully!\nEmployee ID: ${employeeId}\nEmail: ${email}`);
+      document.getElementById('teacher-form').reset();
+      loadAllotmentsData();
+
+    } catch (err) {
+      console.error(err);
+      alert("Error creating teacher account: " + err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account';
+    }
+  }
+</script>
+</body>
+</html>

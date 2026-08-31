@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaachan · Student Roster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14203B;
+    --ink-soft:#4A5578;
+    --paper:#FBF7EE;
+    --paper-panel:#FFFFFF;
+    --line:#E4DCC8;
+    --marigold:#E8A33D;
+    --marigold-deep:#C9791B;
+    --indigo:#1B2A4A;
+    --indigo-soft:#2C3D63;
+    --coral:#D6584F;
+    --mint:#4F9B72;
+    --sky:#3E7CB1;
+    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:0 0 60px 0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+  }
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  .grid-layout{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:24px;
+    margin-top:24px;
+  }
+  @media (max-width: 900px) {
+    .grid-layout { grid-template-columns: 1fr; }
+  }
+  .card{
+    background:var(--paper-panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    margin-bottom:24px;
+  }
+  h2.section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.4rem;
+    margin:0 0 16px 0;
+    color:var(--indigo);
+  }
+  
+  /* Filter bar styles */
+  .filter-bar{
+    display:flex;
+    gap:12px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .filter-bar select, .filter-bar input{
+    padding:10px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:0.9rem;
+  }
+  .filter-bar input{ flex:1; }
+
+  /* Roster lists */
+  .roster-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .roster-table th{
+    text-align:left;
+    padding:10px;
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .roster-table td{
+    padding:12px 10px;
+    font-size:0.88rem;
+    border-bottom:1px solid rgba(228, 220, 200, 0.4);
+  }
+  .roster-table tr:hover td{
+    background:rgba(232, 163, 61, 0.03);
+    cursor:pointer;
+  }
+  .roster-table tr.active-student td{
+    background:rgba(27, 42, 74, 0.04);
+  }
+
+  .badge{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:99px;
+    font-weight:700;
+    font-size:0.75rem;
+    color:#fff;
+  }
+  .badge-mint { background: var(--mint); }
+  .badge-indigo { background: var(--indigo); }
+  .badge-marigold { background: var(--marigold); }
+  .badge-coral { background: var(--coral); }
+  
+  .btn{
+    text-decoration:none;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:0.9rem;
+    border-radius:10px;
+    padding:6px 14px;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .btn-sm{ padding:4px 10px; font-size:0.8rem; }
+  .btn-primary{
+    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
+    color:#fff;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+
+  /* History list items */
+  .history-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    border-bottom:1px solid rgba(228, 220, 200, 0.5);
+  }
+  .history-item:last-child{ border-bottom:none; }
+  .history-meta{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  .trend-arrow{
+    font-weight:700;
+    margin-left:4px;
+  }
+  .trend-up { color: var(--mint); }
+  .trend-down { color: var(--coral); }
+
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-size:0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="nav-container"></div>
+
+<div class="container">
+  <div class="grid-layout">
+    <!-- Left: Roster List -->
+    <div class="card">
+      <h2 class="section-title">My Student Roster</h2>
+      
+      <div class="filter-bar">
+        <select id="class-filter" onchange="filterRoster()">
+          <option value="">All Assigned Classes</option>
+        </select>
+        <input type="text" id="search-input" placeholder="Search by name or roll..." oninput="filterRoster()">
+      </div>
+
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th style="width:70px;">Roll</th>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Last CWPM</th>
+            <th>Grade</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="roster-tbody">
+          <tr>
+            <td colspan="6" class="empty-state">Loading students roster...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right: Student History Details -->
+    <div>
+      <div class="card" id="history-card" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 class="section-title" id="history-student-name" style="margin:0;">Student Details</h2>
+          <a id="history-test-btn" class="btn btn-primary btn-sm">Evaluate Fluency</a>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <h4 style="margin:0 0 10px 0; color:var(--ink-soft); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;">Fluency Progress Trend</h4>
+          <div style="position: relative; height: 160px; width: 100%;">
+            <canvas id="progressChart"></canvas>
+          </div>
+        </div>
+
+        <h4 style="margin:0 0 12px 0; color:var(--ink-soft); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;">Previous Evaluations</h4>
+        <div id="history-list" style="border: 1px solid var(--line); border-radius: 12px; background: var(--paper); overflow: hidden;">
+          <!-- History items injected here -->
+        </div>
+      </div>
+
+      <div class="card" id="empty-history-card">
+        <div class="empty-state" style="padding:60px 20px;">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" style="color:var(--line); margin-bottom:12px;"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p>Select a student from the roster list on the left to view history timeline and statistics.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/db.js"></script>
+<script src="../js/utils.js"></script>
+
+<script>
+  let rawStudents = [];
+  let rawSessions = [];
+  let selectedStudentId = null;
+  let chartInstance = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    await window.auth.checkGuard('teacher');
+    window.utils.renderNav('students', false);
+
+    // Read URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramClassId = urlParams.get('classId');
+    const paramStudentId = urlParams.get('studentId');
+
+    loadStudentsData(paramClassId, paramStudentId);
+  });
+
+  async function loadStudentsData(paramClassId, paramStudentId) {
+    try {
+      const session = await window.auth.getSession();
+      if (!session) return;
+      const teacherId = session.user.id;
+
+      // 1. Fetch data
+      const [allClasses, allotments, students, sessions] = await Promise.all([
+        window.db.getClasses(),
+        window.db.getClassSubjectTeachers(),
+        window.db.getStudentsByTeacher(teacherId),
+        window.db.getSessions({ teacherId })
+      ]);
+
+      rawStudents = students;
+      rawSessions = sessions;
+
+      // Filter classes assigned to this teacher
+      const myClassIds = new Set();
+      allClasses.forEach(c => {
+        if (c.teacher_id === teacherId) myClassIds.add(c.id);
+      });
+      allotments.forEach(a => {
+        if (a.teacher_id === teacherId) myClassIds.add(a.class_id);
+      });
+
+      const assignedClasses = allClasses.filter(c => myClassIds.has(c.id));
+      const classFilter = document.getElementById('class-filter');
+      classFilter.innerHTML = '<option value="">All Assigned Classes</option>' +
+        assignedClasses.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
+
+      if (paramClassId) {
+        classFilter.value = paramClassId;
+      }
+
+      // Render roster
+      filterRoster();
+
+      // Auto select student from parameters
+      if (paramStudentId) {
+        showStudentHistory(paramStudentId);
+      }
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading roster data: " + e.message);
+    }
+  }
+
+  function filterRoster() {
+    const classVal = document.getElementById('class-filter').value;
+    const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+
+    const tbody = document.getElementById('roster-tbody');
+    
+    const filtered = rawStudents.filter(s => {
+      const matchClass = classVal ? s.class_id === parseInt(classVal) : true;
+      const matchSearch = s.name.toLowerCase().includes(searchVal) || s.roll_no.toLowerCase().includes(searchVal);
+      return matchClass && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No matching students found.</td></tr>`;
+      return;
+    }
+
+    // Group sessions by student to find last evaluation
+    const studentHistory = {};
+    rawSessions.forEach(s => {
+      if (!studentHistory[s.student_id]) studentHistory[s.student_id] = [];
+      studentHistory[s.student_id].push(s);
+    });
+
+    tbody.innerHTML = filtered.map(s => {
+      const history = studentHistory[s.id] || [];
+      
+      let lastCwpm = '—';
+      let lastGrade = '—';
+      let scoreColor = '';
+
+      if (history.length > 0) {
+        // Sort history by date descending
+        history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const latest = history[0];
+        lastCwpm = Math.round(latest.cwpm) + ' wpm';
+        lastGrade = latest.grade || '—';
+
+        if (latest.overall_score >= 8) scoreColor = 'badge-mint';
+        else if (latest.overall_score >= 5) scoreColor = 'badge-indigo';
+        else scoreColor = 'badge-coral';
+      }
+
+      const activeClass = selectedStudentId === s.id ? 'class="active-student"' : '';
+      const className = s.classes ? `${s.classes.class_num}${s.classes.section}` : '—';
+
+      return `
+        <tr ${activeClass} onclick="showStudentHistory('${s.id}')">
+          <td><b>${s.roll_no}</b></td>
+          <td><b>${window.utils.escapeHtml(s.name)}</b></td>
+          <td>${className}</td>
+          <td>${lastCwpm}</td>
+          <td>${lastGrade !== '—' ? `<span class="badge ${scoreColor}">${lastGrade}</span>` : '—'}</td>
+          <td>
+            <a href="./test.html" class="btn btn-primary btn-sm" onclick="event.stopPropagation();">Test</a>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function showStudentHistory(studentId) {
+    selectedStudentId = studentId;
+
+    // Highlight row
+    document.querySelectorAll('#roster-tbody tr').forEach(row => {
+      row.classList.remove('active-student');
+    });
+    
+    // Find active student object
+    const student = rawStudents.find(s => s.id === studentId);
+    if (!student) return;
+
+    document.getElementById('empty-history-card').style.display = 'none';
+    document.getElementById('history-card').style.display = 'block';
+
+    const classLabel = student.classes ? `${student.classes.class_num}${student.classes.section}` : '';
+    document.getElementById('history-student-name').textContent = `${student.name} (${classLabel})`;
+    
+    // Configure evaluation button
+    const testBtn = document.getElementById('history-test-btn');
+    testBtn.href = `./test.html`;
+    testBtn.onclick = () => {
+      // In a more advanced implementation, we would pre-select values.
+      // For now, we can pass query string context if needed.
+    };
+
+    // Load detailed evaluation sessions list
+    try {
+      const history = await window.db.getStudentHistory(studentId);
+      const historyListEl = document.getElementById('history-list');
+
+      if (history.length === 0) {
+        historyListEl.innerHTML = `<div class="empty-state">No previous evaluations completed.</div>`;
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+        return;
+      }
+
+      // Sort history descending for the list
+      const listHistory = [...history].reverse();
+
+      historyListEl.innerHTML = listHistory.map(s => {
+        let diffColor = 'trend-up';
+        let badgeColor = 'badge-indigo';
+        if (s.overall_score >= 8) badgeColor = 'badge-mint';
+        else if (s.overall_score < 4) badgeColor = 'badge-coral';
+
+        return `
+          <div class="history-item">
+            <div>
+              <div style="font-weight:600; font-size:0.9rem;">${window.utils.escapeHtml(s.passages?.title || 'Passage')} <span class="badge ${badgeColor}">${s.grade}</span></div>
+              <div class="history-meta">${window.utils.formatDate(s.session_date)} &middot; Language: ${s.lang === 'hindi' ? 'Hindi' : 'English'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:700; font-size:0.95rem; color:var(--indigo);">${s.overall_score}/10</div>
+              <div style="font-size:0.75rem; color:var(--ink-soft);">${Math.round(s.cwpm)} CWPM (${Math.round(s.accuracy_pct)}% Acc)</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render chart
+      renderChart(history);
+
+    } catch (e) {
+      console.error(e);
+      alert("Error loading student history: " + e.message);
+    }
+  }
+
+  function renderChart(history) {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    
+    const labels = history.map(s => window.utils.formatDate(s.session_date));
+    const dataPoints = history.map(s => s.overall_score);
+    const cwpmPoints = history.map(s => s.cwpm);
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Overall Score (0-10)',
+            data: dataPoints,
+            borderColor: '#1B2A4A',
+            backgroundColor: 'rgba(27, 42, 74, 0.05)',
+            borderWidth: 2,
+            tension: 0.1,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Speed (CWPM)',
+            data: cwpmPoints,
+            borderColor: '#E8A33D',
+            backgroundColor: 'rgba(232, 163, 61, 0.05)',
+            borderWidth: 2,
+            tension: 0.1,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            min: 0,
+            max: 10,
+            grid: { drawOnChartArea: true }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            min: 0,
+            grid: { drawOnChartArea: false }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

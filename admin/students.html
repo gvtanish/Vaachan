@@ -358,10 +358,13 @@
         is_active: true
       }));
 
-      await window.db.bulkInsertStudents(listToInsert);
+      const importResult = await window.db.bulkInsertStudents(listToInsert);
       await window.db.logAction("Bulk Import Students", { count: listToInsert.length });
 
-      window.utils?.toast(`Successfully imported ${listToInsert.length} students records!`, "success");
+      const duplicateNote = importResult.skippedDuplicates
+        ? ` ${importResult.skippedDuplicates} duplicate row(s) were merged.`
+        : '';
+      window.utils?.toast(`Successfully imported ${importResult.students.length} student records.${duplicateNote}`, "success");
       
       // Reset
       document.getElementById('csv-preview-card').classList.add('hidden');

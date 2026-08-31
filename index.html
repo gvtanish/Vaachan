@@ -108,8 +108,8 @@
     <div class="alert alert-danger" id="login-error" style="display:none; background:rgba(214,88,79,0.08); color:#9e3931; border:1px solid rgba(214,88,79,0.25); padding:11px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px;"></div>
 
     <div class="tabs">
-      <div class="tab active-teacher" id="tab-teacher" onclick="setRole('teacher')">🧑‍🏫 Teacher</div>
-      <div class="tab" id="tab-admin" onclick="setRole('admin')">🔐 Admin</div>
+      <div class="tab active-teacher" id="tab-teacher" onclick="setRole('teacher')"><span class="solid-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2.5 8 12 13l7.75-4.08V15H21V8L12 3Zm-6 8.16V16c0 1.66 2.69 3 6 3s6-1.34 6-3v-4.84L12 14.32 6 11.16Z"/></svg></span> Teacher</div>
+      <div class="tab" id="tab-admin" onclick="setRole('admin')"><span class="solid-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-5 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm2-7h-4V7a2 2 0 1 1 4 0v2Z"/></svg></span> Admin</div>
     </div>
 
     <form id="login-form" onsubmit="handleLogin(event)">
@@ -124,7 +124,7 @@
         <div style="position:relative;">
           <input type="password" id="password" class="text-input" placeholder="••••••••" required autocomplete="current-password"
             style="width:100%; padding:11px 44px 11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); font-family:'Inter',sans-serif; font-size:0.95rem; color:var(--ink); transition:border-color 0.2s;">
-          <button type="button" onclick="togglePwd()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; color:var(--ink-soft);" title="Show/hide password">👁</button>
+          <button type="button" onclick="togglePwd()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--ink-soft);" title="Show/hide password" aria-label="Show or hide password"><span class="solid-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.73 9.11 1.5 12c1.23 2.89 5 7 10.5 7s9.27-4.11 10.5-7C21.27 9.11 17.5 5 12 5Zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2A2.5 2.5 0 1 0 12 9a2.5 2.5 0 0 0 0 5.5Z"/></svg></span></button>
         </div>
       </div>
 
@@ -176,14 +176,14 @@
       userLabel.textContent = 'Teacher Employee ID';
       usernameInput.placeholder = 'e.g. T10042';
       submitBtn.className = 'btn btn-teacher';
-      submitBtn.textContent = '🧑‍🏫 Enter Teacher Portal';
+      submitBtn.textContent = 'Enter Teacher Portal';
     } else {
       tabTeacher.className = 'tab';
       tabAdmin.className = 'tab active-admin';
       userLabel.textContent = 'Admin Email';
       usernameInput.placeholder = 'admin@vaachan.school';
       submitBtn.className = 'btn btn-admin-login';
-      submitBtn.textContent = '🔐 Enter Admin Portal';
+      submitBtn.textContent = 'Enter Admin Portal';
     }
   }
 

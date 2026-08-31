@@ -35,8 +35,8 @@
 
         <!-- Tabs -->
         <div class="tab-buttons">
-          <button class="tab-btn active" onclick="switchTab('single')">➕ Single Account</button>
-          <button class="tab-btn" onclick="switchTab('bulk')">📄 Bulk CSV Import</button>
+          <button class="tab-btn active" onclick="switchTab('single')">Single Account</button>
+          <button class="tab-btn" onclick="switchTab('bulk')">Bulk CSV Import</button>
         </div>
 
         <!-- Single teacher form -->
@@ -68,10 +68,10 @@
 
           <a href="data:text/csv;charset=utf-8,Name%2CEmployeeID%2CPassword%0AAnand%20Sharma%2CT10042%2CPass%40123%0ABindu%20Devi%2CT10043%2CTeacher%40456"
              download="teachers_template.csv"
-             class="btn btn-ghost btn-sm" style="margin-bottom:14px;">⬇ Download Template CSV</a>
+             class="btn btn-ghost btn-sm" style="margin-bottom:14px;">Download Template CSV</a>
 
           <div class="csv-dropzone" onclick="document.getElementById('teacher-csv').click()">
-            <div style="font-size:2rem; margin-bottom:8px;">📂</div>
+            <div class="solid-icon solid-icon-lg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.75A2.25 2.25 0 0 1 5.25 4.5h4.09c.6 0 1.17.24 1.59.66l1.16 1.17c.42.42.99.66 1.59.66h5.07A2.25 2.25 0 0 1 21 9.24v8.01a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 17.25V6.75Z"/></svg></div>
             <div style="font-weight:600; font-size:0.9rem; color:var(--indigo);">Click to upload CSV</div>
             <div style="font-size:0.75rem; color:var(--ink-soft); margin-top:4px;">Name, EmployeeID, Password</div>
             <input type="file" id="teacher-csv" accept=".csv" style="display:none;" onchange="handleTeacherCsv(event)">
@@ -92,7 +92,7 @@
             </div>
             <div id="bulk-status" style="font-size:0.8rem; color:var(--ink-soft); margin-bottom:10px;"></div>
             <button class="btn btn-admin btn-full" id="bulk-commit-btn" onclick="commitBulkTeachers()">
-              🚀 Create All Teacher Accounts
+              Create All Teacher Accounts
             </button>
           </div>
         </div>
@@ -272,14 +272,8 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating account...';
     try {
-      const email = `${employeeId.toLowerCase()}@vaachan.school`;
-      const client = await window.getSupabaseClient();
-      const { data, error } = await client.auth.signUp({
-        email,
-        password,
-        options: { data: { name, employee_id: employeeId, role: 'teacher' } }
-      });
-      if (error) throw error;
+      const result = await window.db.createTeacherAccounts([{ name, employeeId, password }]);
+      if (!result.results[0]?.ok) throw new Error(result.results[0]?.error || 'Unable to create account.');
       await window.db.logAction('Create Teacher Account', { name, employee_id: employeeId });
       window.utils.toast(`✓ Account created — ${name} (${employeeId})`, 'success');
       document.getElementById('teacher-form').reset();
@@ -353,43 +347,32 @@
     progressWrap.style.display = 'block';
 
     let success = 0, failed = 0;
-    const client = await window.getSupabaseClient();
     const rows = tbody.querySelectorAll('tr');
-
-    for (let i = 0; i < parsedTeachers.length; i++) {
-      const t = parsedTeachers[i];
-      const email = `${t.employeeId.toLowerCase()}@vaachan.school`;
-      const statusCell = rows[i] ? rows[i].querySelector('td:last-child') : null;
-
-      // Throttle delay to avoid triggering Supabase signup rate limiting (HTTP 429)
-      if (i > 0) {
-        statusEl.textContent = `Throttling rate limit... Progress: ${i} / ${parsedTeachers.length}`;
-        await new Promise(resolve => setTimeout(resolve, 1200));
-      }
-
-      try {
-        const { error } = await client.auth.signUp({
-          email,
-          password: t.password,
-          options: { data: { name: t.name, employee_id: t.employeeId, role: 'teacher' } }
-        });
-        if (error) throw error;
-        if (statusCell) statusCell.innerHTML = `<span class="badge badge-mint">Created ✓</span>`;
-        success++;
-      } catch (err) {
-        if (statusCell) statusCell.innerHTML = `<span class="badge badge-coral" title="${window.utils.escapeHtml(err.message)}">Failed ✗</span>`;
-        failed++;
-      }
-
-      const pct = Math.round(((i + 1) / parsedTeachers.length) * 100);
-      progressBar.style.width = pct + '%';
-      statusEl.textContent = `Progress: ${i + 1} / ${parsedTeachers.length}`;
+    try {
+      const result = await window.db.createTeacherAccounts(parsedTeachers);
+      result.results.forEach((account, i) => {
+        const statusCell = rows[i] ? rows[i].querySelector('td:last-child') : null;
+        if (account.ok) {
+          if (statusCell) statusCell.innerHTML = '<span class="badge badge-mint">Created</span>';
+          success++;
+        } else {
+          if (statusCell) statusCell.innerHTML = `<span class="badge badge-coral" title="${window.utils.escapeHtml(account.error)}">Failed</span>`;
+          failed++;
+        }
+      });
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Create All Teacher Accounts';
+      statusEl.textContent = err.message;
+      window.utils.toast(`Bulk import failed: ${err.message}`, 'error');
+      return;
     }
+    progressBar.style.width = '100%';
 
     await window.db.logAction('Bulk Import Teachers', { total: parsedTeachers.length, success, failed });
     statusEl.textContent = `Done — ${success} created, ${failed} failed.`;
     btn.disabled = false;
-    btn.textContent = '🚀 Create All Teacher Accounts';
+    btn.textContent = 'Create All Teacher Accounts';
     window.utils.toast(`Bulk import done: ${success} created, ${failed} failed`, success > 0 ? 'success' : 'error');
     loadAllotmentsData();
   }

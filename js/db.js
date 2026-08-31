@@ -146,7 +146,7 @@
       const client = await window.getSupabaseClient();
       const { data, error } = await client
         .from('students')
-        .insert(studentsList)
+        .upsert(studentsList, { onConflict: 'class_id,roll_no' })
         .select();
       if (error) throw error;
       return data;

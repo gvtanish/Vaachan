@@ -120,8 +120,9 @@
       const substitutions = path.filter(p => p.type === 'substitution').length;
       const omissions = path.filter(p => p.type === 'omission').length;
       const insertions = path.filter(p => p.type === 'insertion').length;
+      const hesitations = path.filter(p => p.type === 'hesitation').length;
 
-      const totalErrors = substitutions + omissions + (insertions * 0.5);
+      const totalErrors = substitutions + omissions + (insertions * 0.5) + (hesitations * 0.25);
       const accuracy = Math.max(0, (M - totalErrors) / M);
 
       return {
@@ -130,7 +131,8 @@
         correct,
         substitutions,
         omissions,
-        insertions
+        insertions,
+        hesitations
       };
     },
 
@@ -194,6 +196,13 @@
 
     // Main Compute Engine
     compute(samples, durationSec, currentStory, finalTranscript, lang) {
+      if (durationSec < 5) {
+        return {
+          isTooShort: true,
+          errorMsg: "Recording too short (under 5 seconds). Please have the student read the full passage and try again."
+        };
+      }
+
       const targetWords = currentStory.text.split(/\s+/).filter(Boolean).length;
       const heardWords = finalTranscript.split(/\s+/).filter(Boolean).length;
 
@@ -249,7 +258,9 @@
       const benchmarks = {
         3: { english: [53, 82], hindi: [45, 70] },
         4: { english: [78, 115], hindi: [65, 95] },
-        5: { english: [95, 140], hindi: [80, 115] }
+        5: { english: [95, 140], hindi: [80, 115] },
+        6: { english: [115, 160], hindi: [100, 140] },
+        7: { english: [130, 180], hindi: [115, 155] }
       };
       
       const classLevel = currentStory.classNum || 3;

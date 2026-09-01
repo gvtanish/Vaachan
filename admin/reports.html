@@ -160,6 +160,26 @@
       </div>
     </div>
 
+    <!-- Passage Difficulty Analysis Card (D2) -->
+    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Passage Difficulty & Analysis</h3>
+    <div class="table-wrap" style="margin-bottom:24px;">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>Passage Title</th>
+          <th>Evaluations</th>
+          <th>Avg Accuracy</th>
+          <th>Avg Speed (CWPM)</th>
+          <th>Avg Overall Score</th>
+          <th>Difficulty Assessment</th>
+        </tr>
+      </thead>
+      <tbody id="passage-analysis-tbody">
+        <tr><td colspan="6" class="empty-state">Loading passage statistics...</td></tr>
+      </tbody>
+    </table>
+    </div>
+
     <!-- Sessions Table -->
     <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Individual Session Log</h3>
     <div class="table-wrap">
@@ -339,6 +359,48 @@
   }
 
   function renderTable() {
+    // 1. Passage Difficulty Analysis
+    const passageMap = {};
+    filteredSessions.forEach(s => {
+      const pTitle = s.passages?.title || 'General Passage';
+      if (!passageMap[pTitle]) {
+        passageMap[pTitle] = { count: 0, sumAcc: 0, sumCwpm: 0, sumScore: 0 };
+      }
+      passageMap[pTitle].count++;
+      passageMap[pTitle].sumAcc += Number(s.accuracy_pct !== null ? s.accuracy_pct : 100);
+      passageMap[pTitle].sumCwpm += Number(s.cwpm || 0);
+      passageMap[pTitle].sumScore += Number(s.overall_score || 0);
+    });
+
+    const pTbody = document.getElementById('passage-analysis-tbody');
+    const pTitles = Object.keys(passageMap);
+    if (pTitles.length === 0) {
+      pTbody.innerHTML = `<tr><td colspan="6" class="empty-state">No passage evaluations recorded yet.</td></tr>`;
+    } else {
+      pTbody.innerHTML = pTitles.map(title => {
+        const item = passageMap[title];
+        const avgAcc = Math.round(item.sumAcc / item.count);
+        const avgCwpm = Math.round(item.sumCwpm / item.count);
+        const avgScore = (item.sumScore / item.count).toFixed(1);
+
+        let diffBadge = '<span class="badge badge-mint">Optimal</span>';
+        if (avgScore < 5.0) diffBadge = '<span class="badge badge-coral">High Difficulty</span>';
+        else if (avgScore < 7.5) diffBadge = '<span class="badge badge-indigo">Moderate</span>';
+
+        return `
+          <tr>
+            <td><b>${window.utils.escapeHtml(title)}</b></td>
+            <td>${item.count}</td>
+            <td>${avgAcc}%</td>
+            <td>${avgCwpm} wpm</td>
+            <td><b>${avgScore}/10</b></td>
+            <td>${diffBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 2. Individual Session Log
     const tbody = document.getElementById('sessions-tbody');
     if (filteredSessions.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching sessions logs found.</td></tr>`;

@@ -355,9 +355,9 @@
       let lastCwpm = '—';
       let lastGrade = '—';
       let scoreColor = '';
+      let trendSymbol = '';
 
       if (history.length > 0) {
-        // Sort history by date descending
         history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         const latest = history[0];
         lastCwpm = Math.round(latest.cwpm) + ' wpm';
@@ -366,6 +366,13 @@
         if (latest.overall_score >= 8) scoreColor = 'badge-mint';
         else if (latest.overall_score >= 5) scoreColor = 'badge-indigo';
         else scoreColor = 'badge-coral';
+
+        if (history.length >= 2) {
+          const diff = Number(latest.overall_score) - Number(history[1].overall_score);
+          if (diff > 0.3) trendSymbol = '<span style="color:var(--mint); font-weight:800; margin-left:4px;" title="Improved">↑</span>';
+          else if (diff < -0.3) trendSymbol = '<span style="color:var(--coral); font-weight:800; margin-left:4px;" title="Declined">↓</span>';
+          else trendSymbol = '<span style="color:var(--ink-soft); font-weight:700; margin-left:4px;" title="Steady">→</span>';
+        }
       }
 
       const activeClass = selectedStudentId === s.id ? 'class="active-student"' : '';
@@ -377,7 +384,7 @@
           <td><b>${window.utils.escapeHtml(s.name)}</b></td>
           <td>${className}</td>
           <td>${lastCwpm}</td>
-          <td>${lastGrade !== '—' ? `<span class="badge ${scoreColor}">${lastGrade}</span>` : '—'}</td>
+          <td>${lastGrade !== '—' ? `<span class="badge ${scoreColor}">${lastGrade}</span>${trendSymbol}` : '—'}</td>
           <td>
             <a href="./test.html" class="btn btn-primary btn-sm" onclick="event.stopPropagation();">Test</a>
           </td>
@@ -389,12 +396,10 @@
   async function showStudentHistory(studentId) {
     selectedStudentId = studentId;
 
-    // Highlight row
     document.querySelectorAll('#roster-tbody tr').forEach(row => {
       row.classList.remove('active-student');
     });
     
-    // Find active student object
     const student = rawStudents.find(s => s.id === studentId);
     if (!student) return;
 
@@ -404,15 +409,9 @@
     const classLabel = student.classes ? `${student.classes.class_num}${student.classes.section}` : '';
     document.getElementById('history-student-name').textContent = `${student.name} (${classLabel})`;
     
-    // Configure evaluation button
     const testBtn = document.getElementById('history-test-btn');
     testBtn.href = `./test.html`;
-    testBtn.onclick = () => {
-      // In a more advanced implementation, we would pre-select values.
-      // For now, we can pass query string context if needed.
-    };
 
-    // Load detailed evaluation sessions list
     try {
       const history = await window.db.getStudentHistory(studentId);
       const historyListEl = document.getElementById('history-list');
@@ -426,30 +425,35 @@
         return;
       }
 
-      // Sort history descending for the list
       const listHistory = [...history].reverse();
 
       historyListEl.innerHTML = listHistory.map(s => {
-        let diffColor = 'trend-up';
         let badgeColor = 'badge-indigo';
         if (s.overall_score >= 8) badgeColor = 'badge-mint';
         else if (s.overall_score < 4) badgeColor = 'badge-coral';
 
         return `
-          <div class="history-item">
-            <div>
-              <div style="font-weight:600; font-size:0.9rem;">${window.utils.escapeHtml(s.passages?.title || 'Passage')} <span class="badge ${badgeColor}">${s.grade}</span></div>
-              <div class="history-meta">${window.utils.formatDate(s.session_date)} &middot; Language: ${s.lang === 'hindi' ? 'Hindi' : 'English'}</div>
+          <div class="history-item" style="flex-direction:column; align-items:stretch; gap:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700; font-size:0.92rem;">${window.utils.escapeHtml(s.passages?.title || 'Passage')} <span class="badge ${badgeColor}">${s.grade}</span></div>
+                <div class="history-meta">${window.utils.formatDate(s.session_date)} &middot; Language: ${s.lang === 'hindi' ? 'Hindi' : 'English'}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-weight:800; font-size:1rem; color:var(--indigo);">${s.overall_score}/10</div>
+                <div style="font-size:0.75rem; color:var(--ink-soft);">${Math.round(s.cwpm)} CWPM (${Math.round(s.accuracy_pct || 100)}% Acc)</div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <div style="font-weight:700; font-size:0.95rem; color:var(--indigo);">${s.overall_score}/10</div>
-              <div style="font-size:0.75rem; color:var(--ink-soft);">${Math.round(s.cwpm)} CWPM (${Math.round(s.accuracy_pct)}% Acc)</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; font-size:0.72rem; margin-top:4px;">
+              <span style="background:rgba(27,42,74,0.06); padding:2px 7px; border-radius:4px;">Acc: <b>${s.accuracy_score !== null ? s.accuracy_score : '10'}</b></span>
+              <span style="background:rgba(232,163,61,0.12); padding:2px 7px; border-radius:4px;">Spd: <b>${s.speed_score}</b></span>
+              <span style="background:rgba(62,124,177,0.12); padding:2px 7px; border-radius:4px;">Phr: <b>${s.phrasing_score}</b></span>
+              <span style="background:rgba(79,155,114,0.12); padding:2px 7px; border-radius:4px;">Exp: <b>${s.expression_score}</b></span>
             </div>
           </div>
         `;
       }).join('');
 
-      // Render chart
       renderChart(history);
 
     } catch (e) {
@@ -462,8 +466,10 @@
     const ctx = document.getElementById('progressChart').getContext('2d');
     
     const labels = history.map(s => window.utils.formatDate(s.session_date));
-    const dataPoints = history.map(s => s.overall_score);
+    const overallPoints = history.map(s => s.overall_score);
     const cwpmPoints = history.map(s => s.cwpm);
+    const accuracyPoints = history.map(s => s.accuracy_score !== null ? s.accuracy_score : 10);
+    const expressionPoints = history.map(s => s.expression_score);
 
     if (chartInstance) {
       chartInstance.destroy();
@@ -476,10 +482,10 @@
         datasets: [
           {
             label: 'Overall Score (0-10)',
-            data: dataPoints,
+            data: overallPoints,
             borderColor: '#1B2A4A',
             backgroundColor: 'rgba(27, 42, 74, 0.05)',
-            borderWidth: 2,
+            borderWidth: 2.5,
             tension: 0.1,
             yAxisID: 'y'
           },
@@ -491,6 +497,24 @@
             borderWidth: 2,
             tension: 0.1,
             yAxisID: 'y1'
+          },
+          {
+            label: 'Accuracy Score (0-10)',
+            data: accuracyPoints,
+            borderColor: '#3E7CB1',
+            borderWidth: 1.5,
+            borderDash: [4, 4],
+            tension: 0.1,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Expression (0-10)',
+            data: expressionPoints,
+            borderColor: '#4F9B72',
+            borderWidth: 1.5,
+            borderDash: [2, 2],
+            tension: 0.1,
+            yAxisID: 'y'
           }
         ]
       },
@@ -515,7 +539,7 @@
           }
         },
         plugins: {
-          legend: { display: false }
+          legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
         }
       }
     });

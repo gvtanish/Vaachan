@@ -193,10 +193,16 @@
         <h2 style="font-family:'Baloo 2', sans-serif; font-size:1.8rem; margin:0; color:var(--indigo);">Class Performance Reports</h2>
         <p style="margin:4px 0 0 0; color:var(--ink-soft); font-size:0.9rem;">View comprehensive summary statistics and diagnostic charts for your assigned class section.</p>
       </div>
-      <div style="display:flex; gap:10px; align-items:center;">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <select id="class-select" onchange="onClassSelected()">
           <option value="">-- Choose Class Section --</option>
         </select>
+        <div style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--ink-soft);">
+          <label for="start-date">From:</label>
+          <input type="date" id="start-date" onchange="generateReport()" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); font-size:0.82rem;">
+          <label for="end-date">To:</label>
+          <input type="date" id="end-date" onchange="generateReport()" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--line); font-size:0.82rem;">
+        </div>
         <button class="btn btn-ghost" onclick="window.print()"><span class="solid-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 8V3H7v5h10Zm0 2H7a3 3 0 0 0-3 3v5h3v3h10v-3h3v-5a3 3 0 0 0-3-3Zm-2 9H9v-5h6v5Z"/></svg></span> Print Report</button>
       </div>
     </div>
@@ -250,6 +256,7 @@
             <th>Avg CWPM</th>
             <th>Avg Accuracy</th>
             <th>Latest Grade</th>
+            <th>NIPUN Status</th>
           </tr>
         </thead>
         <tbody id="student-summary-tbody">
@@ -340,18 +347,25 @@
   }
 
   function generateReport() {
-    // 1. Filter students in this class section
     const classStudents = studentsList.filter(s => s.class_id === selectedClassId);
 
-    // Group sessions by student
+    const startDateVal = document.getElementById('start-date')?.value;
+    const endDateVal = document.getElementById('end-date')?.value;
+
     const studentHistoryMap = {};
     classStudents.forEach(st => {
-      studentHistoryMap[st.id] = sessionsList.filter(s => s.student_id === st.id);
+      let stSessions = sessionsList.filter(s => s.student_id === st.id);
+      if (startDateVal) {
+        stSessions = stSessions.filter(s => s.session_date >= startDateVal);
+      }
+      if (endDateVal) {
+        stSessions = stSessions.filter(s => s.session_date <= endDateVal);
+      }
+      studentHistoryMap[st.id] = stSessions;
     });
 
     const evaluatedStudents = classStudents.filter(st => studentHistoryMap[st.id].length > 0);
 
-    // 2. Calculations
     let sumAccuracy = 0;
     let sumCwpm = 0;
     let sumFluent = 0;
@@ -366,12 +380,10 @@
 
     evaluatedStudents.forEach(st => {
       const history = studentHistoryMap[st.id];
-      // Sort history to get the latest parameters
       history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const latest = history[0];
 
-      // Averages over student's sessions
-      const avgStAcc = history.reduce((acc, s) => acc + Number(s.accuracy_pct || 0), 0) / history.length;
+      const avgStAcc = history.reduce((acc, s) => acc + Number(s.accuracy_pct !== null ? s.accuracy_pct : 100), 0) / history.length;
       const avgStCwpm = history.reduce((acc, s) => acc + Number(s.cwpm || 0), 0) / history.length;
 
       sumAccuracy += avgStAcc;
@@ -381,9 +393,11 @@
         sumFluent++;
       }
 
-      // Latest metrics for skill bars
       if (latest.accuracy_score !== null) {
         sumAccScore += Number(latest.accuracy_score);
+        countedAccScore++;
+      } else {
+        sumAccScore += 10;
         countedAccScore++;
       }
       sumSpeedScore += Number(latest.speed_score || 0);
@@ -395,16 +409,19 @@
 
     const nEval = evaluatedStudents.length;
 
-    // Set Cards values
     document.getElementById('avg-accuracy').textContent = nEval > 0 ? Math.round(sumAccuracy / nEval) + '%' : '—';
     document.getElementById('avg-speed').textContent = nEval > 0 ? Math.round(sumCwpm / nEval) + ' CWPM' : '—';
     document.getElementById('avg-fluent').textContent = nEval > 0 ? Math.round((sumFluent / nEval) * 100) + '%' : '—';
     document.getElementById('eval-ratio').textContent = `${nEval}/${classStudents.length}`;
 
-    // Render tables
+    // Target CWPM benchmarks by class
+    const targets = { 3: 53, 4: 78, 5: 95, 6: 115, 7: 130 };
+    const activeClassObj = allClassesList?.find(c => c.id === selectedClassId);
+    const minTargetCwpm = targets[activeClassObj?.class_num] || 50;
+
     const tbody = document.getElementById('student-summary-tbody');
     if (classStudents.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No students found in this section.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No students found in this section.</td></tr>`;
     } else {
       tbody.innerHTML = classStudents.map(st => {
         const history = studentHistoryMap[st.id] || [];
@@ -412,15 +429,25 @@
         let avgCwpmVal = '—';
         let avgAccVal = '—';
         let latestGrade = '—';
+        let nipunBadge = '<span class="score-badge bg-indigo">Not Assessed</span>';
 
         if (history.length > 0) {
           history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           lastDate = window.utils.formatDate(history[0].session_date);
-          avgCwpmVal = Math.round(history.reduce((a, s) => a + Number(s.cwpm || 0), 0) / history.length) + ' wpm';
+          const rawCwpm = history.reduce((a, s) => a + Number(s.cwpm || 0), 0) / history.length;
+          avgCwpmVal = Math.round(rawCwpm) + ' wpm';
           
-          const sumAccs = history.reduce((a, s) => a + Number(s.accuracy_pct || 0), 0);
+          const sumAccs = history.reduce((a, s) => a + Number(s.accuracy_pct !== null ? s.accuracy_pct : 100), 0);
           avgAccVal = Math.round(sumAccs / history.length) + '%';
           latestGrade = history[0].grade;
+
+          if (rawCwpm >= minTargetCwpm) {
+            nipunBadge = '<span class="score-badge bg-mint">✅ On Track</span>';
+          } else if (rawCwpm >= minTargetCwpm * 0.7) {
+            nipunBadge = '<span class="score-badge bg-marigold">⚠️ Below Target</span>';
+          } else {
+            nipunBadge = '<span class="score-badge bg-coral">🔴 At Risk</span>';
+          }
         }
 
         return `
@@ -431,6 +458,7 @@
             <td>${avgCwpmVal}</td>
             <td>${avgAccVal}</td>
             <td><b>${latestGrade}</b></td>
+            <td>${nipunBadge}</td>
           </tr>
         `;
       }).join('');

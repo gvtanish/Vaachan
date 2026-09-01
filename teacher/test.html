@@ -491,7 +491,8 @@
     document.getElementById('story-title').style.fontFamily = selectedLang === 'hindi' ? "'Noto Sans Devanagari', sans-serif" : "'Baloo 2', sans-serif";
     
     const storyTextEl = document.getElementById('story-text');
-    storyTextEl.textContent = activePassage.text;
+    const rawStoryWords = activePassage.text.split(/\s+/).filter(Boolean);
+    storyTextEl.innerHTML = rawStoryWords.map((w, idx) => `<span class="live-word" id="live-w-${idx}" style="padding:2px 4px; border-radius:4px; transition:all 0.2s ease;">${window.utils.escapeHtml(w)}</span>`).join(' ');
     
     const storyBox = document.getElementById('story-box');
     storyBox.className = 'story-box ' + (selectedLang === 'hindi' ? 'hindi' : 'english');
@@ -583,6 +584,7 @@
           if (res.isFinal) finalTranscript += res[0].transcript + " ";
           else interim += res[0].transcript;
         }
+        updateLiveReadingHighlight(interim);
       };
       recognizer.onerror = () => {};
       try {
@@ -600,11 +602,46 @@
     waveInterval = setInterval(sampleAudio, 60);
   }
 
+  function updateLiveReadingHighlight(interim = "") {
+    if (!recording || !activePassage) return;
+    const fullText = (finalTranscript + " " + interim).trim();
+    const heardWords = fullText.split(/\s+/).filter(Boolean);
+    const heardCount = heardWords.length;
+
+    const rawWords = activePassage.text.split(/\s+/).filter(Boolean);
+    rawWords.forEach((_, idx) => {
+      const span = document.getElementById(`live-w-${idx}`);
+      if (!span) return;
+      if (idx < heardCount - 1) {
+        span.style.background = 'rgba(79, 155, 114, 0.2)';
+        span.style.color = 'var(--mint)';
+        span.style.fontWeight = '600';
+        span.style.outline = 'none';
+      } else if (idx === heardCount - 1) {
+        span.style.background = 'rgba(232, 163, 61, 0.35)';
+        span.style.color = 'var(--indigo)';
+        span.style.fontWeight = '800';
+        span.style.outline = '2px solid var(--marigold)';
+      } else {
+        span.style.background = 'transparent';
+        span.style.color = 'inherit';
+        span.style.fontWeight = 'normal';
+        span.style.outline = 'none';
+      }
+    });
+  }
+
   function updateTimer() {
     const elapsed = (performance.now() - recStartTime) / 1000;
+    if (elapsed >= 240) { // 4 minute auto-stop limit (A6)
+      window.utils?.toast("Recording reached maximum 4 minute limit.", "info");
+      stopRecording();
+      return;
+    }
     const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
     const s = Math.floor(elapsed % 60).toString().padStart(2, '0');
     document.getElementById('timer').textContent = m + ':' + s;
+    updateLiveReadingHighlight();
   }
 
   function estimatePitch(buf, sampleRate) {
@@ -693,6 +730,12 @@
       finalTranscript,
       selectedLang
     );
+
+    if (result.isTooShort) {
+      window.utils?.toast(result.errorMsg, "error");
+      document.getElementById('rec-hint').textContent = 'Tap to retry recording';
+      return;
+    }
 
     // If Speech Recognition transcript is empty, generate interactive fallback
     if (!result.alignResult) {
@@ -808,6 +851,8 @@
     }
   }
 
+  let undoStack = [];
+
   function updateWordStyle(span, type, wordText) {
     span.textContent = wordText;
     if (type === 'correct') {
@@ -816,25 +861,33 @@
       span.style.color = 'var(--ink)';
       span.style.background = 'transparent';
       span.style.fontStyle = 'normal';
+      span.title = "Correct";
     } else if (type === 'substitution') {
       span.style.textDecoration = 'none';
       span.style.borderBottom = '2.5px solid var(--marigold)';
       span.style.color = 'var(--ink)';
-      span.style.background = 'rgba(232,163,61,0.1)';
+      span.style.background = 'rgba(232,163,61,0.15)';
       span.style.fontStyle = 'normal';
       span.title = "Marked as misread";
     } else if (type === 'omission') {
       span.style.textDecoration = 'line-through';
       span.style.borderBottom = 'none';
       span.style.color = 'var(--coral)';
-      span.style.background = 'rgba(214,88,79,0.1)';
+      span.style.background = 'rgba(214,88,79,0.15)';
       span.style.fontStyle = 'normal';
       span.title = "Marked as skipped";
+    } else if (type === 'hesitation') {
+      span.style.textDecoration = 'none';
+      span.style.borderBottom = '2.5px dashed var(--sky)';
+      span.style.color = 'var(--indigo)';
+      span.style.background = 'rgba(62,124,177,0.15)';
+      span.style.fontStyle = 'normal';
+      span.title = "Marked as hesitation / stumbled";
     } else if (type === 'insertion') {
       span.style.textDecoration = 'underline dotted';
       span.style.borderBottom = 'none';
       span.style.color = 'var(--mint)';
-      span.style.background = 'rgba(78,179,151,0.1)';
+      span.style.background = 'rgba(78,179,151,0.15)';
       span.style.fontStyle = 'italic';
       span.title = "Extra word spoken";
     }
@@ -846,6 +899,10 @@
     const currentType = span.dataset.type;
     let nextType = 'correct';
     
+    // Save state for undo
+    undoStack.push({ idx, prevType: currentType });
+    document.getElementById('btn-undo-grading')?.classList.remove('hidden');
+
     if (item.refWord === null) {
       if (currentType === 'insertion') {
         nextType = 'correct';
@@ -855,10 +912,13 @@
         item.type = 'insertion';
       }
     } else {
+      // 4-State Cycle: correct ➔ substitution (misread) ➔ omission (skipped) ➔ hesitation (stumbled) ➔ correct
       if (currentType === 'correct') {
         nextType = 'substitution';
       } else if (currentType === 'substitution') {
         nextType = 'omission';
+      } else if (currentType === 'omission') {
+        nextType = 'hesitation';
       } else {
         nextType = 'correct';
       }
@@ -871,6 +931,25 @@
     recalculateMetrics();
   }
 
+  function undoLastToggle() {
+    if (undoStack.length === 0 || !lastComputedResult) return;
+    const lastAction = undoStack.pop();
+    if (undoStack.length === 0) {
+      document.getElementById('btn-undo-grading')?.classList.add('hidden');
+    }
+    
+    const idx = lastAction.idx;
+    const item = lastComputedResult.alignResult.path[idx];
+    item.type = lastAction.prevType;
+
+    const span = document.querySelector(`.interactive-word[data-idx="${idx}"]`);
+    if (span) {
+      span.dataset.type = lastAction.prevType;
+      updateWordStyle(span, lastAction.prevType, item.refWord || item.heardWord);
+    }
+    recalculateMetrics();
+  }
+
   function recalculateMetrics() {
     if (!lastComputedResult || !lastComputedResult.alignResult) return;
     const r = lastComputedResult;
@@ -880,14 +959,16 @@
     const correct = path.filter(p => p.type === 'correct').length;
     const substitutions = path.filter(p => p.type === 'substitution').length;
     const omissions = path.filter(p => p.type === 'omission').length;
+    const hesitations = path.filter(p => p.type === 'hesitation').length;
     const insertions = path.filter(p => p.type === 'insertion').length;
 
-    const totalErrors = substitutions + omissions + (insertions * 0.5);
+    const totalErrors = substitutions + omissions + (hesitations * 0.25) + (insertions * 0.5);
     const accuracy = M > 0 ? Math.max(0, (M - totalErrors) / M) : 0;
     
     r.alignResult.correct = correct;
     r.alignResult.substitutions = substitutions;
     r.alignResult.omissions = omissions;
+    r.alignResult.hesitations = hesitations;
     r.alignResult.insertions = insertions;
 
     r.accuracyPct = Math.round(accuracy * 100);
@@ -1021,26 +1102,34 @@
 
     document.getElementById('overall-label').textContent = r.naepText;
     document.getElementById('overall-sub').textContent = `Overall Score: ${r.overallScore.toFixed(1)} / 10`;
-
+    
     // Diff / Alignment view
     const transcriptTextEl = document.getElementById('transcript-text');
     document.getElementById('transcript-wrap').classList.remove('hidden');
     transcriptTextEl.innerHTML = '';
     
-    // Add instruction note
+    // Add instruction note + Undo button
     const helpTip = document.createElement('div');
     helpTip.style.fontSize = '0.78rem';
     helpTip.style.color = 'var(--indigo)';
     helpTip.style.marginBottom = '12px';
-    helpTip.style.padding = '6px 10px';
+    helpTip.style.padding = '8px 12px';
     helpTip.style.background = 'rgba(27, 42, 74, 0.05)';
-    helpTip.style.borderRadius = '8px';
+    helpTip.style.borderRadius = '10px';
     helpTip.style.fontWeight = '500';
-    helpTip.innerHTML = '💡 <b>Interactive Grading:</b> Tap any word to toggle error: <i>Normal (Correct) ➔ Yellow Underline (Misread) ➔ Red Strikethrough (Skipped)</i>.';
+    helpTip.style.display = 'flex';
+    helpTip.style.justifyContent = 'space-between';
+    helpTip.style.alignItems = 'center';
+    helpTip.style.flexWrap = 'wrap';
+    helpTip.style.gap = '8px';
+    helpTip.innerHTML = `
+      <div>💡 <b>Interactive Grading:</b> Tap word to cycle error: <i>Normal (Correct) ➔ Yellow (Misread) ➔ Red (Skipped) ➔ Blue (Hesitation)</i></div>
+      <button id="btn-undo-grading" class="logout-btn ${undoStack.length === 0 ? 'hidden' : ''}" onclick="undoLastToggle()" style="color:var(--indigo); border-color:var(--indigo);">↩ Undo</button>
+    `;
     transcriptTextEl.appendChild(helpTip);
 
     const wordsContainer = document.createElement('div');
-    wordsContainer.style.lineHeight = '2';
+    wordsContainer.style.lineHeight = '2.1';
     
     r.alignResult.path.forEach((item, idx) => {
       const span = document.createElement('span');
@@ -1048,7 +1137,7 @@
       span.dataset.idx = idx;
       span.dataset.type = item.type;
       span.style.cursor = 'pointer';
-      span.style.padding = '2px 4px';
+      span.style.padding = '2px 5px';
       span.style.margin = '0 2.5px';
       span.style.borderRadius = '4px';
       span.style.display = 'inline-block';
@@ -1065,6 +1154,28 @@
     });
 
     transcriptTextEl.appendChild(wordsContainer);
+
+    // Student Motivational Feedback Banner (A8)
+    let studentMsg = "Outstanding! You read with excellent fluency and clear expression.";
+    if (r.overallScore < 5.0) studentMsg = "Keep practicing — reading gets better every day! Focus on sounding out words.";
+    else if (r.overallScore < 7.0) studentMsg = "Good effort! Practice reading daily to improve your speed and phrasing.";
+    else if (r.overallScore < 8.5) studentMsg = "Very good reading! Keep up the momentum to reach Grade A+.";
+    
+    let feedbackEl = document.getElementById('student-feedback-msg');
+    if (!feedbackEl) {
+      feedbackEl = document.createElement('div');
+      feedbackEl.id = 'student-feedback-msg';
+      feedbackEl.style.marginTop = '12px';
+      feedbackEl.style.padding = '10px 14px';
+      feedbackEl.style.borderRadius = '10px';
+      feedbackEl.style.background = 'rgba(62,124,177,0.1)';
+      feedbackEl.style.color = 'var(--indigo)';
+      feedbackEl.style.fontWeight = '600';
+      feedbackEl.style.fontSize = '0.88rem';
+      feedbackEl.style.textAlign = 'center';
+      document.querySelector('.overall')?.appendChild(feedbackEl);
+    }
+    feedbackEl.textContent = `💬 "${studentMsg}"`;
 
     const idEl = document.getElementById('results-id');
     idEl.innerHTML = `<b>${window.utils.escapeHtml(selectedStudent.name)}</b> · Roll ${selectedStudent.roll_no} · ${selectedLang === 'hindi' ? 'हिन्दी' : 'English'} &middot; ${new Date().toLocaleDateString('en-IN')}`;
@@ -1083,6 +1194,7 @@
     selectedLang = null;
     activePassage = null;
     lastComputedResult = null;
+    undoStack = [];
 
     document.getElementById('student-select').value = "";
     document.querySelectorAll('#lang-picker .chip').forEach(c => c.classList.remove('active'));
@@ -1094,39 +1206,72 @@
   function downloadReport() {
     if (!lastComputedResult) return;
     const r = lastComputedResult;
-    const lines = [
-      'PM SHRI KENDRIYA VIDYALAYA AFS SULUR',
-      'Vaachan — Reading Fluency Report Card',
-      '========================================',
-      `Student: ${r.studentName}`,
-      `Class: ${r.classLabel}`,
-      `Language: ${selectedLang === 'hindi' ? 'Hindi' : 'English'}`,
-      `Passage: ${r.passageTitle}`,
-      `Date: ${r.dateStr}`,
-      '----------------------------------------',
-      `Accuracy: ${r.accuracyScore !== null ? r.accuracyScore.toFixed(1) + '/10' : '—'} (${r.accuracyPct !== null ? r.accuracyPct + '%' : '—'})`,
-      `Speed (CWPM): ${r.speedScore.toFixed(1)}/10 (${r.cwpm} cwpm)`,
-      `Phrasing: ${r.phrasingScore.toFixed(1)}/10`,
-      `Expression: ${r.expressionScore.toFixed(1)}/10`,
-      '----------------------------------------',
-      `Overall Score: ${r.overallScore.toFixed(1)}/10`,
-      `Grade: ${r.grade}`,
-      `Fluency Assessment: ${r.naepText}`,
-      '========================================'
-    ];
-    if (finalTranscript) {
-      lines.push('', 'Speech recognition transcript:', finalTranscript.trim());
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("Please allow popups to generate the printable PDF report.");
+      return;
     }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Fluency Assessment Report - ${r.studentName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: 'Inter', sans-serif; padding: 28px; color: #14203B; line-height: 1.5; background: #fff; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px solid #1B2A4A; padding-bottom: 14px; margin-bottom: 20px; }
+          .school-title { font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; color: #1B2A4A; }
+          .sub-title { font-size: 13px; color: #4A5578; font-weight: 600; }
+          .score-card { background: #FBF7EE; border: 1.5px solid #E4DCC8; border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 20px; }
+          .grade-tag { font-family: 'Baloo 2', sans-serif; font-size: 32px; font-weight: 800; color: #1B2A4A; }
+          .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+          .m-box { border: 1px solid #E4DCC8; padding: 12px 16px; border-radius: 10px; background: #fafafa; }
+          .m-lbl { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #4A5578; letter-spacing: 0.05em; }
+          .m-val { font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 800; color: #1B2A4A; margin-top: 2px; }
+          .passage-title { font-weight: 700; color: #1B2A4A; margin-bottom: 6px; }
+          .word-wrap { background: #fff; border: 1px solid #E4DCC8; padding: 14px; border-radius: 10px; font-size: 14px; line-height: 2; margin-top: 10px; }
+          .footer-note { text-align: center; font-size: 11px; color: #4A5578; margin-top: 24px; border-top: 1px solid #eee; padding-top: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="school-title">PM SHRI KENDRIYA VIDYALAYA AFS SULUR</div>
+            <div class="sub-title">Vaachan v2.0 Reading Fluency Assessment Card</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700; font-size:16px;">${r.studentName}</div>
+            <div style="font-size:12px; color:#4A5578;">${r.classLabel} &middot; ${r.dateStr}</div>
+          </div>
+        </div>
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${r.studentName.replace(/\s+/g, '_')}_fluency_report.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+        <div class="score-card">
+          <div class="grade-tag">Grade ${r.grade} &middot; Overall ${r.overallScore} / 10</div>
+          <div style="font-weight:700; color:#3E7CB1; font-size:15px; margin-top:4px;">${r.naepText} (NAEP Level ${r.naepLevel})</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="m-box"><div class="m-lbl">Accuracy Rate</div><div class="m-val">${r.accuracyPct !== null ? r.accuracyPct + '%' : '—'} (${r.accuracyScore !== null ? r.accuracyScore : '—'}/10)</div></div>
+          <div class="m-box"><div class="m-lbl">Reading Speed</div><div class="m-val">${r.cwpm} CWPM (${r.speedScore}/10)</div></div>
+          <div class="m-box"><div class="m-lbl">Phrasing & Fluency</div><div class="m-val">${r.phrasingScore} / 10</div></div>
+          <div class="m-box"><div class="m-lbl">Expression & Tone</div><div class="m-val">${r.expressionScore} / 10</div></div>
+        </div>
+
+        <div>
+          <div class="passage-title">Passage: ${r.passageTitle}</div>
+          <div class="word-wrap">
+            ${document.getElementById('transcript-text').innerHTML}
+          </div>
+        </div>
+
+        <div class="footer-note">
+          PM SHRI Kendriya Vidyalaya AFS Sulur &middot; Built by Nexora Technologies &middot; Evaluator Verified Result
+        </div>
+        <script>window.onload = function() { window.print(); }</script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 </script>
 </body>

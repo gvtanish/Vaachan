@@ -13,7 +13,9 @@
     },
 
     // Wagner-Fischer word-level alignment algorithm
+    // Wagner-Fischer word-level alignment algorithm
     alignWords(refText, heardText, lang) {
+      const originalRefWords = refText.split(/\s+/).filter(Boolean);
       const cleanRef = this.cleanText(refText, lang);
       const cleanHeard = this.cleanText(heardText, lang);
 
@@ -26,7 +28,7 @@
       if (M === 0) return { path: [], accuracy: 0, errors: 0 };
       if (N === 0) {
         // All words omitted
-        const path = refWords.map((w, idx) => ({
+        const path = originalRefWords.map((w, idx) => ({
           refIndex: idx,
           heardIndex: -1,
           refWord: w,
@@ -66,7 +68,7 @@
             path.push({
               refIndex: i - 1,
               heardIndex: j - 1,
-              refWord: refWords[i - 1],
+              refWord: originalRefWords[i - 1],
               heardWord: heardWords[j - 1],
               type: cost === 0 ? 'correct' : 'substitution'
             });
@@ -75,7 +77,7 @@
             path.push({
               refIndex: i - 1,
               heardIndex: -1,
-              refWord: refWords[i - 1],
+              refWord: originalRefWords[i - 1],
               heardWord: null,
               type: 'omission'
             });
@@ -94,7 +96,7 @@
           path.push({
             refIndex: i - 1,
             heardIndex: -1,
-            refWord: refWords[i - 1],
+            refWord: originalRefWords[i - 1],
             heardWord: null,
             type: 'omission'
           });
@@ -325,68 +327,72 @@
       
       const pauseCountScore = this.bellScore(actualTotalPauses, idealPauses, Math.max(idealPauses * 0.8, 2.0), 0.75);
 
-      // Phrasing combines consistency, count matching punctuation, and penalties for stumbles
-      let phrasingScore = (rateScore * 0.4) + (pauseCountScore * 0.6) - (mediumPauses * 0.5) - (longPauses * 1.5);
-      phrasingScore = Math.max(0.5, Math.min(10, phrasingScore));
+      // Phrasing combines consistency, count matching punctuation, and penalties for excess stumbles
+      const excessLongPauses = Math.max(0, longPauses - punctCount);
+      const excessMediumPauses = Math.max(0, mediumPauses - punctCount * 1.5);
+      
+      let phrasingScore = (rateScore * 0.5) + (pauseCountScore * 0.5) - (excessMediumPauses * 0.25) - (excessLongPauses * 0.7);
+      phrasingScore = Math.max(3.0, Math.min(10, phrasingScore));
 
       // 5. Expression / Modulation
       const voicedSamples = samples.filter(s => s.rms > voiceThreshold);
       const pitchSamples = voicedSamples.filter(s => s.pitch > 0);
-      let expressionScore = 5.0;
+      let expressionScore = 7.5; // High-quality default for speaking candidates
 
-      if (pitchSamples.length >= 10) {
-        // Octave error correction & median filter
-        const rawPitches = pitchSamples.map(s => s.pitch);
-        const smoothPitches = this.medianFilter(this.fixOctaveErrors(rawPitches), 3);
-
-        const pMedian = this.percentile(smoothPitches, 0.5);
-        const p25 = this.percentile(smoothPitches, 0.25);
-        const p75 = this.percentile(smoothPitches, 0.75);
-        const pIQR = p75 - p25;
-        const iqrRatio = pMedian > 0 ? pIQR / pMedian : 0;
-
-        // Expressive speech has an IQR ratio of ~20% to 35%
-        const pitchScore = this.bellScore(iqrRatio, 0.25, 0.12, 0.75);
-
-        // Volume Dynamic Range
+      if (voicedSamples.length >= 10) {
+        // Volume Dynamic Range (Loudness Modulation)
         const voicedRmsVals = voicedSamples.map(s => s.rms);
         const rms90 = this.percentile(voicedRmsVals, 0.90);
         const rms10 = this.percentile(voicedRmsVals, 0.10);
         const rmsRange = rms90 - rms10;
         const volumeScore = this.bellScore(rmsRange, 0.15, 0.08, 0.65);
 
-        // Sentence Final Lowering: check pitch trajectory in 500ms before long pauses (>1000ms)
-        let loweringMatches = 0;
-        let evaluatedPauses = 0;
-        
-        // Find indices near pauses
-        for (let i = 0; i < samples.length - 10; i++) {
-          if (samples[i].rms <= voiceThreshold && samples[i+10] && samples[i+10].rms <= voiceThreshold) {
-            // Found a pause region. Backtrack to find pre-pause voiced frames
-            const prePauseVoiced = [];
-            for (let k = i - 1; k >= Math.max(0, i - 15); k--) {
-              if (samples[k].rms > voiceThreshold && samples[k].pitch > 0) {
-                prePauseVoiced.push(samples[k].pitch);
-              }
-            }
-            if (prePauseVoiced.length >= 6) {
-              evaluatedPauses++;
-              const recent = prePauseVoiced.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
-              const older = prePauseVoiced.slice(3, 6).reduce((a, b) => a + b, 0) / 3;
-              if (recent < older * 0.98) { // Pitch lowered
-                loweringMatches++;
-              }
-            }
-            // Skip past this pause region
-            i += 15;
-          }
-        }
-        
-        const finalLoweringScore = evaluatedPauses > 0 ? (loweringMatches / evaluatedPauses) * 10 : 8.0;
+        if (pitchSamples.length >= 10) {
+          // Octave error correction & median filter for pitch contours
+          const rawPitches = pitchSamples.map(s => s.pitch);
+          const smoothPitches = this.medianFilter(this.fixOctaveErrors(rawPitches), 3);
 
-        expressionScore = (pitchScore * 0.4) + (volumeScore * 0.3) + (finalLoweringScore * 0.3);
+          const pMedian = this.percentile(smoothPitches, 0.5);
+          const p25 = this.percentile(smoothPitches, 0.25);
+          const p75 = this.percentile(smoothPitches, 0.75);
+          const pIQR = p75 - p25;
+          const iqrRatio = pMedian > 0 ? pIQR / pMedian : 0;
+
+          // Expressive speech has an IQR ratio of ~20% to 35%
+          const pitchScore = this.bellScore(iqrRatio, 0.25, 0.12, 0.75);
+
+          // Sentence Final Lowering: check pitch trajectory in 500ms before long pauses (>1000ms)
+          let loweringMatches = 0;
+          let evaluatedPauses = 0;
+          
+          for (let i = 0; i < samples.length - 10; i++) {
+            if (samples[i].rms <= voiceThreshold && samples[i+10] && samples[i+10].rms <= voiceThreshold) {
+              const prePauseVoiced = [];
+              for (let k = i - 1; k >= Math.max(0, i - 15); k--) {
+                if (samples[k].rms > voiceThreshold && samples[k].pitch > 0) {
+                  prePauseVoiced.push(samples[k].pitch);
+                }
+              }
+              if (prePauseVoiced.length >= 6) {
+                evaluatedPauses++;
+                const recent = prePauseVoiced.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
+                const older = prePauseVoiced.slice(3, 6).reduce((a, b) => a + b, 0) / 3;
+                if (recent < older * 0.98) {
+                  loweringMatches++;
+                }
+              }
+              i += 15;
+            }
+          }
+          
+          const finalLoweringScore = evaluatedPauses > 0 ? (loweringMatches / evaluatedPauses) * 10 : 8.0;
+          expressionScore = (pitchScore * 0.4) + (volumeScore * 0.3) + (finalLoweringScore * 0.3);
+        } else {
+          // Pitch tracker failed, use Volume Modulation as proxy metric (scaled nicely)
+          expressionScore = (volumeScore * 0.6) + 4.0;
+        }
       }
-      expressionScore = Math.max(1.0, Math.min(10, expressionScore));
+      expressionScore = Math.max(3.0, Math.min(10, expressionScore));
 
       // 6. Overall Composite Score & Grading
       let overall = 5.0;

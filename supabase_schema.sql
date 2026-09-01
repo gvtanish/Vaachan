@@ -89,6 +89,8 @@ CREATE TABLE public.sessions (
   grade         TEXT,
   transcript    TEXT,
   diff_json     JSONB,
+  teacher_notes TEXT,
+  hesitation_count INT DEFAULT 0,
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 

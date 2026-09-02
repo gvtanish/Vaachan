@@ -623,28 +623,39 @@
     if (!recording || !activePassage) return;
     
     const fullText = (finalTranscript + " " + interim).trim();
-    const heardWords = fullText.split(/\s+/).filter(Boolean);
-    const heardCount = heardWords.length;
-
-    const elapsedSec = (performance.now() - recStartTime) / 1000;
-    
-    // Target WPM pacing fallback by class level
-    const benchmarks = { 3: 65, 4: 90, 5: 110, 6: 135, 7: 150 };
-    const classNum = selectedStudent?.classes?.class_num || 3;
-    const targetWpm = benchmarks[classNum] || 70;
-    
-    // Determine active word index: ASR word count if available, otherwise elapsed timer pacing
-    let activeIdx = 0;
-    if (heardCount > 0) {
-      activeIdx = heardCount - 1;
-    } else {
-      activeIdx = Math.floor((elapsedSec / 60) * targetWpm);
-    }
-
     const rawWords = activePassage.text.split(/\s+/).filter(Boolean);
-    if (activeIdx >= rawWords.length) {
-      activeIdx = rawWords.length - 1;
+
+    if (!fullText) {
+      // No speech heard yet — clear highlights
+      rawWords.forEach((_, idx) => {
+        const span = document.getElementById(`live-w-${idx}`);
+        if (span) {
+          span.style.background = 'transparent';
+          span.style.color = 'inherit';
+          span.style.fontWeight = 'normal';
+          span.style.outline = 'none';
+        }
+      });
+      return;
     }
+
+    const cleanHeard = window.algorithm.cleanText(fullText, selectedLang);
+    const heardWords = cleanHeard.split(" ").filter(Boolean);
+    const cleanRefWords = rawWords.map(w => window.algorithm.cleanText(w, selectedLang));
+
+    // Align heard words against ref words to find reader's current position in story
+    let refIdx = 0;
+    for (let hIdx = 0; hIdx < heardWords.length && refIdx < cleanRefWords.length; hIdx++) {
+      const hWord = heardWords[hIdx];
+      for (let lookahead = 0; lookahead < 4 && (refIdx + lookahead) < cleanRefWords.length; lookahead++) {
+        if (cleanRefWords[refIdx + lookahead] === hWord) {
+          refIdx = refIdx + lookahead + 1;
+          break;
+        }
+      }
+    }
+
+    const activeIdx = Math.max(0, Math.min(refIdx - 1, rawWords.length - 1));
 
     rawWords.forEach((_, idx) => {
       const span = document.getElementById(`live-w-${idx}`);
@@ -779,52 +790,9 @@
       return;
     }
 
-    // If Speech Recognition transcript is empty, generate interactive fallback
-    if (!result.alignResult) {
-      const refWords = activePassage.text.split(/\s+/).filter(Boolean);
-      const path = refWords.map((w, idx) => ({
-        refIndex: idx,
-        heardIndex: idx,
-        refWord: w,
-        heardWord: w,
-        type: 'correct'
-      }));
-      result.alignResult = {
-        correct: refWords.length,
-        substitutions: 0,
-        omissions: 0,
-        insertions: 0,
-        path: path
-      };
-      result.accuracyPct = 100;
-      result.accuracyScore = 10.0;
-      
-      const overall = (result.accuracyScore * 0.35) + (result.speedScore * 0.30) + (result.phrasingScore * 0.20) + (result.expressionScore * 0.15);
-      result.overallScore = Math.round(overall * 10) / 10;
-      
-      let naepLevel = 1;
-      let naepText = "Non-fluent";
-      if (result.overallScore >= 7.5) {
-        naepLevel = 4;
-        naepText = "Fluent";
-      } else if (result.overallScore >= 5.5) {
-        naepLevel = 3;
-        naepText = "Primarily Fluent";
-      } else if (result.overallScore >= 3.5) {
-        naepLevel = 2;
-        naepText = "Developing";
-      }
-      result.naepLevel = naepLevel;
-      result.naepText = naepText;
-
-      let grade = "E";
-      if (result.overallScore >= 9.0) grade = "A+";
-      else if (result.overallScore >= 8.0) grade = "A";
-      else if (result.overallScore >= 7.0) grade = "B+";
-      else if (result.overallScore >= 6.0) grade = "B";
-      else if (result.overallScore >= 5.0) grade = "C";
-      else if (result.overallScore >= 4.0) grade = "D";
-      result.grade = grade;
+    // If recording was silent, alert teacher
+    if (result.isSilent) {
+      window.utils?.toast("No voice detected during recording. Scores set to 0. You can tap words below to manually grade.", "info");
     }
 
     // Save to Database

@@ -224,30 +224,49 @@
         }
       }
 
+      // Check for Silent Recording (User spoke nothing)
+      if (voicedIndices.length < 5 && heardWords === 0) {
+        const alignResult = this.alignWords(currentStory.text, "", lang);
+        return {
+          accuracyScore: 0,
+          accuracyPct: 0,
+          speedScore: 0,
+          phrasingScore: 0,
+          expressionScore: 0,
+          overallScore: 0,
+          cwpm: 0,
+          speakingSec: Math.round(durationSec * 10) / 10,
+          naepLevel: 1,
+          naepText: "Non-fluent (No Voice Detected)",
+          grade: "E",
+          alignResult: alignResult,
+          isSilent: true
+        };
+      }
+
       if (voicedIndices.length >= 2) {
         const firstT = samples[voicedIndices[0]].t;
         const lastT = samples[voicedIndices[voicedIndices.length - 1]].t;
         const trimmed = (lastT - firstT) / 1000;
-        // Apply floor guard to prevent extreme WPM estimates
         speakingSec = Math.max(trimmed, durationSec * 0.4);
       }
       const speakingMinutes = Math.max(speakingSec / 60, 0.05);
 
       // 2. Alignment & Accuracy
       const hasASR = heardWords > 0;
-      let alignResult = null;
-      let accuracyScore = 10;
-      let accuracyPct = 100;
+      let alignResult = this.alignWords(currentStory.text, finalTranscript, lang);
+      let accuracyScore = null;
+      let accuracyPct = null;
       let correctWords = targetWords;
 
       if (hasASR) {
-        alignResult = this.alignWords(currentStory.text, finalTranscript, lang);
         accuracyPct = alignResult.accuracy * 100;
         correctWords = alignResult.correct;
-        // Score Accuracy: linear scale (e.g. 95% accuracy gets 9.5)
         accuracyScore = alignResult.accuracy * 10;
       } else {
-        accuracyPct = null; // NA or estimated
+        // Speech recognition transcript was empty, leave accuracyScore as null until teacher manually grades
+        correctWords = targetWords;
+        accuracyPct = null;
         accuracyScore = null;
       }
 

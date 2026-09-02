@@ -600,12 +600,14 @@
     document.getElementById('timer').textContent = m + ':' + s;
     updateLiveReadingHighlight();
 
-    // Voice Activity vs Speech Recognition Guard:
-    // If voice input is detected but browser speech recognition yields no text after 3 seconds,
-    // show the browser notice card with direct APK download link!
-    if (elapsed >= 3.0 && !asrWarningTriggered) {
-      const voicedCount = samples.filter(s => s.rms > 0.022).length;
-      if (voicedCount >= 8 && (!finalTranscript || finalTranscript.trim().length === 0)) {
+    // Voice Activity vs Speech Recognition Guard (Android Only):
+    // If voice input is detected but browser speech recognition yields no text after 6 seconds,
+    // show the browser notice card with direct APK download link for Android devices!
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (isAndroid && elapsed >= 6.0 && !asrWarningTriggered) {
+      const fullText = (finalTranscript + " " + (window.lastInterim || "")).trim();
+      const voicedCount = samples.filter(s => s.rms > 0.025).length;
+      if (voicedCount >= 15 && !fullText) {
         asrWarningTriggered = true;
         const banner = document.getElementById('asr-banner');
         if (banner) showAsrNotice(banner);
@@ -620,35 +622,24 @@
   }
 
   function showAsrNotice(el) {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    if (!isAndroid) return; // ONLY display notice on Android devices!
+
     el.className = 'asr-notice';
     el.innerHTML = `
       <div class="asr-notice-title">
-        ⚠️ Speech Recognition Not Supported or Blocked
+        ⚠️ Speech Recognition Not Supported or Blocked on Android
       </div>
       <p style="margin:0 0 6px">
-        Your current browser <strong>cannot automatically listen</strong> to the student's reading.
-        This means <strong>live word highlighting</strong> and <strong>accuracy scoring</strong> will not work in browser mode.
+        Your Chrome browser on Android is <strong>not converting voice to text</strong>.
+        This happens when Chrome blocks background mic streaming or Google Speech Services is inactive.
       </p>
       <div style="background:rgba(232, 163, 61, 0.12);border:1px solid rgba(232, 163, 61, 0.35);border-radius:10px;padding:12px;margin:10px 0;">
-        <div style="font-weight:700;color:var(--indigo);margin-bottom:4px;">📱 Recommended Solution for Android:</div>
-        <p style="margin:0 0 8px;font-size:0.8rem;">Download the official Vaachan Android APK app for full speech recognition support on any Android phone.</p>
+        <div style="font-weight:700;color:var(--indigo);margin-bottom:4px;">📱 Recommended Solution:</div>
+        <p style="margin:0 0 8px;font-size:0.8rem;">Download and install the official Vaachan Android APK app for 100% reliable speech recognition.</p>
         <a href="https://github.com/gvtanish/Vaachan/releases/download/latest/Vaachan.apk" target="_blank" download class="btn btn-primary" style="font-size:0.85rem;padding:8px 16px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
           ⬇️ Download Vaachan Android APK
         </a>
-      </div>
-      <strong>Why does this happen in browser mode?</strong>
-      <ul>
-        <li>Safari (iPhone / iPad) does not support Web Speech Recognition.</li>
-        <li>Firefox and Samsung Internet browsers do not support Web Speech Recognition.</li>
-        ${isMobile ? '<li>Chrome on Android may block background mic recognition or lose user gesture tokens.</li>' : ''}
-      </ul>
-      <strong>Supported Browsers:</strong>
-      <div class="asr-alt-row">
-        <span class="asr-alt-chip good">✅ Chrome (Desktop)</span>
-        <span class="asr-alt-chip good">✅ Edge (Desktop / Android)</span>
-        <span class="asr-alt-chip">❌ Safari</span>
-        <span class="asr-alt-chip">❌ Firefox</span>
       </div>
       <p style="margin:10px 0 0;font-size:0.78rem;color:#888;">
         Note: You can still record audio and manually grade words by tapping them after recording stops.
@@ -724,6 +715,11 @@
         if (res.isFinal) finalTranscript += res[0].transcript + " ";
         else interim += res[0].transcript;
       }
+      window.lastInterim = interim;
+      const bannerEl = document.getElementById('asr-banner');
+      if (bannerEl && (finalTranscript.trim() || interim.trim())) {
+        bannerEl.classList.add('hidden');
+      }
       updateLiveReadingHighlight(interim);
     };
 
@@ -754,10 +750,14 @@
   function updateLiveReadingHighlight(interim = "") {
     if (!recording || !activePassage) return;
     
+    window.lastInterim = interim;
     const fullText = (finalTranscript + " " + interim).trim();
     const rawWords = activePassage.text.split(/\s+/).filter(Boolean);
 
-    if (!fullText) {
+    if (fullText) {
+      const bannerEl = document.getElementById('asr-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+    } else {
       rawWords.forEach((_, idx) => {
         const span = document.getElementById(`live-w-${idx}`);
         if (span) {

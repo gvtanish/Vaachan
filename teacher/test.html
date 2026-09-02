@@ -526,15 +526,31 @@
     }
   });
 
+  let lastHighlightedIdx = -1;
+
   function resetRecordingState() {
     samples = [];
     finalTranscript = "";
     recording = false;
+    lastHighlightedIdx = -1;
     micBtn.classList.remove('recording');
     document.getElementById('rec-hint').textContent = 'Tap to start recording';
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('asr-banner').classList.add('hidden');
     clearWave();
+
+    if (activePassage) {
+      const rawWords = activePassage.text.split(/\s+/).filter(Boolean);
+      rawWords.forEach((_, idx) => {
+        const span = document.getElementById(`live-w-${idx}`);
+        if (span) {
+          span.style.background = 'transparent';
+          span.style.color = 'inherit';
+          span.style.fontWeight = 'normal';
+          span.style.outline = 'none';
+        }
+      });
+    }
   }
 
   function clearWave() {
@@ -565,6 +581,7 @@
     finalTranscript = "";
     recStartTime = performance.now();
     recording = true;
+    lastHighlightedIdx = -1;
     micBtn.classList.add('recording');
     document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
 
@@ -604,24 +621,49 @@
 
   function updateLiveReadingHighlight(interim = "") {
     if (!recording || !activePassage) return;
+    
     const fullText = (finalTranscript + " " + interim).trim();
     const heardWords = fullText.split(/\s+/).filter(Boolean);
     const heardCount = heardWords.length;
 
+    const elapsedSec = (performance.now() - recStartTime) / 1000;
+    
+    // Target WPM pacing fallback by class level
+    const benchmarks = { 3: 65, 4: 90, 5: 110, 6: 135, 7: 150 };
+    const classNum = selectedStudent?.classes?.class_num || 3;
+    const targetWpm = benchmarks[classNum] || 70;
+    
+    // Determine active word index: ASR word count if available, otherwise elapsed timer pacing
+    let activeIdx = 0;
+    if (heardCount > 0) {
+      activeIdx = heardCount - 1;
+    } else {
+      activeIdx = Math.floor((elapsedSec / 60) * targetWpm);
+    }
+
     const rawWords = activePassage.text.split(/\s+/).filter(Boolean);
+    if (activeIdx >= rawWords.length) {
+      activeIdx = rawWords.length - 1;
+    }
+
     rawWords.forEach((_, idx) => {
       const span = document.getElementById(`live-w-${idx}`);
       if (!span) return;
-      if (idx < heardCount - 1) {
+      if (idx < activeIdx) {
         span.style.background = 'rgba(79, 155, 114, 0.2)';
         span.style.color = 'var(--mint)';
         span.style.fontWeight = '600';
         span.style.outline = 'none';
-      } else if (idx === heardCount - 1) {
-        span.style.background = 'rgba(232, 163, 61, 0.35)';
+      } else if (idx === activeIdx) {
+        span.style.background = 'rgba(232, 163, 61, 0.4)';
         span.style.color = 'var(--indigo)';
         span.style.fontWeight = '800';
         span.style.outline = '2px solid var(--marigold)';
+
+        if (lastHighlightedIdx !== activeIdx) {
+          lastHighlightedIdx = activeIdx;
+          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       } else {
         span.style.background = 'transparent';
         span.style.color = 'inherit';

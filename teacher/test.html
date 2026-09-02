@@ -596,31 +596,34 @@
     el.className = 'asr-notice';
     el.innerHTML = `
       <div class="asr-notice-title">
-        ⚠️ Speech Recognition Not Supported
+        ⚠️ Speech Recognition Not Supported or Blocked
       </div>
       <p style="margin:0 0 6px">
         Your current browser <strong>cannot automatically listen</strong> to the student's reading.
-        This means <strong>live word highlighting</strong> and <strong>accuracy scoring</strong> will not work.
+        This means <strong>live word highlighting</strong> and <strong>accuracy scoring</strong> will not work in browser mode.
       </p>
-      <strong>Why does this happen?</strong>
+      <div style="background:rgba(232, 163, 61, 0.12);border:1px solid rgba(232, 163, 61, 0.35);border-radius:10px;padding:12px;margin:10px 0;">
+        <div style="font-weight:700;color:var(--indigo);margin-bottom:4px;">📱 Recommended Solution for Android:</div>
+        <p style="margin:0 0 8px;font-size:0.8rem;">Download the official Vaachan Android APK app for full speech recognition support on any Android phone.</p>
+        <a href="https://github.com/gvtanish/Vaachan/releases/download/latest/Vaachan.apk" target="_blank" download class="btn btn-primary" style="font-size:0.85rem;padding:8px 16px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          ⬇️ Download Vaachan Android APK
+        </a>
+      </div>
+      <strong>Why does this happen in browser mode?</strong>
       <ul>
         <li>Safari (iPhone / iPad) does not support Web Speech Recognition.</li>
-        <li>Firefox on Android or desktop does not support it.</li>
-        <li>Samsung Internet browser does not support it.</li>
-        ${isMobile ? '<li>Some older Android devices may block mic access in WebView browsers.</li>' : ''}
+        <li>Firefox and Samsung Internet browsers do not support Web Speech Recognition.</li>
+        ${isMobile ? '<li>Chrome on Android may block background mic recognition or lose user gesture tokens.</li>' : ''}
       </ul>
-      <strong>Use one of these instead:</strong>
+      <strong>Supported Browsers:</strong>
       <div class="asr-alt-row">
-        <span class="asr-alt-chip good">✅ Google Chrome (Android)</span>
-        <span class="asr-alt-chip good">✅ Microsoft Edge (Android / Windows)</span>
-        <span class="asr-alt-chip good">✅ Chrome on Windows / Mac</span>
-        <span class="asr-alt-chip good">✅ Edge on Windows / Mac</span>
-        <span class="asr-alt-chip">❌ Safari (iPhone / iPad)</span>
+        <span class="asr-alt-chip good">✅ Chrome (Desktop)</span>
+        <span class="asr-alt-chip good">✅ Edge (Desktop / Android)</span>
+        <span class="asr-alt-chip">❌ Safari</span>
         <span class="asr-alt-chip">❌ Firefox</span>
-        <span class="asr-alt-chip">❌ Samsung Internet</span>
       </div>
       <p style="margin:10px 0 0;font-size:0.78rem;color:#888;">
-        You can still record and manually grade words by tapping them after recording stops.
+        Note: You can still record audio and manually grade words by tapping them after recording stops.
       </p>
     `;
     el.classList.remove('hidden');

@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
     name: Build Android APK
@@ -54,10 +57,23 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/Vaachan.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Vaachan-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Vaachan.apk
+          path: android/app/build/outputs/apk/debug/Vaachan.apk
           if-no-files-found: error
+
+      - name: Create or Update GitHub Release with Vaachan.apk
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android/app/build/outputs/apk/debug/Vaachan.apk
+          tag_name: latest
+          name: "Vaachan Android App (Latest Build)"
+          body: "Latest compiled Vaachan Android APK package built by GitHub Actions."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

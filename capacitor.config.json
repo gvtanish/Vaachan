@@ -1,0 +1,9 @@
+{
+  "appId": "com.nexora.vaachan",
+  "appName": "Vaachan",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -641,9 +641,7 @@
     }
 
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') {
-      await audioCtx.resume();
-    }
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
     sourceNode = audioCtx.createMediaStreamSource(micStream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
@@ -658,54 +656,66 @@
     micBtn.classList.add('recording');
     document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
 
-    // Speech Recognition setup (Android Chrome compatible)
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionAvailable = !!SR;
     const banner = document.getElementById('asr-banner');
+
     if (recognitionAvailable) {
-      recognizer = new SR();
-      
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      recognizer.continuous = !isMobile; // Mobile Chrome requires continuous = false
-      recognizer.interimResults = true;
-      recognizer.lang = selectedLang === 'hindi' ? 'hi-IN' : 'en-IN';
-
-      recognizer.onresult = (event) => {
-        let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const res = event.results[i];
-          if (res.isFinal) finalTranscript += res[0].transcript + " ";
-          else interim += res[0].transcript;
-        }
-        updateLiveReadingHighlight(interim);
-      };
-
-      recognizer.onend = () => {
-        // Auto-restart for Android Chrome continuous listening
-        if (recording && recognizer) {
-          try { recognizer.start(); } catch (e) {}
-        }
-      };
-
-      recognizer.onerror = (e) => {
-        console.warn("ASR warning:", e.error);
-        if (recording && recognizer && (e.error === 'no-speech' || e.error === 'network')) {
-          try { recognizer.start(); } catch (err) {}
-        }
-      };
-
-      try {
-        recognizer.start();
-      } catch (e) {
-        recognitionAvailable = false;
-      }
       banner.classList.add('hidden');
+      startRecognizer(SR);
     } else {
       showAsrNotice(banner);
     }
 
     timerInterval = setInterval(updateTimer, 200);
     waveInterval = setInterval(sampleAudio, 60);
+  }
+
+  // Creates a fresh SpeechRecognition instance each time — required for Android Chrome
+  // which silently refuses to restart a stale instance after 1-2 cycles
+  function startRecognizer(SR) {
+    if (!recording) return;
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const lang = selectedLang === 'hindi' ? 'hi-IN' : 'en-IN';
+
+    const r = new SR();
+    r.continuous = !isMobile;   // Android Chrome: continuous must be false
+    r.interimResults = true;
+    r.lang = lang;
+    r.maxAlternatives = 1;
+
+    r.onresult = (event) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i];
+        if (res.isFinal) finalTranscript += res[0].transcript + " ";
+        else interim += res[0].transcript;
+      }
+      updateLiveReadingHighlight(interim);
+    };
+
+    r.onend = () => {
+      // IMPORTANT: do NOT call r.start() — create a fresh instance instead
+      if (recording) {
+        setTimeout(() => startRecognizer(SR), 150);
+      }
+    };
+
+    r.onerror = (e) => {
+      console.warn("ASR error:", e.error);
+      // On recoverable errors, restart with fresh instance after short delay
+      if (recording && e.error !== 'not-allowed' && e.error !== 'service-not-allowed') {
+        setTimeout(() => startRecognizer(SR), 300);
+      }
+    };
+
+    try {
+      r.start();
+      recognizer = r;
+    } catch (e) {
+      console.warn("SR start failed:", e);
+    }
   }
 
   function updateLiveReadingHighlight(interim = "") {

@@ -164,9 +164,9 @@
       if (session) {
         const role = sessionStorage.getItem('VAACHAN_USER_ROLE');
         if (role === 'admin') {
-          window.location.href = './admin/dashboard.html';
+          window.location.href = '/admin/dashboard';
         } else if (role === 'teacher') {
-          window.location.href = './teacher/dashboard.html';
+          window.location.href = '/teacher/dashboard';
         }
       }
     });
@@ -240,9 +240,9 @@
       }
 
       if (profile.role === 'admin') {
-        window.location.href = './admin/dashboard.html';
+        window.location.href = '/admin/dashboard';
       } else {
-        window.location.href = './teacher/dashboard.html';
+        window.location.href = '/teacher/dashboard';
       }
     } catch (err) {
       errEl.textContent = err.message || "Invalid username or password.";

@@ -44,7 +44,7 @@
         await client.auth.signOut();
       }
       sessionStorage.clear();
-      window.location.href = '/index.html';
+      window.location.href = '/';
     },
 
     // Fetch user profile from profiles table
@@ -80,16 +80,18 @@
       
       // If Supabase not configured, redirect to index.html to configure it
       if (!client) {
-        if (!window.location.pathname.endsWith('index.html')) {
-          window.location.href = '/index.html';
+        const p = window.location.pathname;
+        if (!p.endsWith('index.html') && p !== '/') {
+          window.location.href = '/';
         }
         return;
       }
 
       const session = await this.getSession();
       if (!session) {
-        if (!window.location.pathname.endsWith('index.html')) {
-          window.location.href = '/index.html';
+        const p = window.location.pathname;
+        if (!p.endsWith('index.html') && p !== '/') {
+          window.location.href = '/';
         }
         return;
       }
@@ -111,9 +113,9 @@
       if (requiredRole && role !== requiredRole) {
         // Unauthorized role redirect
         if (role === 'admin') {
-          window.location.href = '/admin/dashboard.html';
+          window.location.href = '/admin/dashboard';
         } else if (role === 'teacher') {
-          window.location.href = '/teacher/dashboard.html';
+          window.location.href = '/teacher/dashboard';
         } else {
           await this.signOut();
         }

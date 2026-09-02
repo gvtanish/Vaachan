@@ -244,7 +244,7 @@
       <p>Ensure reading literacy target mapping (Class 3-5 reading parameters check)</p>
     </div>
     <div>
-      <a href="./test.html" class="btn btn-primary">⚡ Start New Test</a>
+      <a href="/teacher/test" class="btn btn-primary">⚡ Start New Test</a>
     </div>
   </div>
 
@@ -372,7 +372,7 @@
         gridEl.innerHTML = `<div class="empty-state">No sections assigned yet. Please contact the Admin to configure allotments.</div>`;
       } else {
         gridEl.innerHTML = myClasses.map(mc => `
-          <div class="section-box" onclick="window.location.href='./students.html?classId=${mc.id}'">
+          <div class="section-box" onclick="window.location.href='/teacher/students?classId=${mc.id}'">
             <h3>${mc.label}</h3>
             <p>${mc.role}</p>
           </div>
@@ -464,7 +464,7 @@
         riskListEl.innerHTML = `<div class="empty-state">No students flagged as at-risk. Great job!</div>`;
       } else {
         riskListEl.innerHTML = riskStudents.map(rs => `
-          <div class="risk-item" onclick="window.location.href='./students.html?studentId=${rs.id}'" style="cursor:pointer;">
+          <div class="risk-item" onclick="window.location.href='/teacher/students?studentId=${rs.id}'" style="cursor:pointer;">
             <div>
               <div class="risk-name">${window.utils.escapeHtml(rs.name)} (${rs.classLabel})</div>
               <div class="risk-details">Last scores: ${rs.score1.toFixed(1)} and ${rs.score2.toFixed(1)} / 10</div>

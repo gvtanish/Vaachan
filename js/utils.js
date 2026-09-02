@@ -68,18 +68,18 @@
       let links = '';
       if (isAdmin) {
         links = `
-          <a href="/admin/dashboard.html" class="${activeTab === 'dashboard' ? 'active' : ''}">Overview</a>
-          <a href="/admin/students.html" class="${activeTab === 'students' ? 'active' : ''}">Students</a>
-          <a href="/admin/teachers.html" class="${activeTab === 'teachers' ? 'active' : ''}">Teacher Allotment</a>
-          <a href="/admin/passages.html" class="${activeTab === 'passages' ? 'active' : ''}">Passages</a>
-          <a href="/admin/reports.html" class="${activeTab === 'reports' ? 'active' : ''}">School Reports</a>
+          <a href="/admin/dashboard" class="${activeTab === 'dashboard' ? 'active' : ''}">Overview</a>
+          <a href="/admin/students" class="${activeTab === 'students' ? 'active' : ''}">Students</a>
+          <a href="/admin/teachers" class="${activeTab === 'teachers' ? 'active' : ''}">Teacher Allotment</a>
+          <a href="/admin/passages" class="${activeTab === 'passages' ? 'active' : ''}">Passages</a>
+          <a href="/admin/reports" class="${activeTab === 'reports' ? 'active' : ''}">School Reports</a>
         `;
       } else {
         links = `
-          <a href="/teacher/dashboard.html" class="${activeTab === 'dashboard' ? 'active' : ''}">Dashboard</a>
-          <a href="/teacher/students.html" class="${activeTab === 'students' ? 'active' : ''}">My Students</a>
-          <a href="/teacher/reports.html" class="${activeTab === 'reports' ? 'active' : ''}">Reports & Analytics</a>
-          <a href="/teacher/test.html" class="btn-test-nav ${activeTab === 'test' ? 'active' : ''}">Run Fluency Test</a>
+          <a href="/teacher/dashboard" class="${activeTab === 'dashboard' ? 'active' : ''}">Dashboard</a>
+          <a href="/teacher/students" class="${activeTab === 'students' ? 'active' : ''}">My Students</a>
+          <a href="/teacher/reports" class="${activeTab === 'reports' ? 'active' : ''}">Reports &amp; Analytics</a>
+          <a href="/teacher/test" class="btn-test-nav ${activeTab === 'test' ? 'active' : ''}">Run Fluency Test</a>
         `;
       }
 
@@ -87,7 +87,7 @@
 
       container.innerHTML = `
         <div class="nav-wrap">
-          <div class="nav-brand" onclick="window.location.href='${isAdmin ? '/admin/dashboard.html' : '/teacher/dashboard.html'}'">
+          <div class="nav-brand" onclick="window.location.href='${isAdmin ? '/admin/dashboard' : '/teacher/dashboard'}'">
             <img src="${assetPath}/kv_logo.png" alt="KV" style="height:32px; width:auto; object-fit:contain; background:#fff; border-radius:4px; padding:2px;">
             <img src="${assetPath}/pm_shri_logo.png" alt="PM SHRI" style="height:32px; width:auto; object-fit:contain; background:#fff; border-radius:4px; padding:2px;">
             <span>Vaachan</span>

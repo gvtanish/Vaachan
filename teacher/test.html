@@ -560,10 +560,13 @@
 
   let lastHighlightedIdx = -1;
 
+  let asrWarningTriggered = false;
+
   function resetRecordingState() {
     samples = [];
     finalTranscript = "";
     recording = false;
+    asrWarningTriggered = false;
     lastHighlightedIdx = -1;
     micBtn.classList.remove('recording');
     document.getElementById('rec-hint').textContent = 'Tap to start recording';
@@ -582,6 +585,31 @@
           span.style.outline = 'none';
         }
       });
+    }
+  }
+
+  function updateTimer() {
+    const elapsed = (performance.now() - recStartTime) / 1000;
+    if (elapsed >= 240) { // 4 minute auto-stop limit (A6)
+      window.utils?.toast("Recording reached maximum 4 minute limit.", "info");
+      stopRecording();
+      return;
+    }
+    const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const s = Math.floor(elapsed % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = m + ':' + s;
+    updateLiveReadingHighlight();
+
+    // Voice Activity vs Speech Recognition Guard:
+    // If voice input is detected but browser speech recognition yields no text after 3 seconds,
+    // show the browser notice card with direct APK download link!
+    if (elapsed >= 3.0 && !asrWarningTriggered) {
+      const voicedCount = samples.filter(s => s.rms > 0.022).length;
+      if (voicedCount >= 8 && (!finalTranscript || finalTranscript.trim().length === 0)) {
+        asrWarningTriggered = true;
+        const banner = document.getElementById('asr-banner');
+        if (banner) showAsrNotice(banner);
+      }
     }
   }
 
@@ -781,18 +809,6 @@
     });
   }
 
-  function updateTimer() {
-    const elapsed = (performance.now() - recStartTime) / 1000;
-    if (elapsed >= 240) { // 4 minute auto-stop limit (A6)
-      window.utils?.toast("Recording reached maximum 4 minute limit.", "info");
-      stopRecording();
-      return;
-    }
-    const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-    const s = Math.floor(elapsed % 60).toString().padStart(2, '0');
-    document.getElementById('timer').textContent = m + ':' + s;
-    updateLiveReadingHighlight();
-  }
 
   function estimatePitch(buf, sampleRate) {
     const SIZE = buf.length;

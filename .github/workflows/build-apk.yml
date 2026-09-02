@@ -35,10 +35,19 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Prepare web dist directory
+      - name: Prepare web dist directory & inject environment secrets
+        env:
+          VAACHAN_SUPABASE_URL: ${{ secrets.VAACHAN_SUPABASE_URL }}
+          VAACHAN_SUPABASE_KEY: ${{ secrets.VAACHAN_SUPABASE_KEY }}
         run: |
           mkdir -p www
           rsync -av --exclude='node_modules' --exclude='.git' --exclude='android' --exclude='.github' --exclude='www' ./ www/
+          if [ -n "$VAACHAN_SUPABASE_URL" ]; then
+            sed -i "s|__VAACHAN_SUPABASE_URL__|$VAACHAN_SUPABASE_URL|g" www/js/supabase.js
+          fi
+          if [ -n "$VAACHAN_SUPABASE_KEY" ]; then
+            sed -i "s|__VAACHAN_SUPABASE_KEY__|$VAACHAN_SUPABASE_KEY|g" www/js/supabase.js
+          fi
 
       - name: Add Android platform & Capacitor Sync
         run: |

@@ -12,8 +12,11 @@
     }
 
     supabasePromise = new Promise(async (resolve) => {
-      let url = localStorage.getItem('VAACHAN_SUPABASE_URL') || '';
-      let key = localStorage.getItem('VAACHAN_SUPABASE_KEY') || '';
+      let url = localStorage.getItem('VAACHAN_SUPABASE_URL') || '__VAACHAN_SUPABASE_URL__';
+      let key = localStorage.getItem('VAACHAN_SUPABASE_KEY') || '__VAACHAN_SUPABASE_KEY__';
+
+      if (url.startsWith('__VAACHAN')) url = '';
+      if (key.startsWith('__VAACHAN')) key = '';
 
       // If keys aren't in localStorage, attempt to fetch from Vercel Serverless environment variable
       if (!url || !key) {

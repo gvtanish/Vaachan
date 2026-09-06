@@ -77,11 +77,13 @@
     // Check auth status and role on page load
     async checkGuard(requiredRole) {
       const client = await window.getSupabaseClient();
-      
+      const isSubDir = window.location.pathname.includes('/teacher/') || window.location.pathname.includes('/admin/');
+      const indexPath = isSubDir ? '../index.html' : './index.html';
+
       // If Supabase not configured, redirect to index.html to configure it
       if (!client) {
         if (!window.location.pathname.endsWith('index.html')) {
-          window.location.href = '/index.html';
+          window.location.href = indexPath;
         }
         return;
       }
@@ -89,7 +91,7 @@
       const session = await this.getSession();
       if (!session) {
         if (!window.location.pathname.endsWith('index.html')) {
-          window.location.href = '/index.html';
+          window.location.href = indexPath;
         }
         return;
       }
@@ -109,11 +111,11 @@
       }
 
       if (requiredRole && role !== requiredRole) {
-        // Unauthorized role redirect
+        // Unauthorized role redirect using relative path calculation
         if (role === 'admin') {
-          window.location.href = '/admin/dashboard.html';
+          window.location.href = isSubDir ? '../admin/dashboard.html' : './admin/dashboard.html';
         } else if (role === 'teacher') {
-          window.location.href = '/teacher/dashboard.html';
+          window.location.href = isSubDir ? '../teacher/dashboard.html' : './teacher/dashboard.html';
         } else {
           await this.signOut();
         }

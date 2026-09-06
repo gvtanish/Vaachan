@@ -388,6 +388,7 @@
 <script src="../js/auth.js"></script>
 <script src="../js/db.js"></script>
 <script src="../js/algorithm.js"></script>
+<script src="../js/speech.js"></script>
 <script src="../js/utils.js"></script>
 
 <script>
@@ -562,7 +563,25 @@
 
   let asrWarningTriggered = false;
 
+  let cachedFloatBuf = null;
+  let cachedPitchCorrBuf = null;
+
+  function releaseAudioResources() {
+    if (micStream) {
+      try { micStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+      micStream = null;
+    }
+    if (audioCtx && audioCtx.state !== 'closed') {
+      try { audioCtx.close(); } catch (e) {}
+      audioCtx = null;
+    }
+    sourceNode = null;
+    analyser = null;
+  }
+
   function resetRecordingState() {
+    releaseAudioResources();
+    window.VaachanSpeech?.stop();
     samples = [];
     finalTranscript = "";
     recording = false;
@@ -601,9 +620,9 @@
     updateLiveReadingHighlight();
 
     // Voice Activity vs Speech Recognition Guard (Android Only):
-    // If voice input is detected but browser speech recognition yields no text after 6 seconds,
-    // show the browser notice card with direct APK download link for Android devices!
-    const isAndroid = /Android/i.test(navigator.userAgent);
+    // If voice input is detected but speech recognition yields no text after 6 seconds,
+    // show the browser notice card with direct APK download link for Android Web Chrome!
+    const isAndroid = /Android/i.test(navigator.userAgent) && !window.VaachanSpeech?.isNative;
     if (isAndroid && elapsed >= 6.0 && !asrWarningTriggered) {
       const fullText = (finalTranscript + " " + (window.lastInterim || "")).trim();
       const voicedCount = samples.filter(s => s.rms > 0.025).length;
@@ -628,7 +647,7 @@
     el.className = 'asr-notice';
     el.innerHTML = `
       <div class="asr-notice-title">
-        ⚠️ Speech Recognition Not Supported or Blocked on Android
+        ⚠️ Speech Recognition Not Supported or Blocked on Android Browser
       </div>
       <p style="margin:0 0 6px">
         Your Chrome browser on Android is <strong>not converting voice to text</strong>.
@@ -649,19 +668,44 @@
   }
 
   async function startRecording() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionAvailable = !!SR;
-    const banner = document.getElementById('asr-banner');
+    releaseAudioResources();
 
-    // Start SR synchronously to preserve Android Chrome user gesture token
     recording = true;
-    if (recognitionAvailable) {
-      banner.classList.add('hidden');
-      startRecognizer(SR, banner);
-    } else {
+    finalTranscript = "";
+    samples = [];
+    recStartTime = performance.now();
+    lastHighlightedIdx = -1;
+    asrWarningTriggered = false;
+
+    micBtn.classList.add('recording');
+    document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
+    const banner = document.getElementById('asr-banner');
+    if (banner) banner.classList.add('hidden');
+
+    // 1. Start Speech Recognition via Unified Engine (Native Capacitor APK or WebSpeech API)
+    const srStarted = await window.VaachanSpeech.start(
+      selectedLang,
+      (transcriptText) => {
+        finalTranscript = transcriptText;
+        if (banner) banner.classList.add('hidden');
+        updateLiveReadingHighlight(transcriptText);
+      },
+      (err) => {
+        console.warn("VaachanSpeech error:", err);
+        if (err === 'not-supported' || err === 'not-allowed' || err === 'service-not-allowed') {
+          showAsrNotice(banner);
+        }
+      },
+      () => {
+        console.log("VaachanSpeech ended");
+      }
+    );
+
+    if (!srStarted && !window.VaachanSpeech.isNative) {
       showAsrNotice(banner);
     }
 
+    // 2. Start WebAudio Mic Analysis for VAD & Waveform
     try {
       micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -670,81 +714,20 @@
           autoGainControl: true
         }
       });
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+      sourceNode = audioCtx.createMediaStreamSource(micStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      sourceNode.connect(analyser);
+      dataArray = new Uint8Array(analyser.fftSize);
     } catch (e) {
-      recording = false;
-      window.utils?.toast("Microphone access is needed to record reading. Please grant mic permissions and retry.", "error");
-      return;
+      console.warn("getUserMedia VAD audio analysis failed:", e);
     }
-
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') await audioCtx.resume();
-    sourceNode = audioCtx.createMediaStreamSource(micStream);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    sourceNode.connect(analyser);
-    dataArray = new Uint8Array(analyser.fftSize);
-
-    samples = [];
-    finalTranscript = "";
-    recStartTime = performance.now();
-    lastHighlightedIdx = -1;
-    micBtn.classList.add('recording');
-    document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
 
     timerInterval = setInterval(updateTimer, 200);
-    waveInterval = setInterval(sampleAudio, 60);
-  }
-
-  // Creates a fresh SpeechRecognition instance each time — required for Android Chrome
-  function startRecognizer(SR, banner) {
-    if (!recording) return;
-
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const lang = selectedLang === 'hindi' ? 'hi-IN' : 'en-IN';
-
-    const r = new SR();
-    r.continuous = !isMobile;
-    r.interimResults = true;
-    r.lang = lang;
-    r.maxAlternatives = 1;
-
-    r.onresult = (event) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const res = event.results[i];
-        if (res.isFinal) finalTranscript += res[0].transcript + " ";
-        else interim += res[0].transcript;
-      }
-      window.lastInterim = interim;
-      const bannerEl = document.getElementById('asr-banner');
-      if (bannerEl && (finalTranscript.trim() || interim.trim())) {
-        bannerEl.classList.add('hidden');
-      }
-      updateLiveReadingHighlight(interim);
-    };
-
-    r.onend = () => {
-      if (recording) {
-        setTimeout(() => startRecognizer(SR, banner), 150);
-      }
-    };
-
-    r.onerror = (e) => {
-      console.warn("ASR error:", e.error);
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') {
-        if (banner) showAsrNotice(banner);
-      } else if (recording) {
-        setTimeout(() => startRecognizer(SR, banner), 300);
-      }
-    };
-
-    try {
-      r.start();
-      recognizer = r;
-    } catch (e) {
-      console.warn("SR start failed:", e);
-      if (banner) showAsrNotice(banner);
-    }
+    if (analyser) waveInterval = setInterval(sampleAudio, 60);
   }
 
   function updateLiveReadingHighlight(interim = "") {
@@ -809,7 +792,7 @@
     });
   }
 
-
+  // Pre-allocated array buffers to eliminate GC pauses and prevent app auto-close on mobile
   function estimatePitch(buf, sampleRate) {
     const SIZE = buf.length;
     let rms = 0;
@@ -820,17 +803,19 @@
     let r1 = 0, r2 = SIZE - 1, thres = 0.2;
     for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
     for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
-    const trimmed = buf.slice(r1, r2);
-    const n = trimmed.length;
-    const c = new Array(n).fill(0);
+    const n = Math.max(1, r2 - r1);
+    
+    if (!cachedPitchCorrBuf || cachedPitchCorrBuf.length < n) {
+      cachedPitchCorrBuf = new Float32Array(n);
+    }
     for (let lag = 0; lag < n; lag++) {
       let sum = 0;
-      for (let i = 0; i < n - lag; i++) { sum += trimmed[i] * trimmed[i + lag]; }
-      c[lag] = sum;
+      for (let i = 0; i < n - lag; i++) { sum += buf[r1 + i] * buf[r1 + i + lag]; }
+      cachedPitchCorrBuf[lag] = sum;
     }
-    let d = 0; while (d < n - 1 && c[d] > c[d + 1]) d++;
+    let d = 0; while (d < n - 1 && cachedPitchCorrBuf[d] > cachedPitchCorrBuf[d + 1]) d++;
     let maxval = -1, maxpos = -1;
-    for (let i = d; i < n; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+    for (let i = d; i < n; i++) { if (cachedPitchCorrBuf[i] > maxval) { maxval = cachedPitchCorrBuf[i]; maxpos = i; } }
     let T0 = maxpos;
     if (T0 <= 0) return { rms, pitch: 0 };
     const freq = sampleRate / T0;
@@ -839,13 +824,18 @@
   }
 
   function sampleAudio() {
-    if (!recording) return;
+    if (!recording || !analyser) return;
     analyser.getByteTimeDomainData(dataArray);
-    const floatBuf = new Float32Array(dataArray.length);
-    for (let i = 0; i < dataArray.length; i++) { floatBuf[i] = (dataArray[i] - 128) / 128; }
-    const { rms, pitch } = estimatePitch(floatBuf, audioCtx.sampleRate);
+    
+    if (!cachedFloatBuf || cachedFloatBuf.length !== dataArray.length) {
+      cachedFloatBuf = new Float32Array(dataArray.length);
+    }
+    for (let i = 0; i < dataArray.length; i++) { cachedFloatBuf[i] = (dataArray[i] - 128) / 128; }
+    
+    const sampleRate = audioCtx ? audioCtx.sampleRate : 44100;
+    const { rms, pitch } = estimatePitch(cachedFloatBuf, sampleRate);
     samples.push({ t: performance.now() - recStartTime, rms, pitch });
-    drawWave(floatBuf, rms);
+    drawWave(cachedFloatBuf, rms);
   }
 
   function drawWave(buf, rms) {
@@ -868,24 +858,24 @@
     document.getElementById('rec-hint').textContent = 'Analyzing parameters...';
     clearInterval(timerInterval);
     clearInterval(waveInterval);
-    if (recognizer) { try { recognizer.stop(); } catch (e) {} }
-    if (micStream) { micStream.getTracks().forEach(t => t.stop()); }
-    if (audioCtx) { audioCtx.close(); }
+    
+    window.VaachanSpeech?.stop();
+    releaseAudioResources();
 
     const durationSec = (performance.now() - recStartTime) / 1000;
     setTimeout(() => computeResults(durationSec), 500);
   }
 
   function stopEverything() {
-    if (recording) {
-      recording = false;
-      clearInterval(timerInterval);
-      clearInterval(waveInterval);
-      if (recognizer) { try { recognizer.stop(); } catch (e) {} }
-      if (micStream) { micStream.getTracks().forEach(t => t.stop()); }
-      if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
-    }
+    recording = false;
+    clearInterval(timerInterval);
+    clearInterval(waveInterval);
+    window.VaachanSpeech?.stop();
+    releaseAudioResources();
   }
+
+  window.addEventListener('beforeunload', stopEverything);
+  window.addEventListener('pagehide', stopEverything);
 
   /* Compute & Save Results */
   async function computeResults(durationSec) {

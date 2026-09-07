@@ -2,183 +2,85 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · Student Roster</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --sky:#3E7CB1;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    padding:0 0 60px 0;
-    overflow-x:hidden;
-    max-width:100%;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-  }
-  .container{
-    max-width:1200px;
-    margin:0 auto;
-    padding:0 20px;
-  }
-  .grid-layout{
-    display:grid;
+  .grid-layout {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-    gap:24px;
-    margin-top:24px;
+    gap: 24px;
+    margin-top: 10px;
   }
+  
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .filter-bar select {
+    width: 200px;
+  }
+  .filter-bar input {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .roster-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .roster-table th {
+    text-align: left;
+    padding: 12px 10px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    border-bottom: 1.5px solid var(--line);
+    white-space: nowrap;
+  }
+  .roster-table td {
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: middle;
+  }
+  .roster-table tr:hover td {
+    background: rgba(232, 163, 61, 0.05);
+    cursor: pointer;
+  }
+  .roster-table tr.active-student td {
+    background: rgba(27, 42, 74, 0.07);
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: var(--transition-fast);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item:hover { background: var(--paper-hover); }
+  .history-meta {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+
   @media (max-width: 900px) {
-    .grid-layout { grid-template-columns: 1fr; }
+    .grid-layout { grid-template-columns: 1fr; gap: 18px; }
   }
   @media (max-width: 600px) {
-    .container{padding:0 12px;}
-    .grid-layout{gap:0;margin-top:16px;}
-    .card{padding:16px;border-radius:14px;margin-bottom:16px;}
-    h2.section-title{font-size:1.15rem;margin-bottom:12px;}
-    .filter-bar{flex-direction:column;gap:8px;}
-    .filter-bar select,.filter-bar input{width:100%;}
-    .history-item{align-items:flex-start;gap:10px;}
-  }
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:24px;
-    box-shadow:var(--shadow);
-    margin-bottom:24px;
-  }
-  h2.section-title{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.4rem;
-    margin:0 0 16px 0;
-    color:var(--indigo);
-  }
-  
-  /* Filter bar styles */
-  .filter-bar{
-    display:flex;
-    gap:12px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-  }
-  .filter-bar select, .filter-bar input{
-    padding:10px 14px;
-    border-radius:10px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    font-family:'Inter',sans-serif;
-    font-size:0.9rem;
-  }
-  .filter-bar input{ flex:1; }
-
-  /* Roster lists */
-  .roster-table{
-    width:100%;
-    border-collapse:collapse;
-  }
-  .roster-table th{
-    text-align:left;
-    padding:10px;
-    font-size:0.78rem;
-    font-weight:700;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    border-bottom:1px solid var(--line);
-  }
-  .roster-table td{
-    padding:12px 10px;
-    font-size:0.88rem;
-    border-bottom:1px solid rgba(228, 220, 200, 0.4);
-  }
-  .roster-table tr:hover td{
-    background:rgba(232, 163, 61, 0.03);
-    cursor:pointer;
-  }
-  .roster-table tr.active-student td{
-    background:rgba(27, 42, 74, 0.04);
-  }
-
-  .badge{
-    display:inline-block;
-    padding:3px 8px;
-    border-radius:99px;
-    font-weight:700;
-    font-size:0.75rem;
-    color:#fff;
-  }
-  .badge-mint { background: var(--mint); }
-  .badge-indigo { background: var(--indigo); }
-  .badge-marigold { background: var(--marigold); }
-  .badge-coral { background: var(--coral); }
-  
-  .btn{
-    text-decoration:none;
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:0.9rem;
-    border-radius:10px;
-    padding:6px 14px;
-    border:none;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-  }
-  .btn-sm{ padding:4px 10px; font-size:0.8rem; }
-  .btn-primary{
-    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
-    color:#fff;
-  }
-  .btn-ghost{
-    background:transparent;
-    color:var(--ink-soft);
-    border:1px solid var(--line);
-  }
-
-  /* History list items */
-  .history-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px;
-    border-bottom:1px solid rgba(228, 220, 200, 0.5);
-  }
-  .history-item:last-child{ border-bottom:none; }
-  .history-meta{
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    margin-top:2px;
-  }
-
-  .trend-arrow{
-    font-weight:700;
-    margin-left:4px;
-  }
-  .trend-up { color: var(--mint); }
-  .trend-down { color: var(--coral); }
-
-  .empty-state{
-    text-align:center;
-    padding:40px 20px;
-    color:var(--ink-soft);
-    font-size:0.9rem;
+    .grid-layout { gap: 14px; margin-top: 6px; }
+    .filter-bar { flex-direction: column; gap: 10px; }
+    .filter-bar select, .filter-bar input { width: 100%; }
+    .roster-table { min-width: 480px; }
   }
 </style>
 </head>
@@ -191,60 +93,61 @@
     <!-- Left: Roster List -->
     <div class="card">
       <h2 class="section-title">My Student Roster</h2>
+      <p class="section-desc">Select any student to inspect historical fluency trajectory.</p>
       
       <div class="filter-bar">
         <select id="class-filter" onchange="filterRoster()">
           <option value="">All Assigned Classes</option>
         </select>
-        <input type="text" id="search-input" placeholder="Search by name or roll..." oninput="filterRoster()">
+        <input type="text" id="search-input" class="text-input" placeholder="Search by name or roll..." oninput="filterRoster()">
       </div>
 
       <div class="table-wrap">
-      <table class="roster-table">
-        <thead>
-          <tr>
-            <th style="width:70px;">Roll</th>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Last CWPM</th>
-            <th>Grade</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="roster-tbody">
-          <tr>
-            <td colspan="6" class="empty-state">Loading students roster...</td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">Roll</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Last CWPM</th>
+              <th>Grade</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="roster-tbody">
+            <tr class="empty-row">
+              <td colspan="6">Loading students roster...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- Right: Student History Details -->
     <div>
       <div class="card" id="history-card" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
           <h2 class="section-title" id="history-student-name" style="margin:0;">Student Details</h2>
-          <a id="history-test-btn" class="btn btn-primary btn-sm">Evaluate Fluency</a>
+          <a id="history-test-btn" class="btn btn-primary btn-sm">⚡ Evaluate Fluency</a>
         </div>
 
         <div style="margin-bottom:24px;">
-          <h4 style="margin:0 0 10px 0; color:var(--ink-soft); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;">Fluency Progress Trend</h4>
-          <div style="position: relative; height: 160px; width: 100%;">
+          <h4 style="margin:0 0 10px 0; color:var(--ink-soft); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Fluency Progress Trend</h4>
+          <div style="position: relative; height: 180px; width: 100%;">
             <canvas id="progressChart"></canvas>
           </div>
         </div>
 
-        <h4 style="margin:0 0 12px 0; color:var(--ink-soft); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;">Previous Evaluations</h4>
-        <div id="history-list" style="border: 1px solid var(--line); border-radius: 12px; background: var(--paper); overflow: hidden;">
+        <h4 style="margin:0 0 12px 0; color:var(--ink-soft); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;">Previous Evaluations</h4>
+        <div id="history-list" class="list-group">
           <!-- History items injected here -->
         </div>
       </div>
 
       <div class="card" id="empty-history-card">
-        <div class="empty-state" style="padding:60px 20px;">
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" style="color:var(--line); margin-bottom:12px;"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <p>Select a student from the roster list on the left to view history timeline and statistics.</p>
+        <div style="text-align:center; padding:50px 20px; color:var(--ink-soft);">
+          <div class="solid-icon solid-icon-lg" style="margin-bottom:12px; color:var(--ink-muted);" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2.5 8 12 13l7.75-4.08V15H21V8L12 3Zm-6 8.16V16c0 1.66 2.69 3 6 3s6-1.34 6-3v-4.84L12 14.32 6 11.16Z"/></svg></div>
+          <p style="font-size:0.92rem; font-weight:500;">Select a student from the roster list to view their fluency timeline and statistics.</p>
         </div>
       </div>
     </div>
@@ -268,7 +171,6 @@
     await window.auth.checkGuard('teacher');
     window.utils.renderNav('students', false);
 
-    // Read URL query parameters
     const urlParams = new URLSearchParams(window.location.search);
     const paramClassId = urlParams.get('classId');
     const paramStudentId = urlParams.get('studentId');
@@ -282,7 +184,6 @@
       if (!session) return;
       const teacherId = session.user.id;
 
-      // 1. Fetch data
       const [allClasses, allotments, students, sessions] = await Promise.all([
         window.db.getClasses(),
         window.db.getClassSubjectTeachers(),
@@ -293,7 +194,6 @@
       rawStudents = students;
       rawSessions = sessions;
 
-      // Filter classes assigned to this teacher
       const myClassIds = new Set();
       allClasses.forEach(c => {
         if (c.teacher_id === teacherId) myClassIds.add(c.id);
@@ -311,17 +211,15 @@
         classFilter.value = paramClassId;
       }
 
-      // Render roster
       filterRoster();
 
-      // Auto select student from parameters
       if (paramStudentId) {
         showStudentHistory(paramStudentId);
       }
 
     } catch (e) {
       console.error(e);
-      alert("Error loading roster data: " + e.message);
+      window.utils.toast("Error loading roster data: " + e.message, "error");
     }
   }
 
@@ -338,11 +236,10 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No matching students found.</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No matching students found in this section.</td></tr>`;
       return;
     }
 
-    // Group sessions by student to find last evaluation
     const studentHistory = {};
     rawSessions.forEach(s => {
       if (!studentHistory[s.student_id]) studentHistory[s.student_id] = [];
@@ -395,6 +292,7 @@
 
   async function showStudentHistory(studentId) {
     selectedStudentId = studentId;
+    window.utils.haptic('light');
 
     document.querySelectorAll('#roster-tbody tr').forEach(row => {
       row.classList.remove('active-student');
@@ -417,7 +315,7 @@
       const historyListEl = document.getElementById('history-list');
 
       if (history.length === 0) {
-        historyListEl.innerHTML = `<div class="empty-state">No previous evaluations completed.</div>`;
+        historyListEl.innerHTML = `<div class="empty-state" style="padding:24px; text-align:center; color:var(--ink-soft);">No previous evaluations completed.</div>`;
         if (chartInstance) {
           chartInstance.destroy();
           chartInstance = null;
@@ -440,15 +338,15 @@
                 <div class="history-meta">${window.utils.formatDate(s.session_date)} &middot; Language: ${s.lang === 'hindi' ? 'Hindi' : 'English'}</div>
               </div>
               <div style="text-align:right;">
-                <div style="font-weight:800; font-size:1rem; color:var(--indigo);">${s.overall_score}/10</div>
+                <div style="font-weight:800; font-size:1.05rem; color:var(--indigo);">${s.overall_score}/10</div>
                 <div style="font-size:0.75rem; color:var(--ink-soft);">${Math.round(s.cwpm)} CWPM (${Math.round(s.accuracy_pct || 100)}% Acc)</div>
               </div>
             </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; font-size:0.72rem; margin-top:4px;">
-              <span style="background:rgba(27,42,74,0.06); padding:2px 7px; border-radius:4px;">Acc: <b>${s.accuracy_score !== null ? s.accuracy_score : '10'}</b></span>
-              <span style="background:rgba(232,163,61,0.12); padding:2px 7px; border-radius:4px;">Spd: <b>${s.speed_score}</b></span>
-              <span style="background:rgba(62,124,177,0.12); padding:2px 7px; border-radius:4px;">Phr: <b>${s.phrasing_score}</b></span>
-              <span style="background:rgba(79,155,114,0.12); padding:2px 7px; border-radius:4px;">Exp: <b>${s.expression_score}</b></span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; font-size:0.74rem; margin-top:4px;">
+              <span class="badge badge-indigo">Acc: <b>${s.accuracy_score !== null ? s.accuracy_score : '10'}</b></span>
+              <span class="badge badge-marigold">Spd: <b>${s.speed_score}</b></span>
+              <span class="badge badge-sky">Phr: <b>${s.phrasing_score}</b></span>
+              <span class="badge badge-mint">Exp: <b>${s.expression_score}</b></span>
             </div>
           </div>
         `;
@@ -456,9 +354,14 @@
 
       renderChart(history);
 
+      // On mobile viewports, scroll smoothly to the history card
+      if (window.innerWidth <= 900) {
+        document.getElementById('history-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
     } catch (e) {
       console.error(e);
-      alert("Error loading student history: " + e.message);
+      window.utils.toast("Error loading student history: " + e.message, "error");
     }
   }
 
@@ -486,7 +389,7 @@
             borderColor: '#1B2A4A',
             backgroundColor: 'rgba(27, 42, 74, 0.05)',
             borderWidth: 2.5,
-            tension: 0.1,
+            tension: 0.2,
             yAxisID: 'y'
           },
           {
@@ -495,25 +398,25 @@
             borderColor: '#E8A33D',
             backgroundColor: 'rgba(232, 163, 61, 0.05)',
             borderWidth: 2,
-            tension: 0.1,
+            tension: 0.2,
             yAxisID: 'y1'
           },
           {
-            label: 'Accuracy Score (0-10)',
+            label: 'Accuracy Score',
             data: accuracyPoints,
             borderColor: '#3E7CB1',
             borderWidth: 1.5,
             borderDash: [4, 4],
-            tension: 0.1,
+            tension: 0.2,
             yAxisID: 'y'
           },
           {
-            label: 'Expression (0-10)',
+            label: 'Expression',
             data: expressionPoints,
             borderColor: '#4F9B72',
             borderWidth: 1.5,
             borderDash: [2, 2],
-            tension: 0.1,
+            tension: 0.2,
             yAxisID: 'y'
           }
         ]
@@ -539,7 +442,7 @@
           }
         },
         plugins: {
-          legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+          legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10.5 } } }
         }
       }
     });

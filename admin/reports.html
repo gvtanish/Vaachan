@@ -2,14 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · School Reports</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-  body { padding: 0 0 60px 0; overflow-x: hidden; max-width: 100%; }
-
   .filter-row {
     display: flex;
     gap: 12px;
@@ -21,7 +19,7 @@
 
   .charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 18px;
     margin-bottom: 24px;
   }
@@ -29,21 +27,49 @@
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 18px 16px;
     text-align: center;
   }
   .chart-card-title {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
     color: var(--ink-soft);
     margin-bottom: 12px;
   }
   .chart-box {
     position: relative;
-    height: 200px;
+    height: 210px;
     width: 100%;
+  }
+
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .report-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .filter-col { min-width: 0; }
+    .filter-col input, .filter-col select { width: 100%; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .report-header { flex-direction: column; align-items: stretch; gap: 12px; }
+    .report-actions { width: 100%; }
+    .report-actions .btn { flex: 1; justify-content: center; }
+  }
+
+  @media (max-width: 480px) {
+    .filter-row { grid-template-columns: 1fr; }
   }
 
   @media print {
@@ -52,47 +78,20 @@
     .card { box-shadow: none; border: none; padding: 0; }
     .chart-card { border: 1px solid #ccc; }
   }
-  .report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  @media (max-width:600px) {
-    .filter-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .filter-col{min-width:0;}
-    .filter-col input,.filter-col select{width:100%;}
-    .charts-grid{grid-template-columns:1fr;}
-    .chart-box{height:190px;}
-    .report-header {
-      align-items: stretch !important;
-    }
-    .report-header > div:last-child {
-      width: 100%;
-      flex-wrap: wrap;
-      display: flex;
-      gap: 10px;
-    }
-    .report-header .btn {
-      flex: 1;
-    }
-  }
 </style>
 </head>
 <body>
 
 <div id="nav-container"></div>
 
-<div class="container">
+<div class="container" style="padding-top:4px;">
   <div class="card">
     <div class="report-header">
       <div>
         <h2 style="font-family:'Baloo 2', sans-serif; font-size:1.8rem; margin:0; color:var(--indigo);">School Diagnostic Reports</h2>
-        <p style="margin:4px 0 0 0; color:var(--ink-soft); font-size:0.9rem;">Analyze fluency statistics across all student sessions and export records.</p>
+        <p class="section-desc" style="margin-top:4px; margin-bottom:0;">Analyze fluency statistics across all student sessions and export assessment records.</p>
       </div>
-      <div style="display:flex; gap:10px;">
+      <div class="report-actions">
         <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
         <button class="btn btn-primary" onclick="window.print()"><span class="solid-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 8V3H7v5h10Zm0 2H7a3 3 0 0 0-3 3v5h3v3h10v-3h3v-5a3 3 0 0 0-3-3Zm-2 9H9v-5h6v5Z"/></svg></span> Print Layout</button>
       </div>
@@ -141,67 +140,67 @@
     <!-- Analytical Charts -->
     <div class="charts-grid">
       <div class="chart-card">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Performance by Class</div>
+        <div class="chart-card-title">Performance by Class</div>
         <div class="chart-box">
           <canvas id="classChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Performance by Section</div>
+        <div class="chart-card-title">Performance by Section</div>
         <div class="chart-box">
           <canvas id="sectionChart"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Fluency levels distribution</div>
+        <div class="chart-card-title">Fluency Levels Distribution</div>
         <div class="chart-box">
           <canvas id="levelsChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Passage Difficulty Analysis Card (D2) -->
-    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Passage Difficulty & Analysis</h3>
+    <!-- Passage Difficulty Analysis Card -->
+    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.3rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Passage Difficulty & Analysis</h3>
     <div class="table-wrap" style="margin-bottom:24px;">
-    <table class="list-table">
-      <thead>
-        <tr>
-          <th>Passage Title</th>
-          <th>Evaluations</th>
-          <th>Avg Accuracy</th>
-          <th>Avg Speed (CWPM)</th>
-          <th>Avg Overall Score</th>
-          <th>Difficulty Assessment</th>
-        </tr>
-      </thead>
-      <tbody id="passage-analysis-tbody">
-        <tr><td colspan="6" class="empty-state">Loading passage statistics...</td></tr>
-      </tbody>
-    </table>
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Passage Title</th>
+            <th>Evaluations</th>
+            <th>Avg Accuracy</th>
+            <th>Avg CWPM</th>
+            <th>Avg Score</th>
+            <th>Difficulty</th>
+          </tr>
+        </thead>
+        <tbody id="passage-analysis-tbody">
+          <tr class="empty-row"><td colspan="6">Loading passage statistics...</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Sessions Table -->
-    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.25rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Individual Session Log</h3>
+    <h3 style="font-family:'Baloo 2', sans-serif; font-size:1.3rem; color:var(--indigo); margin-top:24px; margin-bottom:12px;">Individual Session Log</h3>
     <div class="table-wrap">
-    <table class="list-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Student</th>
-          <th>Class</th>
-          <th>Language</th>
-          <th>Evaluator</th>
-          <th>CWPM</th>
-          <th>Grade</th>
-          <th>Score</th>
-        </tr>
-      </thead>
-      <tbody id="sessions-tbody">
-        <tr>
-          <td colspan="8" class="empty-state">Loading sessions logs...</td>
-        </tr>
-      </tbody>
-    </table>
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Student</th>
+            <th>Class</th>
+            <th>Language</th>
+            <th>Evaluator</th>
+            <th>CWPM</th>
+            <th>Grade</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="sessions-tbody">
+          <tr class="empty-row">
+            <td colspan="8">Loading sessions logs...</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -236,7 +235,7 @@
       applyFilters();
     } catch (e) {
       console.error(e);
-      alert("Error loading reports log: " + e.message);
+      window.utils.toast("Error loading reports log: " + e.message, "error");
     }
   }
 
@@ -265,15 +264,12 @@
   }
 
   function renderCharts() {
-    // 1. Group by Class
     const classSums = { 3: 0, 4: 0, 5: 0 };
     const classCounts = { 3: 0, 4: 0, 5: 0 };
     
-    // 2. Group by Section
     const secSums = { A: 0, B: 0, C: 0, D: 0, E: 0 };
     const secCounts = { A: 0, B: 0, C: 0, D: 0, E: 0 };
 
-    // 3. Group by levels
     const levels = { 4: 0, 3: 0, 2: 0, 1: 0 };
 
     filteredSessions.forEach(s => {
@@ -296,7 +292,6 @@
     const classAvgs = [3, 4, 5].map(c => classCounts[c] > 0 ? classSums[c] / classCounts[c] : 0);
     const secAvgs = ['A','B','C','D','E'].map(sec => secCounts[sec] > 0 ? secSums[sec] / secCounts[sec] : 0);
 
-    // Class chart
     const ctxClass = document.getElementById('classChart').getContext('2d');
     if (classChart) classChart.destroy();
     classChart = new Chart(ctxClass, {
@@ -317,7 +312,6 @@
       }
     });
 
-    // Section chart
     const ctxSec = document.getElementById('sectionChart').getContext('2d');
     if (sectionChart) sectionChart.destroy();
     sectionChart = new Chart(ctxSec, {
@@ -338,28 +332,27 @@
       }
     });
 
-    // Levels Pie Chart
     const ctxLvl = document.getElementById('levelsChart').getContext('2d');
     if (levelsChart) levelsChart.destroy();
     levelsChart = new Chart(ctxLvl, {
-      type: 'pie',
+      type: 'doughnut',
       data: {
         labels: ['Fluent', 'Primarily', 'Developing', 'Non-fluent'],
         datasets: [{
           data: [levels[4], levels[3], levels[2], levels[1]],
-          backgroundColor: ['#4F9B72', '#1B2A4A', '#E8A33D', '#D6584F']
+          backgroundColor: ['#4F9B72', '#1B2A4A', '#E8A33D', '#D6584F'],
+          borderWidth: 2
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } }
       }
     });
   }
 
   function renderTable() {
-    // 1. Passage Difficulty Analysis
     const passageMap = {};
     filteredSessions.forEach(s => {
       const pTitle = s.passages?.title || 'General Passage';
@@ -375,7 +368,7 @@
     const pTbody = document.getElementById('passage-analysis-tbody');
     const pTitles = Object.keys(passageMap);
     if (pTitles.length === 0) {
-      pTbody.innerHTML = `<tr><td colspan="6" class="empty-state">No passage evaluations recorded yet.</td></tr>`;
+      pTbody.innerHTML = `<tr class="empty-row"><td colspan="6">No passage evaluations recorded yet.</td></tr>`;
     } else {
       pTbody.innerHTML = pTitles.map(title => {
         const item = passageMap[title];
@@ -400,10 +393,9 @@
       }).join('');
     }
 
-    // 2. Individual Session Log
     const tbody = document.getElementById('sessions-tbody');
     if (filteredSessions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching sessions logs found.</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">No matching session logs found.</td></tr>`;
       return;
     }
 
@@ -420,7 +412,7 @@
           <td>Class ${classLabel}</td>
           <td>${s.lang === 'hindi' ? 'Hindi' : 'English'}</td>
           <td>${window.utils.escapeHtml(teacherName)}</td>
-          <td>${Math.round(s.cwpm || 0)}</td>
+          <td><b>${Math.round(s.cwpm || 0)}</b></td>
           <td><b>${s.grade || 'E'}</b></td>
           <td><b>${s.overall_score || '0'}/10</b></td>
         </tr>

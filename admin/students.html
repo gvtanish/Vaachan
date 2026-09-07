@@ -2,17 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · Student Records</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-  body { padding: 0 0 60px 0; overflow-x: hidden; max-width: 100%; }
-  .preview-wrap { max-height: 200px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin: 12px 0; }
-  .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
-  @media (max-width:600px) {
-    .form-row > div[style]{width:100% !important;}
+  .preview-wrap {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    margin: 12px 0;
+  }
+  .search-filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .search-filter-row input { flex: 1; min-width: 180px; }
+  .search-filter-row select { width: 160px; }
+
+  @media (max-width: 600px) {
+    .search-filter-row { flex-direction: column; }
+    .search-filter-row select { width: 100%; }
   }
 </style>
 </head>
@@ -20,39 +34,36 @@
 
 <div id="nav-container"></div>
 
-<div class="container">
+<div class="container" style="padding-top:4px;">
   <div class="grid-2col">
     <!-- Left panel: Students list & Filter -->
     <div class="card">
       <h2 class="section-title">Manage Student Records</h2>
+      <p class="section-desc">Search, filter, or activate/deactivate student enrollment.</p>
       
-      <div class="form-row" style="margin-bottom:20px;">
-        <div style="flex:1;">
-          <input type="text" id="search-input" class="text-input" placeholder="Search by name or roll number..." oninput="loadRoster()">
-        </div>
-        <div style="width:160px;">
-          <select id="class-filter" onchange="loadRoster()">
-            <option value="">All Classes</option>
-          </select>
-        </div>
+      <div class="search-filter-row">
+        <input type="text" id="search-input" class="text-input" placeholder="Search by name or roll number..." oninput="loadRoster()">
+        <select id="class-filter" onchange="loadRoster()">
+          <option value="">All Classes</option>
+        </select>
       </div>
 
       <div class="table-wrap">
-      <table class="list-table">
-        <thead>
-          <tr>
-            <th style="width:70px;">Roll</th>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Guardian Name</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="roster-tbody">
-          <!-- Rows injected here -->
-        </tbody>
-      </table>
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">Roll</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Guardian</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="roster-tbody">
+            <tr class="empty-row"><td colspan="6">Loading students...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -61,6 +72,7 @@
       <!-- Manual Add Card -->
       <div class="card">
         <h2 class="section-title">Add Student Record</h2>
+        <p class="section-desc">Create a single student record.</p>
         <form id="add-student-form" onsubmit="addStudent(event)">
           <div class="field-group">
             <label for="student-name">Full Name</label>
@@ -100,25 +112,27 @@
             <input type="text" id="student-guardian" class="text-input" placeholder="e.g. Suresh Kumar">
           </div>
 
-          <button type="submit" class="btn btn-admin" style="width:100%;">Save Student Record</button>
+          <button type="submit" class="btn btn-admin btn-full">Save Student Record</button>
         </form>
       </div>
 
       <!-- CSV Bulk Import Card -->
       <div class="card">
         <h2 class="section-title">Bulk CSV Import</h2>
-        <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 16px 0; line-height:1.4;">Upload a comma-separated file with columns:<br><b>Name, RollNo, ClassNumber, SectionLetter, Gender, DOB, GuardianName, GuardianPhone</b></p>
+        <p class="section-desc">Upload a CSV file with columns:<br><b>Name, RollNo, ClassNumber, SectionLetter, Gender, DOB, GuardianName, GuardianPhone</b></p>
         
         <div class="csv-dropzone" onclick="document.getElementById('csv-file').click()">
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--marigold); margin-bottom:8px;"><path d="M12 16V8m0 8l-4-4m4 4l4-4M3 16V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div style="font-size:0.85rem; font-weight:600; color:var(--indigo);">Click to choose CSV file</div>
+          <div class="solid-icon solid-icon-lg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.75A2.25 2.25 0 0 1 5.25 4.5h4.09c.6 0 1.17.24 1.59.66l1.16 1.17c.42.42.99.66 1.59.66h5.07A2.25 2.25 0 0 1 21 9.24v8.01a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 17.25V6.75Z"/></svg></div>
+          <div style="font-size:0.92rem; font-weight:700; color:var(--indigo);">Tap to choose CSV file</div>
           <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="handleCsvFile(event)">
         </div>
 
-        <div id="csv-preview-card" class="hidden">
-          <div class="stat-label">Parsing Preview (<span id="csv-count">0</span> records)</div>
+        <div id="csv-preview-card" class="hidden" style="margin-top:14px;">
+          <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); margin-bottom:6px;">
+            Parsing Preview (<span id="csv-count">0</span> records)
+          </div>
           <div class="preview-wrap">
-            <table class="list-table" style="font-size:0.75rem;">
+            <table class="list-table" style="font-size:0.8rem;">
               <thead>
                 <tr>
                   <th>Roll</th>
@@ -130,7 +144,7 @@
               <tbody id="csv-preview-tbody"></tbody>
             </table>
           </div>
-          <button class="btn btn-primary" style="width:100%;" onclick="commitCsvImport()">Commit CSV Import</button>
+          <button class="btn btn-primary btn-full" onclick="commitCsvImport()">Commit CSV Import</button>
         </div>
       </div>
     </div>
@@ -146,6 +160,7 @@
 <script>
   let rawClasses = [];
   let parsedStudents = [];
+  let rawStudents = [];
 
   window.addEventListener('DOMContentLoaded', async () => {
     await window.auth.checkGuard('admin');
@@ -159,7 +174,6 @@
       const classes = await window.db.getClasses();
       rawClasses = classes;
 
-      // Populate class filter dropdowns
       const filterSelect = document.getElementById('class-filter');
       filterSelect.innerHTML = '<option value="">All Classes</option>' +
         classes.map(c => `<option value="${c.id}">Class ${c.class_num}${c.section}</option>`).join('');
@@ -172,7 +186,7 @@
 
     } catch (e) {
       console.error(e);
-      alert("Error loading students config: " + e.message);
+      window.utils.toast("Error loading classes config: " + e.message, "error");
     }
   }
 
@@ -186,10 +200,11 @@
       if (search) filters.search = search;
 
       const students = await window.db.getStudents(filters);
+      rawStudents = students;
 
       const tbody = document.getElementById('roster-tbody');
       if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No student records matches query filters.</td></tr>`;
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No student records match search filters.</td></tr>`;
       } else {
         tbody.innerHTML = students.map(s => {
           const classLabel = s.classes ? `${s.classes.class_num}${s.classes.section}` : '—';
@@ -200,7 +215,7 @@
               <td>${classLabel}</td>
               <td>${window.utils.escapeHtml(s.guardian_name || '—')}</td>
               <td>
-                <span class="badge ${s.is_active ? 'badge-mint' : 'badge-coral'}" style="background:${s.is_active ? 'var(--mint)' : 'var(--coral)'};">
+                <span class="badge ${s.is_active ? 'badge-mint' : 'badge-coral'}">
                   ${s.is_active ? 'Active' : 'Inactive'}
                 </span>
               </td>
@@ -219,16 +234,16 @@
 
   async function toggleActive(studentId, currentStatus) {
     try {
-      const student = rawStudents = await window.db.getStudents();
       const st = rawStudents.find(s => s.id === studentId);
       if (st) {
         st.is_active = !currentStatus;
         await window.db.upsertStudent(st);
         await window.db.logAction("Toggle Student Status", { student_id: studentId, status: !currentStatus });
+        window.utils.toast(`Student status updated to ${!currentStatus ? 'Active' : 'Inactive'}`, 'success');
         loadRoster();
       }
     } catch (e) {
-      alert("Error toggle student: " + e.message);
+      window.utils.toast("Error updating student: " + e.message, "error");
     }
   }
 
@@ -254,18 +269,16 @@
 
       await window.db.logAction("Add Student Manual", { name, roll_no, class_id });
 
-      // Reset form
       document.getElementById('add-student-form').reset();
       loadRoster();
-      window.utils?.toast("Student record saved successfully!", "success");
+      window.utils.toast(`Student ${name} saved successfully!`, "success");
 
     } catch (err) {
       console.error(err);
-      alert("Error adding student record: " + err.message);
+      window.utils.toast("Error adding student record: " + err.message, "error");
     }
   }
 
-  /* CSV Import parsing */
   function handleCsvFile(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -282,7 +295,6 @@
     parsedStudents = [];
     const lines = text.split('\n');
     
-    // Skip headers (Name, RollNo, ClassNumber, SectionLetter, Gender, DOB, GuardianName, GuardianPhone)
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -304,7 +316,6 @@
       const guardian_name = cols[6] || null;
       const guardian_phone = cols[7] || null;
 
-      // Find matching class ID in database classes list
       const matchedClass = rawClasses.find(c => c.class_num === classNum && c.section === section);
       if (!matchedClass) {
         console.warn(`Class ${classNum}${section} not recognized on line ${i + 1}`);
@@ -329,7 +340,7 @@
     const previewCount = document.getElementById('csv-count');
 
     if (parsedStudents.length === 0) {
-      window.utils?.toast("No valid records found in the uploaded CSV. Ensure format correctness.", "error");
+      window.utils.toast("No valid records found in the CSV file.", "error");
       previewCard.classList.add('hidden');
       return;
     }
@@ -351,7 +362,6 @@
     if (parsedStudents.length === 0) return;
 
     try {
-      // Map back array without display labels
       const listToInsert = parsedStudents.map(s => ({
         name: s.name,
         roll_no: s.roll_no,
@@ -367,11 +377,10 @@
       await window.db.logAction("Bulk Import Students", { count: listToInsert.length });
 
       const duplicateNote = importResult.skippedDuplicates
-        ? ` ${importResult.skippedDuplicates} duplicate row(s) were merged.`
+        ? ` (${importResult.skippedDuplicates} duplicates merged)`
         : '';
-      window.utils?.toast(`Successfully imported ${importResult.students.length} student records.${duplicateNote}`, "success");
+      window.utils.toast(`Successfully imported ${importResult.students.length} student records.${duplicateNote}`, "success");
       
-      // Reset
       document.getElementById('csv-preview-card').classList.add('hidden');
       document.getElementById('csv-file').value = '';
       parsedStudents = [];
@@ -379,7 +388,7 @@
 
     } catch (e) {
       console.error(e);
-      window.utils?.toast("Error importing records: " + e.message, "error");
+      window.utils.toast("Error importing records: " + e.message, "error");
     }
   }
 </script>

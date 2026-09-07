@@ -2,55 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · Passages Configuration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
-<style>
-  body { padding: 0 0 60px 0; overflow-x: hidden; max-width: 100%; }
-  .passage-body-preview {
-    font-size: 0.83rem;
-    line-height: 1.65;
-    color: var(--ink-soft);
-    background: var(--paper);
-    border: 1px solid var(--line-soft);
-    border-radius: 8px;
-    padding: 10px 12px;
-    max-height: 78px;
-    overflow: hidden;
-    position: relative;
-    margin-top: 10px;
-  }
-  .passage-body-preview::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 28px;
-    background: linear-gradient(transparent, var(--paper));
-  }
-  @media (max-width:600px) {
-    #passage-form > div[style*="display:flex"]{flex-direction:column;gap:0 !important;}
-  }
-</style>
 </head>
 <body>
 
 <div id="nav-container"></div>
 
-<div class="container">
+<div class="container" style="padding-top:4px;">
   <div class="grid-2col">
     <!-- Left column: Create passage -->
     <div class="card">
       <h2 class="section-title">Add Reading Passage</h2>
+      <p class="section-desc">Create reference reading material for assessments.</p>
+      
       <form id="passage-form" onsubmit="savePassage(event)">
         <div class="field-group">
           <label for="passage-title-input">Passage Title</label>
           <input type="text" id="passage-title-input" class="text-input" placeholder="e.g. The Brave Little Sailboat" required>
         </div>
 
-        <div style="display:flex; gap:12px; margin-bottom:14px;">
-          <div style="flex:1;">
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="form-col">
             <label for="passage-class">Class Level</label>
             <select id="passage-class" required>
               <option value="3">Class 3</option>
@@ -58,7 +34,7 @@
               <option value="5">Class 5</option>
             </select>
           </div>
-          <div style="flex:1;">
+          <div class="form-col">
             <label for="passage-lang">Language</label>
             <select id="passage-lang" required>
               <option value="english">English</option>
@@ -67,12 +43,12 @@
           </div>
         </div>
 
-        <div style="display:flex; gap:12px; margin-bottom:14px;">
-          <div style="flex:1;">
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="form-col">
             <label for="passage-cwpm-lo">Low target CWPM</label>
             <input type="number" id="passage-cwpm-lo" class="text-input" placeholder="e.g. 53" required>
           </div>
-          <div style="flex:1;">
+          <div class="form-col">
             <label for="passage-cwpm-hi">High target CWPM</label>
             <input type="number" id="passage-cwpm-hi" class="text-input" placeholder="e.g. 82" required>
           </div>
@@ -83,13 +59,14 @@
           <textarea id="passage-text-input" rows="8" placeholder="Type or paste reference passage text..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-admin" style="width:100%;">Save Passage</button>
+        <button type="submit" class="btn btn-admin btn-full">Save Passage</button>
       </form>
     </div>
 
     <!-- Right column: Passages list -->
     <div class="card">
       <h2 class="section-title">Registered Passages</h2>
+      <p class="section-desc">Active reading passages available for class evaluations.</p>
       <div id="passages-list">
         <div style="padding:30px; text-align:center; color:var(--ink-soft);">Loading passages...</div>
       </div>
@@ -115,13 +92,12 @@
 
   async function loadPassages() {
     try {
-      const passages = await window.db.getPassages(false); // fetch all, including inactive
+      const passages = await window.db.getPassages(false);
       passagesList = passages;
-
       renderPassages();
     } catch (e) {
       console.error(e);
-      alert("Error loading passages: " + e.message);
+      window.utils.toast("Error loading passages: " + e.message, "error");
     }
   }
 
@@ -137,7 +113,7 @@
       const langBadge = p.lang === 'hindi' ? '<span class="badge badge-indigo">Hindi</span>' : '<span class="badge badge-indigo">English</span>';
 
       return `
-        <div class="passage-box">
+        <div class="passage-card">
           <div class="passage-header">
             <div>
               <div class="passage-title">${window.utils.escapeHtml(p.title)}</div>
@@ -147,7 +123,7 @@
                 <span>Target: ${p.cwpm_lo}-${p.cwpm_hi} CWPM</span>
               </div>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div class="passage-actions">
               ${activeBadge}
               <button class="btn btn-ghost btn-sm" onclick="togglePassageStatus(${p.id}, ${p.is_active})">Toggle</button>
             </div>
@@ -165,10 +141,11 @@
         p.is_active = !currentStatus;
         await window.db.upsertPassage(p);
         await window.db.logAction("Toggle Passage Status", { passage_id: passageId, status: !currentStatus });
+        window.utils.toast(`Passage status changed to ${!currentStatus ? 'Active' : 'Inactive'}`, 'success');
         loadPassages();
       }
     } catch (e) {
-      alert("Error toggling passage: " + e.message);
+      window.utils.toast("Error toggling passage: " + e.message, "error");
     }
   }
 
@@ -194,13 +171,12 @@
 
       await window.db.logAction("Add Reading Passage", { title, class_num: classNum, lang });
 
-      // Reset
       document.getElementById('passage-form').reset();
       loadPassages();
-      window.utils?.toast("Reading passage configured successfully!", "success");
+      window.utils.toast("Reading passage saved successfully!", "success");
 
     } catch (err) {
-      alert("Error saving passage: " + err.message);
+      window.utils.toast("Error saving passage: " + err.message, "error");
     }
   }
 </script>

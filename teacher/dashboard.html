@@ -2,234 +2,133 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · Teacher Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.15);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    padding:0 0 60px 0;
-    overflow-x:hidden;
-    max-width:100%;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-  }
-  .container{
-    max-width:1200px;
-    margin:0 auto;
-    padding:0 20px;
-  }
-  .grid-layout{
-    display:grid;
+  .grid-layout {
+    display: grid;
     grid-template-columns: 2fr 1fr;
-    gap:24px;
-    margin-top:24px;
-  }
-  .table-wrap{
-    width:100%;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    margin:0 -4px;
-  }
-  @media (max-width: 900px) {
-    .grid-layout { grid-template-columns: 1fr; gap:16px; }
-  }
-  @media (max-width: 600px) {
-    .container{padding:0 12px;}
-    .grid-layout{gap:12px;margin-top:12px;}
-    .card{padding:16px;border-radius:16px;margin-bottom:14px;}
-    h2.section-title{font-size:1.15rem;margin-bottom:12px;}
-    .hero-panel{padding:18px 16px;border-radius:18px;margin-top:8px;margin-bottom:14px;flex-direction:column;align-items:stretch;gap:12px;}
-    .hero-text h1{font-size:1.45rem;}
-    .hero-text p{font-size:.82rem;}
-    .hero-panel .btn{width:100%;justify-content:center;padding:12px 16px;}
-    .section-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:0;}
-    .section-box{padding:12px 8px;}
-    .section-box h3{font-size:1.35rem;}
-    .risk-item{align-items:flex-start;gap:8px;padding:10px;}
-    .risk-item .score-badge{flex-shrink:0;}
-    .list-table th, .list-table td{padding:10px 8px;font-size:0.82rem;}
-  }
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:24px;
-    box-shadow:var(--shadow);
-    margin-bottom:24px;
-  }
-  h2.section-title{
-    font-family:'Baloo 2',sans-serif;
-    font-size:1.4rem;
-    margin:0 0 16px 0;
-    color:var(--indigo);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+    gap: 24px;
+    margin-top: 10px;
   }
   
-  /* Class sections styling */
-  .section-grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap:16px;
-    margin-bottom:20px;
+  .hero-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    background: linear-gradient(135deg, var(--indigo), var(--indigo-soft));
+    color: #fff;
+    padding: 28px 30px;
+    border-radius: var(--radius-xl);
+    margin-top: 6px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
   }
-  .section-box{
+  .hero-text h1 {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.95rem;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .hero-text p {
+    margin: 6px 0 0 0;
+    color: #D6DCED;
+    font-size: 0.92rem;
+  }
+  
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .section-box {
     border: 1.5px solid var(--line);
     background: var(--paper);
-    border-radius: 14px;
-    padding: 16px;
+    border-radius: var(--radius);
+    padding: 16px 14px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
+    touch-action: manipulation;
   }
-  .section-box:hover{
+  .section-box:active, .section-box:hover {
     border-color: var(--marigold);
     transform: translateY(-2px);
+    background: var(--paper-panel);
+    box-shadow: var(--shadow-sm);
   }
-  .section-box h3{
-    font-family:'Baloo 2', sans-serif;
-    font-size:1.6rem;
-    margin:0;
-    color:var(--indigo);
+  .section-box h3 {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.6rem;
+    margin: 0;
+    color: var(--indigo);
   }
-  .section-box p{
-    margin:4px 0 0 0;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-  }
-
-  /* List tables */
-  .list-table{
-    width:100%;
-    border-collapse:collapse;
-  }
-  .list-table th{
-    text-align:left;
-    padding:12px;
-    font-size:0.8rem;
-    font-weight:700;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    border-bottom:1px solid var(--line);
-  }
-  .list-table td{
-    padding:14px 12px;
-    font-size:0.9rem;
-    border-bottom:1px solid rgba(228, 220, 200, 0.5);
-  }
-  .list-table tr:last-child td{
-    border-bottom:none;
+  .section-box p {
+    margin: 4px 0 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
   }
 
-  .score-badge{
-    display:inline-block;
-    padding:3px 10px;
-    border-radius:99px;
-    font-weight:700;
-    font-size:0.8rem;
-    color:#fff;
+  .risk-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(214,88,79,0.06);
+    border: 1px solid rgba(214,88,79,0.2);
+    margin-bottom: 10px;
+    transition: var(--transition);
+    touch-action: manipulation;
   }
-  .bg-mint { background: var(--mint); }
-  .bg-indigo { background: var(--indigo); }
-  .bg-marigold { background: var(--marigold); }
-  .bg-coral { background: var(--coral); }
-  
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    text-decoration:none;
-    font-family:'Baloo 2',sans-serif;
-    font-weight:700;
-    font-size:1rem;
-    border-radius:12px;
-    padding:12px 24px;
-    border:none;
-    cursor:pointer;
-    transition:all 0.15s ease;
+  .risk-item:hover, .risk-item:active {
+    background: rgba(214,88,79,0.12);
+    transform: translateY(-1px);
   }
-  .btn-primary{
-    background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));
-    color:#fff;
-    box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);
+  .risk-name { font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+  .risk-details { font-size: 0.76rem; color: var(--coral); margin-top: 3px; font-weight: 500; }
+
+  .summary-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    padding: 12px 0;
   }
-  .btn-primary:hover{
-    opacity:0.95;
-    transform:translateY(-1px);
+  .summary-stat-val {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
   }
 
-  /* At-risk student alert block */
-  .risk-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px;
-    border-radius:10px;
-    background:rgba(214,88,79,0.06);
-    border:1px solid rgba(214,88,79,0.15);
-    margin-bottom:10px;
+  @media (max-width: 900px) {
+    .grid-layout { grid-template-columns: 1fr; gap: 16px; }
   }
-  .risk-name{
-    font-weight:600;
-    font-size:0.9rem;
-    color:var(--ink);
-  }
-  .risk-details{
-    font-size:0.75rem;
-    color:var(--coral);
-    margin-top:2px;
-  }
-
-  .hero-panel{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:18px;
-    background:linear-gradient(135deg, var(--indigo), var(--indigo-soft));
-    color:#fff;
-    padding:30px;
-    border-radius:24px;
-    margin-top:10px;
-    margin-bottom:24px;
-    box-shadow:var(--shadow);
-  }
-  .hero-text h1{
-    font-family:'Baloo 2', sans-serif;
-    font-size:2rem;
-    margin:0;
-  }
-  .hero-text p{
-    margin:6px 0 0 0;
-    color:#C0C8DB;
-    font-size:0.95rem;
-  }
-  
-  .empty-state{
-    text-align:center;
-    padding:30px 20px;
-    color:var(--ink-soft);
-    font-size:0.9rem;
+  @media (max-width: 600px) {
+    .hero-panel {
+      padding: 20px 16px;
+      border-radius: var(--radius-lg);
+      margin-top: 0;
+      margin-bottom: 16px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .hero-text h1 { font-size: 1.55rem; }
+    .hero-text p { font-size: 0.84rem; }
+    .hero-panel .btn { width: 100%; }
+    .section-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .section-box { padding: 12px 8px; }
+    .section-box h3 { font-size: 1.35rem; }
   }
 </style>
 </head>
@@ -241,10 +140,10 @@
   <div class="hero-panel">
     <div class="hero-text">
       <h1 id="welcome-title">Namaste, Teacher</h1>
-      <p>Ensure reading literacy target mapping (Class 3-5 reading parameters check)</p>
+      <p>Continuous reading fluency mapping for Class 3–5 foundational literacy</p>
     </div>
     <div>
-      <a href="./test.html" class="btn btn-primary">⚡ Start New Test</a>
+      <a href="./test.html" class="btn btn-primary btn-lg">⚡ Start Fluency Test</a>
     </div>
   </div>
 
@@ -254,32 +153,34 @@
       <!-- My Allotments Card -->
       <div class="card">
         <h2 class="section-title">My Assigned Sections</h2>
+        <p class="section-desc">Tap a section to view student roster and launch tests.</p>
         <div class="section-grid" id="sections-grid">
-          <div class="empty-state">Loading assigned sections...</div>
+          <div class="empty-state" style="grid-column: 1 / -1; text-align:center; padding:20px; color:var(--ink-soft);">Loading assigned sections...</div>
         </div>
       </div>
 
       <!-- Recent Sessions Card -->
       <div class="card">
         <h2 class="section-title">Recent Reading Evaluations</h2>
+        <p class="section-desc">Latest student reading tests conducted in your classes.</p>
         <div class="table-wrap">
-        <table class="list-table">
-          <thead>
-            <tr>
-              <th>Student Name</th>
-              <th>Class</th>
-              <th>Date</th>
-              <th>CWPM</th>
-              <th>NAEP Level</th>
-              <th>Overall</th>
-            </tr>
-          </thead>
-          <tbody id="recent-sessions-tbody">
-            <tr>
-              <td colspan="6" class="empty-state">Loading recent evaluations...</td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="list-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Date</th>
+                <th>CWPM</th>
+                <th>NAEP Level</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody id="recent-sessions-tbody">
+              <tr class="empty-row">
+                <td colspan="6">Loading recent evaluations...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -288,25 +189,29 @@
     <div>
       <!-- At-Risk Panel -->
       <div class="card">
-        <h2 class="section-title">At-Risk Students <span style="font-size:0.75rem; background:rgba(214,88,79,0.15); color:var(--coral); padding:2px 8px; border-radius:99px;" id="risk-count">0</span></h2>
-        <p style="font-size:0.8rem; color:var(--ink-soft); margin:-8px 0 16px 0; line-height:1.4;">Students scoring below Grade D (overall &lt; 4.0) in their last 2 evaluations.</p>
+        <h2 class="section-title" style="display:flex; align-items:center; justify-content:space-between;">
+          <span>At-Risk Students</span>
+          <span class="badge badge-coral" id="risk-count">0</span>
+        </h2>
+        <p class="section-desc">Scored overall &lt; 4.0 in last 2 checks.</p>
         <div id="risk-list">
-          <div class="empty-state">Loading list...</div>
+          <div class="empty-state" style="text-align:center; padding:20px; color:var(--ink-soft);">Loading list...</div>
         </div>
       </div>
       
       <!-- Stats Summary Card -->
       <div class="card">
         <h2 class="section-title">This Week Summary</h2>
-        <div style="display:flex; justify-content:space-around; text-align:center; padding:10px 0;">
+        <p class="section-desc">Activity in the last 7 days.</p>
+        <div class="summary-stats">
           <div>
-            <div style="font-family:'Baloo 2', sans-serif; font-size:2rem; font-weight:700; color:var(--indigo);" id="stat-sessions">0</div>
-            <div style="font-size:0.75rem; color:var(--ink-soft); text-transform:uppercase;">Sessions</div>
+            <div class="summary-stat-val" style="color:var(--indigo);" id="stat-sessions">0</div>
+            <div class="stat-label">Evaluations</div>
           </div>
-          <div style="border-left:1px solid var(--line);"></div>
+          <div style="border-left:1.5px solid var(--line); height:40px;"></div>
           <div>
-            <div style="font-family:'Baloo 2', sans-serif; font-size:2rem; font-weight:700; color:var(--mint);" id="stat-accuracy">0%</div>
-            <div style="font-size:0.75rem; color:var(--ink-soft); text-transform:uppercase;">Avg Accuracy</div>
+            <div class="summary-stat-val" style="color:var(--mint);" id="stat-accuracy">0%</div>
+            <div class="stat-label">Avg Accuracy</div>
           </div>
         </div>
       </div>
@@ -362,14 +267,16 @@
       allSubjectAllotments.forEach(sa => {
         if (sa.teacher_id === teacherId && !classTracker.has(sa.class_id)) {
           const classObj = sa.classes;
-          myClasses.push({ id: classObj.id, label: `${classObj.class_num}${classObj.section}`, role: sa.subject });
-          classTracker.add(classObj.id);
+          if (classObj) {
+            myClasses.push({ id: classObj.id, label: `${classObj.class_num}${classObj.section}`, role: sa.subject });
+            classTracker.add(classObj.id);
+          }
         }
       });
 
       const gridEl = document.getElementById('sections-grid');
       if (myClasses.length === 0) {
-        gridEl.innerHTML = `<div class="empty-state">No sections assigned yet. Please contact the Admin to configure allotments.</div>`;
+        gridEl.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1; text-align:center; padding:20px; color:var(--ink-soft);">No sections assigned yet. Please contact the Admin.</div>`;
       } else {
         gridEl.innerHTML = myClasses.map(mc => `
           <div class="section-box" onclick="window.location.href='./students.html?classId=${mc.id}'">
@@ -400,27 +307,29 @@
 
       // Render Recent Sessions Table
       const recentTbody = document.getElementById('recent-sessions-tbody');
-      const recentLimit = sessions.slice(0, 5);
+      const recentLimit = sessions.slice(0, 6);
 
       if (recentLimit.length === 0) {
-        recentTbody.innerHTML = `<tr><td colspan="6" class="empty-state">No reading checks completed yet.</td></tr>`;
+        recentTbody.innerHTML = `<tr class="empty-row"><td colspan="6">No reading checks completed yet.</td></tr>`;
       } else {
         recentTbody.innerHTML = recentLimit.map(s => {
           const student = s.students || {};
           const className = student.classes ? `${student.classes.class_num}${student.classes.section}` : '—';
           
-          let levelClass = 'bg-indigo';
-          if (s.naep_level === 4) levelClass = 'bg-mint';
-          if (s.naep_level === 2) levelClass = 'bg-marigold';
-          if (s.naep_level === 1) levelClass = 'bg-coral';
+          let levelBadgeClass = 'badge-indigo';
+          if (s.naep_level === 4) levelBadgeClass = 'badge-mint';
+          if (s.naep_level === 2) levelBadgeClass = 'badge-marigold';
+          if (s.naep_level === 1) levelBadgeClass = 'badge-coral';
+
+          const levelLabel = s.naep_level === 4 ? 'Level 4 · Fluent' : s.naep_level === 3 ? 'Level 3 · Primarily' : s.naep_level === 2 ? 'Level 2 · Developing' : 'Level 1 · Non-fluent';
 
           return `
             <tr>
               <td><b>${window.utils.escapeHtml(student.name || 'Unknown')}</b></td>
               <td>${className}</td>
               <td>${window.utils.formatDate(s.session_date)}</td>
-              <td>${s.cwpm || '—'}</td>
-              <td><span class="score-badge ${levelClass}">L${s.naep_level} · ${s.naep_level === 4 ? 'Fluent' : s.naep_level === 3 ? 'Primarily' : s.naep_level === 2 ? 'Developing' : 'Non-fluent'}</span></td>
+              <td><b>${s.cwpm || '—'}</b></td>
+              <td><span class="badge ${levelBadgeClass}">${levelLabel}</span></td>
               <td><b>${s.overall_score || '0'}/10</b> <small>(${s.grade || 'E'})</small></td>
             </tr>
           `;
@@ -431,7 +340,6 @@
       const riskListEl = document.getElementById('risk-list');
       const riskCountEl = document.getElementById('risk-count');
       
-      // Group sessions by student
       const studentHistory = {};
       sessions.forEach(s => {
         if (!studentHistory[s.student_id]) studentHistory[s.student_id] = [];
@@ -442,7 +350,6 @@
       students.forEach(st => {
         const history = studentHistory[st.id] || [];
         if (history.length >= 2) {
-          // Sort by creation date descending to get the most recent 2
           history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           const score1 = Number(history[0].overall_score || 0);
           const score2 = Number(history[1].overall_score || 0);
@@ -461,7 +368,7 @@
 
       riskCountEl.textContent = riskStudents.length;
       if (riskStudents.length === 0) {
-        riskListEl.innerHTML = `<div class="empty-state">No students flagged as at-risk. Great job!</div>`;
+        riskListEl.innerHTML = `<div class="empty-state" style="text-align:center; padding:20px; color:var(--ink-soft);">No students flagged as at-risk. Great job!</div>`;
       } else {
         riskListEl.innerHTML = riskStudents.map(rs => `
           <div class="risk-item" onclick="window.location.href='./students.html?studentId=${rs.id}'" style="cursor:pointer;">
@@ -469,14 +376,14 @@
               <div class="risk-name">${window.utils.escapeHtml(rs.name)} (${rs.classLabel})</div>
               <div class="risk-details">Last scores: ${rs.score1.toFixed(1)} and ${rs.score2.toFixed(1)} / 10</div>
             </div>
-            <span class="score-badge bg-coral">Flagged</span>
+            <span class="badge badge-coral">Flagged</span>
           </div>
         `).join('');
       }
 
     } catch (e) {
       console.error(e);
-      alert("Error loading dashboard data: " + e.message);
+      window.utils.toast("Error loading dashboard data: " + e.message, "error");
     }
   }
 </script>

@@ -2,247 +2,298 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <title>Vaachan · Reading Fluency Check</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/shared.css">
 <style>
-  :root{
-    --ink:#14203B;
-    --ink-soft:#4A5578;
-    --paper:#FBF7EE;
-    --paper-panel:#FFFFFF;
-    --line:#E4DCC8;
-    --marigold:#E8A33D;
-    --marigold-deep:#C9791B;
-    --indigo:#1B2A4A;
-    --indigo-soft:#2C3D63;
-    --coral:#D6584F;
-    --mint:#4F9B72;
-    --sky:#3E7CB1;
-    --shadow: 0 10px 30px -12px rgba(20,32,59,0.25);
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    padding:0 0 60px 0;
-    overflow-x:hidden;
-    max-width:100%;
+  body {
     background:
       radial-gradient(circle at 12% 8%, rgba(232,163,61,0.06), transparent 40%),
       radial-gradient(circle at 90% 85%, rgba(62,124,177,0.06), transparent 45%),
       var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
   }
-  .wrap{max-width:680px; margin:0 auto; padding:0 16px;}
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
   
-  /* Card */
-  .card{
-    background:var(--paper-panel);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:30px;
-    box-shadow:var(--shadow);
-    margin-top:24px;
-    margin-bottom:18px;
+  .card {
+    background: var(--paper-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-top: 12px;
+    margin-bottom: 20px;
+    transition: var(--transition);
   }
-  .eyebrow{
-    font-size:0.75rem;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;
-    color:var(--marigold-deep); margin:0 0 6px;
+  .eyebrow {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--marigold-deep);
+    margin: 0 0 6px;
   }
-  h2.step-title{
-    font-family:'Baloo 2',sans-serif;font-size:1.5rem;margin:0 0 4px;color:var(--indigo);
+  h2.step-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.55rem;
+    margin: 0 0 6px;
+    color: var(--indigo);
+    line-height: 1.25;
   }
-  .step-sub{color:var(--ink-soft);font-size:0.95rem;margin:0 0 20px;line-height:1.5;}
+  .step-sub {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
 
   /* Form Elements */
-  .field-group{margin-bottom:18px;}
-  .field-group label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
-  .text-input, select{
-    width:100%;
-    padding:12px 14px;
-    border-radius:12px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    font-family:'Inter',sans-serif;
-    font-size:0.95rem;
-    color:var(--ink);
-  }
-  .text-input:focus, select:focus{outline:none;border-color:var(--marigold);}
-
+  .field-group { margin-bottom: 18px; }
+  .field-group label { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; display: block; }
+  
   /* Pickers */
-  .picker-group{margin-bottom:18px;}
-  .picker-label{font-size:0.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;display:block;}
-  .picker-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .chip{
-    flex:1; min-width:84px;
-    border:1.5px solid var(--line);
-    background:var(--paper);
-    border-radius:12px;
-    padding:12px 10px;
-    text-align:center;
-    cursor:pointer;
-    font-family:'Baloo 2',sans-serif;
-    font-weight:600;
-    font-size:0.95rem;
-    color:var(--ink);
-    transition:all .15s ease;
-    user-select:none;
+  .picker-group { margin-bottom: 20px; }
+  .picker-label { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; display: block; }
+  .picker-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip {
+    flex: 1; min-width: 90px;
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border-radius: var(--radius-sm);
+    padding: 13px 12px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink);
+    transition: var(--transition);
+    user-select: none;
+    touch-action: manipulation;
   }
-  .chip:hover{border-color:var(--marigold);}
-  .chip.active{
-    background:var(--indigo);
-    border-color:var(--indigo);
-    color:#fff;
-    box-shadow:0 6px 16px -6px rgba(27,42,74,0.5);
+  .chip:active, .chip:hover { border-color: var(--marigold); }
+  .chip.active {
+    background: var(--indigo);
+    border-color: var(--indigo);
+    color: #fff;
+    box-shadow: 0 6px 16px -6px rgba(27,42,74,0.5);
   }
 
-  .btn{
-    appearance:none;border:none;cursor:pointer;
-    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.05rem;
-    border-radius:14px;padding:14px 20px;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    width:100%;
-    transition:all .12s ease;
-  }
-  .btn:active{transform:scale(0.98);}
-  .btn-primary{background:linear-gradient(155deg, var(--marigold), var(--marigold-deep));color:#fff;box-shadow:0 8px 18px -8px rgba(201,121,27,0.6);}
-  .btn-primary:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
-  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
-  .btn-row{display:flex;gap:10px;margin-top:4px;}
+  .btn-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .btn-row .btn { flex: 1; min-width: 140px; }
 
   /* Story screen */
-  .story-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-  .pill{
-    font-size:0.75rem;font-weight:700;color:var(--indigo);
-    background:rgba(27,42,74,0.08);
-    padding:5px 12px;border-radius:99px;
+  .story-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
   }
-  .story-box{
+  .story-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--indigo);
+    background: rgba(27,42,74,0.08);
+    padding: 5px 12px;
+    border-radius: 99px;
+  }
+  
+  /* Font size controls for kids */
+  .font-size-controls {
+    display: inline-flex;
+    align-items: center;
     background: var(--paper);
-    border:1px dashed var(--line);
-    border-radius:16px;
-    padding:24px;
-    margin-bottom:18px;
-    max-height:365px;
-    overflow-y:auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
   }
-  .story-box.hindi{font-family:'Noto Sans Devanagari',sans-serif;font-size:1.25rem;line-height:2.15;}
-  .story-box.english{font-family:'Lexend',sans-serif;font-size:1.15rem;line-height:2.05;}
-  .story-title{
-    font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);
-    font-size:1.2rem;margin:0 0 12px;
+  .font-size-btn {
+    background: none;
+    border: none;
+    padding: 5px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--indigo);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+  }
+  .font-size-btn:active { background: var(--paper-hover); }
+
+  .story-box {
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 18px;
+    max-height: 380px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: font-size 0.15s ease;
+  }
+  .story-box.hindi { font-family: 'Noto Sans Devanagari', sans-serif; font-size: 1.3rem; line-height: 2.2; }
+  .story-box.english { font-family: 'Lexend', sans-serif; font-size: 1.2rem; line-height: 2.1; }
+  .story-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    color: var(--indigo);
+    font-size: 1.35rem;
+    margin: 0 0 14px;
   }
 
   /* Recorder */
-  .rec-panel{
-    display:flex;flex-direction:column;align-items:center;
-    padding:18px 8px 6px;
+  .rec-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 8px 6px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
   }
-  canvas#wave{width:100%;height:64px;border-radius:10px;background:var(--indigo);margin-bottom:16px;}
-  .mic-btn{
-    width:78px;height:78px;border-radius:50%;
-    border:none;cursor:pointer;
-    background:linear-gradient(155deg, var(--coral), #b3413a);
-    color:#fff;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 10px 24px -10px rgba(214,88,79,0.7);
-    transition:transform .15s ease;
-    margin-bottom:10px;
+  canvas#wave {
+    width: 100%;
+    max-width: 100%;
+    height: 56px;
+    border-radius: 10px;
+    background: var(--indigo);
+    margin-bottom: 14px;
   }
-  .mic-btn.recording{animation:pulse 1.4s infinite;}
-  .mic-btn:active{transform:scale(0.94);}
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(214,88,79,0.55);}
-    70%{box-shadow:0 0 0 18px rgba(214,88,79,0);}
-    100%{box-shadow:0 0 0 0 rgba(214,88,79,0);}
+  .mic-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(155deg, var(--coral), #b3413a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 24px -10px rgba(214,88,79,0.7);
+    transition: transform 0.15s ease;
+    margin-bottom: 10px;
+    touch-action: manipulation;
   }
-  .timer{font-family:'Baloo 2',sans-serif;font-size:1.5rem;color:var(--indigo);font-weight:700;margin-bottom:2px;}
-  .rec-hint{font-size:0.85rem;color:var(--ink-soft);text-align:center;}
-  .status-banner{
-    font-size:0.8rem; background:rgba(62,124,177,0.10); color:var(--sky);
-    padding:10px 14px;border-radius:10px;margin-bottom:14px;line-height:1.45;
+  .mic-btn.recording { animation: pulse 1.4s infinite; }
+  .mic-btn:active { transform: scale(0.92); }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(214,88,79,0.55); }
+    70% { box-shadow: 0 0 0 18px rgba(214,88,79,0); }
+    100% { box-shadow: 0 0 0 0 rgba(214,88,79,0); }
   }
-  .asr-notice{
-    background:linear-gradient(135deg,rgba(220,53,69,0.08),rgba(255,140,0,0.06));
-    border:1.5px solid rgba(220,53,69,0.28);
-    border-radius:14px;padding:16px 18px;margin-bottom:16px;
-    font-size:0.82rem;line-height:1.6;color:var(--indigo);
+  .timer {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 1.6rem;
+    color: var(--indigo);
+    font-weight: 800;
+    margin-bottom: 2px;
   }
-  .asr-notice-title{
-    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.95rem;
-    color:#c0392b;display:flex;align-items:center;gap:7px;margin-bottom:8px;
+  .rec-hint {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-align: center;
   }
-  .asr-notice ul{
-    margin:4px 0 0 0;padding-left:18px;
+
+  .asr-notice {
+    background: linear-gradient(135deg, rgba(220,53,69,0.08), rgba(255,140,0,0.06));
+    border: 1.5px solid rgba(220,53,69,0.28);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--indigo);
   }
-  .asr-notice ul li{ margin-bottom:4px; }
-  .asr-alt-row{
-    display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;
-  }
-  .asr-alt-chip{
-    background:rgba(62,124,177,0.12);border:1px solid rgba(62,124,177,0.3);
-    border-radius:99px;padding:4px 12px;font-size:0.76rem;
-    font-weight:700;color:var(--indigo);white-space:nowrap;
-  }
-  .asr-alt-chip.good{
-    background:rgba(79,155,114,0.15);border-color:rgba(79,155,114,0.4);color:#1a6b3a;
+  .asr-notice-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #c0392b;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 8px;
   }
 
   /* Results layout */
-  .overall{
-    text-align:center;padding:6px 0 20px;
+  .overall {
+    text-align: center;
+    padding: 8px 0 22px;
   }
-  .stars{font-size:2.2rem;letter-spacing:4px;margin-bottom:6px;}
-  .grade-badge{
-    display:inline-block;
-    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.1rem;
-    color:#fff;background:var(--indigo);
-    padding:4px 18px;border-radius:99px;margin-bottom:10px;letter-spacing:0.02em;
+  .stars { font-size: 2.3rem; letter-spacing: 4px; margin-bottom: 6px; color: var(--marigold); }
+  .grade-badge {
+    display: inline-block;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #fff;
+    background: var(--indigo);
+    padding: 5px 20px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+    box-shadow: var(--shadow-sm);
   }
-  .overall-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.3rem;color:var(--indigo);}
-  .overall-sub{font-size:0.9rem;color:var(--ink-soft);margin-top:2px;}
+  .overall-label { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--indigo); }
+  .overall-sub { font-size: 0.92rem; color: var(--ink-soft); margin-top: 2px; font-weight: 600; }
 
-  .metric{margin-bottom:18px;}
-  .metric-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
-  .metric-name{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--ink);font-size:1.02rem;}
-  .metric-score{font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--indigo);font-size:1.02rem;}
+  .metric { margin-bottom: 18px; }
+  .metric-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .metric-name { font-family: 'Baloo 2', sans-serif; font-weight: 700; color: var(--ink); font-size: 1.05rem; }
+  .metric-score { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--indigo); font-size: 1.05rem; }
   
-  /* Upgraded progress bars */
-  .eq-track{
-    height:14px;border-radius:8px;background:var(--line);overflow:hidden;
-    display:flex;gap:3px;padding:2px;
+  .eq-track {
+    height: 14px;
+    border-radius: 8px;
+    background: var(--line);
+    overflow: hidden;
+    display: flex;
+    gap: 3px;
+    padding: 2px;
   }
-  .eq-bar{flex:1;border-radius:4px;background:var(--line);transition:background .4s ease;}
-  .metric-note{font-size:0.85rem;color:var(--ink-soft);margin-top:7px;line-height:1.45;}
+  .eq-bar { flex: 1; border-radius: 4px; background: var(--line); transition: background .4s ease; }
+  .metric-note { font-size: 0.84rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.45; }
 
-  .transcript-box{
-    background:var(--paper);border:1px solid var(--line);border-radius:14px;
-    padding:16px;font-size:0.95rem;color:var(--ink-soft);line-height:1.75;margin-top:10px;
+  .transcript-box {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.8;
+    margin-top: 14px;
   }
-  .transcript-box b{color:var(--ink); display:block; margin-bottom:8px;}
+  .transcript-box b { color: var(--ink); display: block; margin-bottom: 8px; }
 
-  .footer-note{
-    text-align:center;font-size:0.75rem;color:var(--ink-soft);opacity:0.8;margin-top:14px;line-height:1.5;
+  .results-id {
+    text-align: center;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
   }
-  .hidden{display:none !important;}
-  .results-id{
-    text-align:center;font-size:0.9rem;color:var(--ink-soft);margin-bottom:6px;
-  }
-  .results-id b{color:var(--ink);}
-  @media (max-width:600px){
-    .wrap{padding:0 12px;}
-    .card{padding:20px 16px;border-radius:16px;margin-top:16px;}
-    h2.step-title{font-size:1.3rem;}
-    .step-sub{font-size:.88rem;margin-bottom:16px;}
-    .chip{min-width:calc(50% - 4px);padding:10px 8px;}
-    .story-box{padding:16px;max-height:52vh;}
-    .story-box.hindi{font-size:1.1rem;line-height:2;}
-    .story-box.english{font-size:1rem;line-height:1.9;}
-    .btn-row{flex-direction:column;}
-    .btn-row .btn{width:100%;}
+  .results-id b { color: var(--ink); }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 0 12px; }
+    .card { padding: 20px 16px; border-radius: var(--radius-lg); margin-top: 8px; }
+    h2.step-title { font-size: 1.35rem; }
+    .step-sub { font-size: 0.86rem; margin-bottom: 16px; }
+    .chip { min-width: calc(50% - 6px); padding: 11px 8px; font-size: 0.92rem; }
+    .story-box { padding: 18px 14px; max-height: 48vh; }
+    .story-box.hindi { font-size: 1.15rem; line-height: 2.1; }
+    .story-box.english { font-size: 1.05rem; line-height: 1.95; }
+    .btn-row { flex-direction: column; }
+    .btn-row .btn { width: 100%; }
+    .rec-panel { padding: 14px 8px; }
+    .mic-btn { width: 72px; height: 72px; }
   }
 </style>
 </head>
@@ -253,9 +304,9 @@
 <div class="wrap">
   <!-- STEP 1: SETUP -->
   <div class="card" id="screen-setup">
-    <p class="eyebrow">Step 1</p>
+    <p class="eyebrow">Step 1 of 3</p>
     <h2 class="step-title">Select Student & Language</h2>
-    <p class="step-sub">Select the allotted class section and choose the reading candidate.</p>
+    <p class="step-sub">Choose the assigned class section, student, and target reading language.</p>
 
     <div class="field-group">
       <label for="class-select">Assigned Class Section</label>
@@ -275,24 +326,28 @@
       <span class="picker-label">Language</span>
       <div class="picker-row" id="lang-picker">
         <div class="chip" data-lang="english" onclick="selectLang('english')">English</div>
-        <div class="chip" data-lang="hindi" onclick="selectLang('hindi')">हिन्दी</div>
+        <div class="chip" data-lang="hindi" onclick="selectLang('hindi')">हिन्दी (Hindi)</div>
       </div>
     </div>
 
-    <button class="btn btn-primary" id="btn-continue" disabled onclick="startEvaluation()">Show the passage</button>
+    <button class="btn btn-primary btn-lg" id="btn-continue" disabled onclick="startEvaluation()">
+      Continue to Reading Passage ➔
+    </button>
   </div>
 
   <!-- STEP 2: STORY + RECORD -->
   <div class="card hidden" id="screen-story">
-    <p class="eyebrow" id="story-eyebrow">Step 2</p>
-    <h2 class="step-title">Read the passage aloud</h2>
-    <p class="step-sub">Hand the device to the student. Tap the mic icon, have them read the full passage, then tap it again to complete.</p>
-
-    <div class="story-meta">
-      <span class="pill" id="pill-student">Aarav Sharma</span>
-      <span class="pill" id="pill-class">Class 3A</span>
-      <span class="pill" id="pill-lang">English</span>
-      <span class="pill" id="pill-words">0 words</span>
+    <div class="story-meta-row">
+      <div class="story-meta">
+        <span class="pill" id="pill-student">Aarav Sharma</span>
+        <span class="pill" id="pill-class">Class 3A</span>
+        <span class="pill" id="pill-lang">English</span>
+        <span class="pill" id="pill-words">0 words</span>
+      </div>
+      <div class="font-size-controls" title="Adjust text size">
+        <button class="font-size-btn" onclick="adjustStoryFontSize(-1)" aria-label="Decrease text size">A-</button>
+        <button class="font-size-btn" onclick="adjustStoryFontSize(1)" aria-label="Increase text size">A+</button>
+      </div>
     </div>
 
     <div class="story-box" id="story-box">
@@ -303,22 +358,22 @@
     <div id="asr-banner" class="hidden"></div>
 
     <div class="rec-panel">
-      <canvas id="wave" width="600" height="64"></canvas>
+      <canvas id="wave" width="600" height="56"></canvas>
       <div class="timer" id="timer">00:00</div>
       <button class="mic-btn" id="mic-btn" aria-label="Start recording">
-        <svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15Z" stroke="#fff" stroke-width="1.8"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3.2M9 20.2h6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15Z" stroke="#fff" stroke-width="2"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3.2M9 20.2h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <p class="rec-hint" id="rec-hint">Tap to start recording</p>
+      <p class="rec-hint" id="rec-hint">Tap microphone to start reading</p>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-ghost" id="btn-back" onclick="goBackToSetup()">Change setup</button>
+      <button class="btn btn-ghost" id="btn-back" onclick="goBackToSetup()">Change Setup</button>
     </div>
   </div>
 
   <!-- STEP 3: RESULTS -->
   <div class="card hidden" id="screen-results">
-    <p class="eyebrow">Result Details</p>
+    <p class="eyebrow">Assessment Results</p>
     <p class="results-id" id="results-id"></p>
     <div class="overall">
       <div class="stars" id="stars">★★★☆☆</div>
@@ -369,17 +424,16 @@
 
     <div class="transcript-box" id="transcript-wrap">
       <b>Word-by-word Alignment View:</b>
-      <div id="transcript-text" style="font-family:'Lexend', sans-serif;"></div>
+      <div id="transcript-text"></div>
     </div>
 
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn btn-ghost" id="btn-retry" onclick="retryReading()">Read again</button>
-      <button class="btn btn-primary" id="btn-newstudent" onclick="resetToNewEvaluation()">Next student</button>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-ghost" id="btn-retry" onclick="retryReading()">🔄 Read Again</button>
+      <button class="btn btn-primary" id="btn-newstudent" onclick="resetToNewEvaluation()">✨ Next Student</button>
     </div>
     <div class="btn-row" style="margin-top:10px;">
-      <button class="btn btn-ghost" id="btn-download" onclick="downloadReport()">⬇ Download this report</button>
+      <button class="btn btn-ghost" id="btn-download" onclick="downloadReport()">⬇ Download Assessment PDF</button>
     </div>
-    <p class="footer-note">Results are computed by comparing recording dynamics and Speech Recognition transcript matching. Target targets are aligned to NIPUN / DIBELS benchmarks.</p>
   </div>
 </div>
 
@@ -402,17 +456,16 @@
   let activePassage = null;
 
   let audioCtx, analyser, micStream, sourceNode, dataArray;
-  let recognizer = null, recognitionAvailable = false, finalTranscript = "";
   let recStartTime = 0, timerInterval = null, waveInterval = null;
-  let samples = []; // {t, rms, pitch}
+  let samples = [];
   let recording = false;
   let lastComputedResult = null;
+  let currentStoryFontSize = 1.2;
 
   window.addEventListener('DOMContentLoaded', async () => {
     await window.auth.checkGuard('teacher');
     window.utils.renderNav('test', false);
 
-    // Show notice immediately ONLY if on non-native Android browser that lacks Speech Recognition
     await window.VaachanSpeech?.checkEnvironment();
     if (!window.VaachanSpeech?.isNative) {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -425,13 +478,19 @@
     loadSetupData();
   });
 
+  function adjustStoryFontSize(delta) {
+    const box = document.getElementById('story-box');
+    if (!box) return;
+    currentStoryFontSize = Math.max(0.95, Math.min(2.0, currentStoryFontSize + (delta * 0.15)));
+    box.style.fontSize = currentStoryFontSize + 'rem';
+  }
+
   async function loadSetupData() {
     try {
       const session = await window.auth.getSession();
       if (!session) return;
       const teacherId = session.user.id;
 
-      // Fetch allotments and students
       const [allClasses, allotments, students, passages] = await Promise.all([
         window.db.getClasses(),
         window.db.getClassSubjectTeachers(),
@@ -442,7 +501,6 @@
       studentsList = students;
       passagesList = passages;
 
-      // Filter classes assigned to this teacher
       const myClassIds = new Set();
       allClasses.forEach(c => {
         if (c.teacher_id === teacherId) myClassIds.add(c.id);
@@ -458,7 +516,7 @@
 
     } catch (e) {
       console.error(e);
-      alert("Error loading setup data: " + e.message);
+      window.utils.toast("Error loading setup data: " + e.message, "error");
     }
   }
 
@@ -489,6 +547,7 @@
 
   function selectLang(lang) {
     selectedLang = lang;
+    window.utils.haptic('light');
     document.querySelectorAll('#lang-picker .chip').forEach(c => {
       c.classList.toggle('active', c.dataset.lang === lang);
     });
@@ -507,16 +566,14 @@
   function startEvaluation() {
     if (!selectedStudent || !selectedLang) return;
     
-    // Find matching passage
     const classNum = selectedStudent.classes ? selectedStudent.classes.class_num : 3;
     activePassage = passagesList.find(p => p.class_num === classNum && p.lang === selectedLang);
 
     if (!activePassage) {
-      alert(`No active passage found for Class ${classNum} in ${selectedLang === 'english' ? 'English' : 'Hindi'}. Please contact the Admin to configure passages.`);
+      window.utils.toast(`No active passage configured for Class ${classNum} in ${selectedLang === 'english' ? 'English' : 'Hindi'}.`, "warning");
       return;
     }
 
-    // Set up step 2 panel
     document.getElementById('pill-student').textContent = selectedStudent.name;
     document.getElementById('pill-class').textContent = `Class ${selectedStudent.classes.class_num}${selectedStudent.classes.section}`;
     document.getElementById('pill-lang').textContent = selectedLang === 'english' ? 'English' : 'हिन्दी';
@@ -532,6 +589,8 @@
     
     const storyBox = document.getElementById('story-box');
     storyBox.className = 'story-box ' + (selectedLang === 'hindi' ? 'hindi' : 'english');
+    currentStoryFontSize = selectedLang === 'hindi' ? 1.3 : 1.2;
+    storyBox.style.fontSize = currentStoryFontSize + 'rem';
 
     resetRecordingState();
     showScreen('screen-story');
@@ -549,12 +608,12 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* Recording Logic */
   const micBtn = document.getElementById('mic-btn');
   const waveCanvas = document.getElementById('wave');
   const waveCtx = waveCanvas.getContext('2d');
 
   micBtn.addEventListener('click', async () => {
+    window.utils.haptic('light');
     if (!recording) {
       await startRecording();
     } else {
@@ -563,11 +622,8 @@
   });
 
   let lastHighlightedIdx = -1;
-
   let asrWarningTriggered = false;
-
   let cachedFloatBuf = null;
-  let cachedPitchCorrBuf = null;
 
   function releaseAudioResources() {
     if (micStream) {
@@ -591,7 +647,7 @@
     asrWarningTriggered = false;
     lastHighlightedIdx = -1;
     micBtn.classList.remove('recording');
-    document.getElementById('rec-hint').textContent = 'Tap to start recording';
+    document.getElementById('rec-hint').textContent = 'Tap microphone to start reading';
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('asr-banner').classList.add('hidden');
     clearWave();
@@ -612,7 +668,7 @@
 
   function updateTimer() {
     const elapsed = (performance.now() - recStartTime) / 1000;
-    if (elapsed >= 240) { // 4 minute auto-stop limit (A6)
+    if (elapsed >= 240) {
       window.utils?.toast("Recording reached maximum 4 minute limit.", "info");
       stopRecording();
       return;
@@ -622,9 +678,6 @@
     document.getElementById('timer').textContent = m + ':' + s;
     updateLiveReadingHighlight();
 
-    // Voice Activity vs Speech Recognition Guard (Android Browser Only):
-    // If voice input is detected but speech recognition yields no text after 6 seconds,
-    // show the browser notice card with direct APK download link for Android Web Chrome!
     const isAndroidBrowser = /Android/i.test(navigator.userAgent) && !window.VaachanSpeech?.isNative;
     if (isAndroidBrowser && elapsed >= 6.0 && !asrWarningTriggered) {
       const fullText = (finalTranscript + " " + (window.lastInterim || "")).trim();
@@ -644,29 +697,23 @@
   }
 
   function showAsrNotice(el) {
-    if (window.VaachanSpeech?.isNative) return; // Never show notice on native Android APK app!
+    if (window.VaachanSpeech?.isNative) return;
     const isAndroid = /Android/i.test(navigator.userAgent);
-    if (!isAndroid) return; // ONLY display notice on Android browsers!
+    if (!isAndroid) return;
 
     el.className = 'asr-notice';
     el.innerHTML = `
       <div class="asr-notice-title">
-        ⚠️ Speech Recognition Not Supported or Blocked on Android Browser
+        ⚠️ Android Browser Mic Streaming Restricted
       </div>
       <p style="margin:0 0 6px">
-        Your Chrome browser on Android is <strong>not converting voice to text</strong>.
-        This happens when Chrome blocks background mic streaming or Google Speech Services is inactive.
+        Your browser has paused automatic voice-to-text. For uninterrupted offline recognition, use the official APK app.
       </p>
-      <div style="background:rgba(232, 163, 61, 0.12);border:1px solid rgba(232, 163, 61, 0.35);border-radius:10px;padding:12px;margin:10px 0;">
-        <div style="font-weight:700;color:var(--indigo);margin-bottom:4px;">📱 Recommended Solution:</div>
-        <p style="margin:0 0 8px;font-size:0.8rem;">Download and install the official Vaachan Android APK app for 100% reliable speech recognition.</p>
-        <a href="https://github.com/gvtanish/Vaachan/releases/download/latest/Vaachan.apk" target="_blank" download class="btn btn-primary" style="font-size:0.85rem;padding:8px 16px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+      <div style="background:rgba(232, 163, 61, 0.12);border:1px solid rgba(232, 163, 61, 0.35);border-radius:10px;padding:10px;margin:8px 0;">
+        <a href="https://github.com/gvtanish/Vaachan/releases/download/latest/Vaachan.apk" target="_blank" download class="btn btn-primary" style="font-size:0.85rem;padding:8px 14px;text-decoration:none;">
           ⬇️ Download Vaachan Android APK
         </a>
       </div>
-      <p style="margin:10px 0 0;font-size:0.78rem;color:#888;">
-        Note: You can still record audio and manually grade words by tapping them after recording stops.
-      </p>
     `;
     el.classList.remove('hidden');
   }
@@ -682,11 +729,10 @@
     asrWarningTriggered = false;
 
     micBtn.classList.add('recording');
-    document.getElementById('rec-hint').textContent = 'Recording… tap to stop';
+    document.getElementById('rec-hint').textContent = 'Listening… Tap when student finishes';
     const banner = document.getElementById('asr-banner');
     if (banner) banner.classList.add('hidden');
 
-    // 1. Start Speech Recognition via Unified Engine (Native Capacitor APK or WebSpeech API)
     const srStarted = await window.VaachanSpeech.start(
       selectedLang,
       (transcriptText) => {
@@ -709,11 +755,6 @@
       showAsrNotice(banner);
     }
 
-    // 2. Hardware Mic Contention Guard:
-    // On mobile devices (Android APK or Mobile Browser), running getUserMedia concurrently with SpeechRecognition
-    // causes hardware mic conflicts that crash the Android audio server or abort speech recognition.
-    // We only initialize getUserMedia WebAudio analysis on desktop browsers when SpeechRecognition is active,
-    // OR on mobile as a fallback ONLY if SpeechRecognition is completely unavailable.
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.VaachanSpeech?.isNative;
 
     if (!isMobileDevice || !srStarted) {
@@ -734,7 +775,7 @@
         sourceNode.connect(analyser);
         dataArray = new Uint8Array(analyser.fftSize);
       } catch (e) {
-        console.warn("getUserMedia audio initialization failed (expected on some mobile platforms):", e);
+        console.warn("getUserMedia audio initialization fallback:", e);
       }
     }
 
@@ -804,8 +845,6 @@
     });
   }
 
-  // Fast, bounded autocorrelation pitch estimation (75 Hz - 450 Hz)
-  // Eliminates O(N^2) CPU saturation and stops Android ANR crashes on mobile
   function estimatePitch(buf, sampleRate) {
     const SIZE = buf.length;
     let rms = 0;
@@ -840,7 +879,6 @@
     const now = performance.now() - recStartTime;
 
     if (analyser && audioCtx) {
-      // Direct WebAudio stream (desktop or fallback)
       analyser.getByteTimeDomainData(dataArray);
       if (!cachedFloatBuf || cachedFloatBuf.length !== dataArray.length) {
         cachedFloatBuf = new Float32Array(dataArray.length);
@@ -851,13 +889,11 @@
       samples.push({ t: now, rms, pitch });
       drawWave(cachedFloatBuf, rms);
     } else {
-      // Mobile exclusive SR mode: synthesize voice-activity samples & live wave from speech engine
       const isSpeaking = window.VaachanSpeech ? window.VaachanSpeech.isUserSpeaking() : false;
       let rms = 0.005;
       let pitch = 0;
 
       if (isSpeaking) {
-        // Natural conversational reading energy & pitch
         rms = 0.045 + (Math.random() * 0.04);
         pitch = 180 + (Math.sin(now / 500) * 35) + (Math.random() * 15);
       }
@@ -911,7 +947,7 @@
   function stopRecording() {
     recording = false;
     micBtn.classList.remove('recording');
-    document.getElementById('rec-hint').textContent = 'Analyzing parameters...';
+    document.getElementById('rec-hint').textContent = 'Computing scores…';
     clearInterval(timerInterval);
     clearInterval(waveInterval);
     
@@ -934,7 +970,6 @@
   window.addEventListener('beforeunload', stopEverything);
   window.addEventListener('pagehide', stopEverything);
 
-  /* Compute & Save Results */
   async function computeResults(durationSec) {
     const result = window.algorithm.compute(
       samples,
@@ -950,12 +985,10 @@
       return;
     }
 
-    // If recording was silent, alert teacher
     if (result.isSilent) {
-      window.utils?.toast("No voice detected during recording. Scores set to 0. You can tap words below to manually grade.", "info");
+      window.utils?.toast("No voice detected during recording. You can tap words below to manually grade.", "info");
     }
 
-    // Save to Database
     try {
       const session = await window.auth.getSession();
       if (!session) return;
@@ -981,7 +1014,6 @@
 
       const savedSession = await window.db.saveSession(sessionData);
       
-      // Log event
       await window.db.logAction("Fluency Evaluation", {
         student_id: selectedStudent.id,
         student_name: selectedStudent.name,
@@ -1002,7 +1034,7 @@
 
     } catch (e) {
       console.error(e);
-      alert("Error saving evaluation: " + e.message);
+      window.utils.toast("Error saving evaluation: " + e.message, "error");
     }
   }
 
@@ -1069,7 +1101,6 @@
     const currentType = span.dataset.type;
     let nextType = 'correct';
     
-    // Save state for undo
     undoStack.push({ idx, prevType: currentType });
     document.getElementById('btn-undo-grading')?.classList.remove('hidden');
 
@@ -1082,7 +1113,6 @@
         item.type = 'insertion';
       }
     } else {
-      // 4-State Cycle: correct ➔ substitution (misread) ➔ omission (skipped) ➔ hesitation (stumbled) ➔ correct
       if (currentType === 'correct') {
         nextType = 'substitution';
       } else if (currentType === 'substitution') {
@@ -1242,7 +1272,6 @@
     setBar('phrasing', r.phrasingScore);
     setBar('expression', r.expressionScore);
 
-    // Accuracy Note
     if (r.accuracyScore !== null) {
       const errors = r.alignResult ? (r.alignResult.substitutions + r.alignResult.omissions) : 0;
       document.getElementById('accuracy-note').textContent = `${r.accuracyPct}% accuracy rate. Noticed ${errors} errors/omissions.`;
@@ -1250,22 +1279,16 @@
       document.getElementById('accuracy-note').textContent = "Speech recognition transcript unavailable; cannot measure accuracy.";
     }
 
-    // Speed Note
     const benchmarks = { english: '53–82', hindi: '45–70' };
     const classNum = selectedStudent.classes.class_num;
     document.getElementById('speed-note').textContent = `Speed of ${r.cwpm} Correct Words Per Minute. Target for Class ${classNum}: ${benchmarks[selectedLang] || '50-80'} CWPM.`;
 
-    // Phrasing Note
     document.getElementById('phrasing-note').textContent = `Rate variation is controlled. Fluent phrasing was registered with appropriate breaths.`;
-
-    // Expression Note
     document.getElementById('expression-note').textContent = `Score tracks pitch range dynamics and declarative sentence-end tone modulation.`;
 
-    // Stars
     const starCount = Math.round((r.overallScore / 10) * 5);
     document.getElementById('stars').textContent = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
 
-    // Grade and overall text
     const badge = document.getElementById('grade-badge');
     badge.textContent = 'Grade ' + r.grade;
     badge.style.background = r.overallScore >= 8 ? 'var(--mint)' : r.overallScore >= 5 ? 'var(--indigo)' : 'var(--coral)';
@@ -1273,19 +1296,17 @@
     document.getElementById('overall-label').textContent = r.naepText;
     document.getElementById('overall-sub').textContent = `Overall Score: ${r.overallScore.toFixed(1)} / 10`;
     
-    // Diff / Alignment view
     const transcriptTextEl = document.getElementById('transcript-text');
     document.getElementById('transcript-wrap').classList.remove('hidden');
     transcriptTextEl.innerHTML = '';
     
-    // Add instruction note + Undo button
     const helpTip = document.createElement('div');
-    helpTip.style.fontSize = '0.78rem';
+    helpTip.style.fontSize = '0.8rem';
     helpTip.style.color = 'var(--indigo)';
     helpTip.style.marginBottom = '12px';
-    helpTip.style.padding = '8px 12px';
+    helpTip.style.padding = '10px 14px';
     helpTip.style.background = 'rgba(27, 42, 74, 0.05)';
-    helpTip.style.borderRadius = '10px';
+    helpTip.style.borderRadius = 'var(--radius-sm)';
     helpTip.style.fontWeight = '500';
     helpTip.style.display = 'flex';
     helpTip.style.justifyContent = 'space-between';
@@ -1293,13 +1314,13 @@
     helpTip.style.flexWrap = 'wrap';
     helpTip.style.gap = '8px';
     helpTip.innerHTML = `
-      <div>💡 <b>Interactive Grading:</b> Tap word to cycle error: <i>Normal (Correct) ➔ Yellow (Misread) ➔ Red (Skipped) ➔ Blue (Hesitation)</i></div>
-      <button id="btn-undo-grading" class="logout-btn ${undoStack.length === 0 ? 'hidden' : ''}" onclick="undoLastToggle()" style="color:var(--indigo); border-color:var(--indigo);">↩ Undo</button>
+      <div>💡 <b>Interactive Grading:</b> Tap word to cycle error: <i>Normal ➔ Yellow (Misread) ➔ Red (Skipped) ➔ Blue (Hesitation)</i></div>
+      <button id="btn-undo-grading" class="btn btn-sm btn-ghost ${undoStack.length === 0 ? 'hidden' : ''}" onclick="undoLastToggle()">↩ Undo</button>
     `;
     transcriptTextEl.appendChild(helpTip);
 
     const wordsContainer = document.createElement('div');
-    wordsContainer.style.lineHeight = '2.1';
+    wordsContainer.style.lineHeight = '2.2';
     
     r.alignResult.path.forEach((item, idx) => {
       const span = document.createElement('span');
@@ -1307,11 +1328,12 @@
       span.dataset.idx = idx;
       span.dataset.type = item.type;
       span.style.cursor = 'pointer';
-      span.style.padding = '2px 5px';
-      span.style.margin = '0 2.5px';
-      span.style.borderRadius = '4px';
+      span.style.padding = '3px 6px';
+      span.style.margin = '2px 3px';
+      span.style.borderRadius = '6px';
       span.style.display = 'inline-block';
       span.style.userSelect = 'none';
+      span.style.touchAction = 'manipulation';
       span.style.transition = 'all 0.15s ease';
 
       updateWordStyle(span, item.type, item.refWord || item.heardWord);
@@ -1325,7 +1347,6 @@
 
     transcriptTextEl.appendChild(wordsContainer);
 
-    // Student Motivational Feedback Banner (A8)
     let studentMsg = "Outstanding! You read with excellent fluency and clear expression.";
     if (r.overallScore < 5.0) studentMsg = "Keep practicing — reading gets better every day! Focus on sounding out words.";
     else if (r.overallScore < 7.0) studentMsg = "Good effort! Practice reading daily to improve your speed and phrasing.";
@@ -1335,13 +1356,13 @@
     if (!feedbackEl) {
       feedbackEl = document.createElement('div');
       feedbackEl.id = 'student-feedback-msg';
-      feedbackEl.style.marginTop = '12px';
-      feedbackEl.style.padding = '10px 14px';
-      feedbackEl.style.borderRadius = '10px';
-      feedbackEl.style.background = 'rgba(62,124,177,0.1)';
+      feedbackEl.style.marginTop = '14px';
+      feedbackEl.style.padding = '12px 16px';
+      feedbackEl.style.borderRadius = 'var(--radius-sm)';
+      feedbackEl.style.background = 'rgba(62,124,177,0.12)';
       feedbackEl.style.color = 'var(--indigo)';
       feedbackEl.style.fontWeight = '600';
-      feedbackEl.style.fontSize = '0.88rem';
+      feedbackEl.style.fontSize = '0.92rem';
       feedbackEl.style.textAlign = 'center';
       document.querySelector('.overall')?.appendChild(feedbackEl);
     }
@@ -1378,7 +1399,7 @@
     const r = lastComputedResult;
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert("Please allow popups to generate the printable PDF report.");
+      window.utils.toast("Please allow popups to generate printable report.", "warning");
       return;
     }
     printWindow.document.write(`

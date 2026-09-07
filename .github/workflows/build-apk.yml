@@ -58,6 +58,9 @@ jobs:
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           if [ -f "$MANIFEST" ]; then
+            # Insert package visibility queries for Android 11+ SpeechRecognizer
+            sed -i '/<application/i \    <queries>\n        <intent>\n            <action android:name="android.speech.RecognitionService" \/>\n        <\/intent>\n    <\/queries>' $MANIFEST
+            # Insert required microphone and network permissions
             sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" \/>\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" \/>\n    <uses-permission android:name="android.permission.INTERNET" \/>' $MANIFEST
           fi
 

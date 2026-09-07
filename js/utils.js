@@ -81,7 +81,7 @@
       if (!container) return;
 
       const userRole = sessionStorage.getItem('VAACHAN_USER_ROLE');
-      const userName = sessionStorage.getItem('VAACHAN_USER_NAME') || (isAdmin ? 'Administrator' : 'Teacher');
+      const userName = sessionStorage.getItem('VAACHAN_USER_NAME') || (isAdmin ? 'Admin' : 'Teacher');
 
       // Detect base path relative to current URL
       const inSubDir = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/teacher/');
@@ -90,7 +90,6 @@
       const teacherPath = inSubDir ? (window.location.pathname.includes('/teacher/') ? '.' : '../teacher') : './teacher';
 
       let links = '';
-      let mobileDrawerLinks = '';
 
       if (isAdmin) {
         links = `
@@ -100,13 +99,6 @@
           <a href="${adminPath}/passages.html" class="${activeTab === 'passages' ? 'active' : ''}">Passages</a>
           <a href="${adminPath}/reports.html" class="${activeTab === 'reports' ? 'active' : ''}">Reports</a>
         `;
-        mobileDrawerLinks = `
-          <a href="${adminPath}/dashboard.html" class="drawer-link ${activeTab === 'dashboard' ? 'active' : ''}">📊 Overview</a>
-          <a href="${adminPath}/students.html" class="drawer-link ${activeTab === 'students' ? 'active' : ''}">🎓 Students</a>
-          <a href="${adminPath}/teachers.html" class="drawer-link ${activeTab === 'teachers' ? 'active' : ''}">👩‍🏫 Teacher Allotment</a>
-          <a href="${adminPath}/passages.html" class="drawer-link ${activeTab === 'passages' ? 'active' : ''}">📖 Passages</a>
-          <a href="${adminPath}/reports.html" class="drawer-link ${activeTab === 'reports' ? 'active' : ''}">📈 School Reports</a>
-        `;
       } else {
         links = `
           <a href="${teacherPath}/dashboard.html" class="${activeTab === 'dashboard' ? 'active' : ''}">Dashboard</a>
@@ -114,66 +106,29 @@
           <a href="${teacherPath}/reports.html" class="${activeTab === 'reports' ? 'active' : ''}">Reports</a>
           <a href="${teacherPath}/test.html" class="btn-test-nav ${activeTab === 'test' ? 'active' : ''}">⚡ Run Test</a>
         `;
-        mobileDrawerLinks = `
-          <a href="${teacherPath}/dashboard.html" class="drawer-link ${activeTab === 'dashboard' ? 'active' : ''}">🏠 Dashboard</a>
-          <a href="${teacherPath}/students.html" class="drawer-link ${activeTab === 'students' ? 'active' : ''}">👥 My Students</a>
-          <a href="${teacherPath}/reports.html" class="drawer-link ${activeTab === 'reports' ? 'active' : ''}">📊 Reports & Analytics</a>
-          <a href="${teacherPath}/test.html" class="drawer-link drawer-cta ${activeTab === 'test' ? 'active' : ''}">⚡ Run Fluency Test</a>
-        `;
       }
 
       const assetPath = `${basePath}/assets`;
 
       container.innerHTML = `
         <div class="nav-wrap">
-          <div class="nav-left">
-            <div class="nav-brand" onclick="window.location.href='${isAdmin ? adminPath + '/dashboard.html' : teacherPath + '/dashboard.html'}'">
-              <img src="${assetPath}/kv_logo.png" alt="KV" class="nav-logo" onerror="this.style.display='none'">
-              <img src="${assetPath}/pm_shri_logo.png" alt="PM SHRI" class="nav-logo" onerror="this.style.display='none'">
-              <span class="nav-title">Vaachan</span>
-            </div>
+          <div class="nav-brand" onclick="window.location.href='${isAdmin ? adminPath + '/dashboard.html' : teacherPath + '/dashboard.html'}'">
+            <img src="${assetPath}/kv_logo.png" alt="KV" class="nav-logo" onerror="this.style.display='none'">
+            <img src="${assetPath}/pm_shri_logo.png" alt="PM SHRI" class="nav-logo" onerror="this.style.display='none'">
+            <span class="nav-title">Vaachan</span>
           </div>
           
           <div class="nav-links desktop-links">${links}</div>
 
-          <div class="nav-right">
-            <div class="nav-profile desktop-profile">
-              <span class="user-greeting">Namaste, <b>${this.escapeHtml(userName)}</b></span>
-              <button class="logout-btn" onclick="window.auth.signOut()" title="Sign Out">Logout</button>
-            </div>
-            
-            <!-- Mobile Menu Hamburger Button -->
-            <button class="nav-menu-toggle" id="nav-toggle-btn" aria-label="Toggle navigation menu" onclick="window.utils.toggleMobileNav()">
-              <svg class="menu-icon-bars" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-              <svg class="menu-icon-close hidden" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+          <div class="nav-profile">
+            <span class="user-greeting">Namaste, <b>${this.escapeHtml(userName)}</b></span>
+            <button class="logout-btn" onclick="window.auth.signOut()" title="Sign Out">Logout</button>
           </div>
         </div>
 
         <!-- Mobile Horizontal Tab Pills -->
         <div class="mobile-tab-bar">
           ${links}
-        </div>
-
-        <!-- Mobile Slide-out Drawer -->
-        <div class="mobile-drawer hidden" id="mobile-nav-drawer">
-          <div class="drawer-header">
-            <div class="drawer-user">
-              <div class="drawer-avatar">${this.escapeHtml(userName.charAt(0).toUpperCase())}</div>
-              <div>
-                <div class="drawer-name">${this.escapeHtml(userName)}</div>
-                <div class="drawer-role">${isAdmin ? 'School Administrator' : 'Class Teacher'}</div>
-              </div>
-            </div>
-          </div>
-          <div class="drawer-nav">
-            ${mobileDrawerLinks}
-          </div>
-          <div class="drawer-footer">
-            <button class="btn btn-ghost btn-full" onclick="window.auth.signOut()" style="color:#fff; border-color:rgba(255,255,255,0.25);">
-              🚪 Log Out
-            </button>
-          </div>
         </div>
       `;
 
@@ -183,18 +138,15 @@
         style.id = 'nav-styles';
         style.textContent = `
           #nav-container {
-            background: rgba(27, 42, 74, 0.96);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: #1B2A4A;
             color: #fff;
             padding: max(10px, env(safe-area-inset-top, 10px)) 20px 10px;
-            box-shadow: 0 4px 20px rgba(20,32,59,0.18);
-            margin-bottom: 22px;
+            box-shadow: 0 4px 18px rgba(20,32,59,0.16);
+            margin-bottom: 20px;
             position: sticky;
             top: 0;
             z-index: 1000;
             width: 100%;
-            transition: all 0.2s ease;
           }
           .nav-wrap {
             max-width: 1200px;
@@ -204,25 +156,25 @@
             justify-content: space-between;
             gap: 12px;
           }
-          .nav-left { display: flex; align-items: center; gap: 14px; }
           .nav-brand {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
             user-select: none;
+            flex-shrink: 0;
           }
           .nav-logo {
-            height: 32px;
+            height: 30px;
             width: auto;
             object-fit: contain;
             background: #fff;
-            border-radius: 6px;
+            border-radius: 5px;
             padding: 2px;
           }
           .nav-title {
             font-family: 'Baloo 2', sans-serif;
-            font-size: 1.45rem;
+            font-size: 1.4rem;
             font-weight: 800;
             letter-spacing: -0.01em;
             color: #FFFFFF;
@@ -236,8 +188,8 @@
             color: #C0C8DB;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.92rem;
-            padding: 8px 14px;
+            font-size: 0.9rem;
+            padding: 7px 13px;
             border-radius: 8px;
             transition: all 0.15s ease;
             white-space: nowrap;
@@ -248,8 +200,8 @@
           }
           .nav-links a.active {
             color: #fff;
-            background: rgba(255,255,255,0.16);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.18);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22);
           }
           .nav-links a.btn-test-nav {
             background: linear-gradient(135deg, var(--marigold), var(--marigold-deep));
@@ -259,12 +211,12 @@
           }
           .nav-links a.btn-test-nav:hover {
             background: #f0b555;
-            transform: translateY(-1px);
           }
           .nav-profile {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
+            flex-shrink: 0;
           }
           .user-greeting {
             font-size: 0.85rem;
@@ -272,107 +224,36 @@
             white-space: nowrap;
           }
           .logout-btn {
-            background: transparent;
-            border: 1.5px solid rgba(228,220,200,0.4);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(228,220,200,0.35);
             color: #E4DCC8;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 0.82rem;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s ease;
-          }
-          .logout-btn:hover {
-            color: #fff;
-            border-color: #fff;
-            background: rgba(255,255,255,0.1);
-          }
-          
-          .nav-menu-toggle {
-            display: none;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #fff;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
             touch-action: manipulation;
           }
-          
+          .logout-btn:hover, .logout-btn:active {
+            color: #fff;
+            border-color: #fff;
+            background: rgba(255,255,255,0.15);
+          }
+
           .mobile-tab-bar {
             display: none;
           }
 
-          .mobile-drawer {
-            display: none;
-            background: #15213A;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 16px 14px 20px;
-            margin: 10px -20px -10px;
-            animation: drawerSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          }
-          @keyframes drawerSlide {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .drawer-header {
-            padding-bottom: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 12px;
-          }
-          .drawer-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-          }
-          .drawer-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: var(--marigold);
-            color: var(--indigo);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.1rem;
-          }
-          .drawer-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
-          .drawer-role { font-size: 0.76rem; color: #A4B1CD; }
-          .drawer-nav { display: flex; flex-direction: column; gap: 6px; }
-          .drawer-link {
-            color: #D6DCED;
-            text-decoration: none;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            transition: all 0.15s ease;
-          }
-          .drawer-link:active, .drawer-link.active {
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-          }
-          .drawer-cta {
-            background: var(--marigold);
-            color: var(--indigo) !important;
-            font-weight: 800;
-            margin-top: 4px;
-          }
-          .drawer-footer { margin-top: 14px; }
-
           @media (max-width: 768px) {
             #nav-container {
-              padding: max(8px, env(safe-area-inset-top, 8px)) 12px 8px;
+              padding: max(8px, env(safe-area-inset-top, 8px)) 14px 8px;
               margin-bottom: 14px;
             }
-            .desktop-links, .desktop-profile { display: none !important; }
-            .nav-menu-toggle { display: flex; align-items: center; justify-content: center; }
-            .mobile-drawer:not(.hidden) { display: block; }
-            .nav-brand span { font-size: 1.25rem; }
-            .nav-logo { height: 26px; }
+            .desktop-links { display: none !important; }
+            .nav-brand span { font-size: 1.22rem; }
+            .nav-logo { height: 24px; }
+            .user-greeting { display: none; }
             
             /* Responsive horizontal scrollable pill bar on mobile */
             .mobile-tab-bar {
@@ -380,55 +261,37 @@
               gap: 6px;
               overflow-x: auto;
               -webkit-overflow-scrolling: touch;
-              padding: 6px 0 2px;
+              padding: 8px 0 2px;
               margin: 4px -4px 0;
               scrollbar-width: none;
             }
             .mobile-tab-bar::-webkit-scrollbar { display: none; }
             .mobile-tab-bar a {
-              color: #C0C8DB;
+              color: #D2D9EB;
               text-decoration: none;
-              font-size: 0.8rem;
-              font-weight: 600;
-              padding: 6px 12px;
+              font-size: 0.82rem;
+              font-weight: 700;
+              padding: 6px 14px;
               border-radius: 20px;
-              background: rgba(255,255,255,0.06);
+              background: rgba(255,255,255,0.08);
               white-space: nowrap;
               flex-shrink: 0;
               transition: all 0.12s ease;
+              touch-action: manipulation;
             }
             .mobile-tab-bar a.active {
               color: #fff;
-              background: rgba(255,255,255,0.2);
+              background: rgba(255,255,255,0.24);
+              box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             }
             .mobile-tab-bar a.btn-test-nav {
               background: var(--marigold);
-              color: var(--indigo) !important;
-              font-weight: 700;
+              color: #1B2A4A !important;
+              font-weight: 800;
             }
           }
         `;
         document.head.appendChild(style);
-      }
-    },
-
-    toggleMobileNav() {
-      const drawer = document.getElementById('mobile-nav-drawer');
-      const toggleBtn = document.getElementById('nav-toggle-btn');
-      if (!drawer || !toggleBtn) return;
-
-      const isClosed = drawer.classList.contains('hidden');
-      const iconBars = toggleBtn.querySelector('.menu-icon-bars');
-      const iconClose = toggleBtn.querySelector('.menu-icon-close');
-
-      if (isClosed) {
-        drawer.classList.remove('hidden');
-        if (iconBars) iconBars.classList.add('hidden');
-        if (iconClose) iconClose.classList.remove('hidden');
-      } else {
-        drawer.classList.add('hidden');
-        if (iconBars) iconBars.classList.remove('hidden');
-        if (iconClose) iconClose.classList.add('hidden');
       }
     },
 
@@ -457,7 +320,6 @@
         <span style="flex:1;">${this.escapeHtml(message)}</span>
       `;
 
-      // Tap to dismiss
       toast.style.cursor = 'pointer';
       toast.onclick = () => {
         toast.style.opacity = '0';

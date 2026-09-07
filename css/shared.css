@@ -276,7 +276,7 @@ body {
   min-width: 0;
 }
 
-/* Mobile-friendly Inputs (16px base font avoids iOS Safari unwanted auto-zoom) */
+/* Mobile-friendly Inputs */
 .text-input, select, textarea {
   width: 100%;
   padding: 12px 14px;
@@ -444,6 +444,7 @@ textarea {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+  min-width: 580px; /* Ensures columns never get squished into vertical 1-word towers! */
 }
 
 .list-table thead {
@@ -466,6 +467,7 @@ textarea {
   padding: 13px 14px;
   border-bottom: 1px solid var(--line-soft);
   vertical-align: middle;
+  white-space: nowrap; /* Prevents text and names from breaking awkwardly into vertical towers */
 }
 
 .list-table tr:last-child td {
@@ -480,11 +482,22 @@ textarea {
   background: var(--paper-hover);
 }
 
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 580px;
+}
+.roster-table th, .roster-table td {
+  white-space: nowrap;
+}
+
 .empty-row td {
   text-align: center;
   padding: 36px 16px;
   color: var(--ink-soft);
   font-size: 0.9rem;
+  white-space: normal;
 }
 
 /* ---------- Alerts ---------- */
@@ -826,7 +839,7 @@ textarea {
     width: 100%;
   }
   
-  .list-table, .roster-table { min-width: 480px; }
+  .list-table, .roster-table { min-width: 560px; }
 }
 
 @media (max-width: 480px) {
